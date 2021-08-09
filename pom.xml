@@ -30,7 +30,35 @@
 
   <properties>
     <project.git.project>dubai</project.git.project>
+    <!-- module version -->
+    <version.utils-lang>1.0.2</version.utils-lang>
+    <version.mongodb>4.3.0</version.mongodb>
+    <version.spring>5.3.9</version.spring>
+    <version.spring-boot>2.5.3</version.spring-boot>
+    <version.spring-cloud>Hoxton.SR12</version.spring-cloud>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Commons Utils -->
+      <dependency>
+        <groupId>io.github.dbstarll</groupId>
+        <artifactId>utils-lang</artifactId>
+        <version>${version.utils-lang}</version>
+      </dependency>
+      <!-- MongoDB -->
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>bson</artifactId>
+        <version>${version.mongodb}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongodb-driver-sync</artifactId>
+        <version>${version.mongodb}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <profiles>
     <profile>
