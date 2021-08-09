@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.github.dbstarll.dubai.model.spring.autoconfigure.CollectionAutoConfiguration,\
+io.github.dbstarll.dubai.model.spring.autoconfigure.MongoAutoConfiguration

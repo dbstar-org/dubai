@@ -1,0 +1,9 @@
+package io.github.dbstarll.dubai.model.service.test3;
+
+import io.github.dbstarll.dubai.model.service.Implementation;
+import io.github.dbstarll.dubai.model.service.ServiceSaver;
+import io.github.dbstarll.dubai.model.service.test.TestAttachs;
+
+@Implementation(TestServiceImplemental.class)
+public interface TestServiceAttach extends TestAttachs, ServiceSaver<TestEntity> {
+}
