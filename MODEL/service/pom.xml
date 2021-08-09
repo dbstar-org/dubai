@@ -14,12 +14,12 @@
     <dependency>
       <groupId>io.github.dbstarll.dubai</groupId>
       <artifactId>dubai-model-collection</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.github.dbstarll.dubai</groupId>
       <artifactId>dubai-model-entity</artifactId>
-      <version>${project.version}</version>
+      <version>1.0.0-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
