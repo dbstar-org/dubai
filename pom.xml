@@ -24,8 +24,8 @@
 
   <modules>
     <module>MODEL</module>
-    <!--    <module>MODULE</module>-->
-    <!--    <module>BOOT</module>-->
+    <module>MODULE</module>
+    <module>BOOT</module>
   </modules>
 
   <properties>
