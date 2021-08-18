@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>io.github.dbstarll.parent</groupId>
     <artifactId>base</artifactId>
-    <version>1.1.9</version>
+    <version>1.2.0</version>
   </parent>
   <groupId>io.github.dbstarll.dubai</groupId>
   <artifactId>dubai</artifactId>
@@ -30,7 +31,7 @@
   <properties>
     <project.git.project>dubai</project.git.project>
     <!-- module version -->
-    <version.utils-lang>1.0.2</version.utils-lang>
+    <version.utils-lang>1.0.3</version.utils-lang>
     <version.mongodb>4.3.0</version.mongodb>
     <version.spring>5.3.9</version.spring>
     <version.spring-boot>2.5.3</version.spring-boot>
@@ -41,7 +42,7 @@
     <dependencies>
       <!-- Commons Utils -->
       <dependency>
-        <groupId>io.github.dbstarll</groupId>
+        <groupId>io.github.dbstarll.utils</groupId>
         <artifactId>utils-lang</artifactId>
         <version>${version.utils-lang}</version>
       </dependency>
