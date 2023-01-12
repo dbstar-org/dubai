@@ -50,4 +50,9 @@ public class MockMongoCursor<T> implements MongoCursor<T> {
     public ServerAddress getServerAddress() {
         return null;
     }
+
+    @Override
+    public int available() {
+        return it.hasNext() ? 1 : 0;
+    }
 }

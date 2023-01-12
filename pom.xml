@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.dbstarll.parent</groupId>
     <artifactId>base</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.4</version>
   </parent>
   <groupId>io.github.dbstarll.dubai</groupId>
   <artifactId>dubai</artifactId>
@@ -25,17 +25,15 @@
   <modules>
     <module>MODEL</module>
     <module>MODULE</module>
-    <module>BOOT</module>
   </modules>
 
   <properties>
     <project.git.project>dubai</project.git.project>
     <!-- module version -->
-    <version.utils-lang>1.0.3</version.utils-lang>
-    <version.mongodb>4.3.0</version.mongodb>
-    <version.spring>5.3.9</version.spring>
-    <version.spring-boot>2.5.3</version.spring-boot>
-    <version.spring-cloud>Hoxton.SR12</version.spring-cloud>
+    <version.utils-lang>1.0.4</version.utils-lang>
+    <version.mongodb>4.8.1</version.mongodb>
+    <version.spring>5.3.24</version.spring>
+    <version.spring-boot>2.7.7</version.spring-boot>
   </properties>
 
   <dependencyManagement>

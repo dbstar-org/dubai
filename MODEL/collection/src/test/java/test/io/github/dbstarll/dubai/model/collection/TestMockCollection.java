@@ -17,6 +17,7 @@ import com.mongodb.connection.StreamFactoryFactory;
 import com.mongodb.internal.bulk.InsertRequest;
 import com.mongodb.internal.connection.Cluster;
 import com.mongodb.internal.connection.DefaultClusterFactory;
+import com.mongodb.internal.connection.InternalConnectionPoolSettings;
 import com.mongodb.internal.event.EventListenerHelper;
 import com.mongodb.internal.operation.MixedBulkWriteOperation;
 import com.mongodb.internal.operation.ReadOperation;
@@ -56,7 +57,19 @@ public class TestMockCollection {
     }
 
     private static Cluster createCluster(MongoClientSettings settings, @Nullable MongoDriverInformation mongoDriverInformation) {
-        return new DefaultClusterFactory().createCluster(settings.getClusterSettings(), settings.getServerSettings(), settings.getConnectionPoolSettings(), getStreamFactory(settings, false), getStreamFactory(settings, true), settings.getCredential(), EventListenerHelper.getCommandListener(settings.getCommandListeners()), settings.getApplicationName(), mongoDriverInformation, settings.getCompressorList(), settings.getServerApi());
+        return new DefaultClusterFactory().createCluster(
+                settings.getClusterSettings(),
+                settings.getServerSettings(),
+                settings.getConnectionPoolSettings(),
+                InternalConnectionPoolSettings.builder().build(),
+                getStreamFactory(settings, false),
+                getStreamFactory(settings, true),
+                settings.getCredential(),
+                EventListenerHelper.getCommandListener(settings.getCommandListeners()),
+                settings.getApplicationName(),
+                mongoDriverInformation,
+                settings.getCompressorList(),
+                settings.getServerApi());
     }
 
     private static StreamFactory getStreamFactory(MongoClientSettings settings, boolean isHeartbeat) {
