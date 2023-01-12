@@ -98,6 +98,7 @@
               <configuration>
                 <argLine>
                   -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar
+                  @{argLine}
                 </argLine>
               </configuration>
             </plugin>

@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.dbstarll.parent</groupId>
     <artifactId>base</artifactId>
-    <version>1.2.4</version>
+    <version>1.2.5</version>
   </parent>
   <groupId>io.github.dbstarll.dubai</groupId>
   <artifactId>dubai</artifactId>
@@ -25,10 +25,13 @@
   <modules>
     <module>MODEL</module>
     <module>MODULE</module>
+    <module>report-aggregate</module>
   </modules>
 
   <properties>
     <project.git.project>dubai</project.git.project>
+    <sonar.coverage.jacoco.xmlReportPaths>report-aggregate/target/site/jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
     <!-- module version -->
     <version.utils-lang>1.0.4</version.utils-lang>
     <version.mongodb>4.8.1</version.mongodb>
