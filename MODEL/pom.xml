@@ -55,6 +55,9 @@
         <version.junit>4.13.2</version.junit>
         <version.jmockit>1.49</version.jmockit>
         <version.surefire-junit47>3.0.0-M7</version.surefire-junit47>
+        <argLine>
+          -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar
+        </argLine>
       </properties>
       <dependencyManagement>
         <dependencies>
@@ -95,12 +98,6 @@
                   <version>${version.surefire-junit47}</version>
                 </dependency>
               </dependencies>
-              <configuration>
-                <argLine>
-                  -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar
-                  @{argLine}
-                </argLine>
-              </configuration>
             </plugin>
           </plugins>
         </pluginManagement>
