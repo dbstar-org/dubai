@@ -10,12 +10,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.security.NoSuchAlgorithmException;
 
 @Configuration
+@EnableConfigurationProperties(MongoProperties.class)
 public class MongoAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(MongoClientFactory.class)
