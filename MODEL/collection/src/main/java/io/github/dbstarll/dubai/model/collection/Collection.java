@@ -14,7 +14,6 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 public interface Collection<E extends Entity> {
-
     /**
      * Get the class of documents stored in this collection.
      *
@@ -464,5 +463,11 @@ public interface Collection<E extends Entity> {
      */
     Collection<E> original();
 
+    /**
+     * 检查仓库中是否包含指定id的entity.
+     *
+     * @param id id of entity
+     * @return 仓库中是否包含指定id的entity
+     */
     boolean contains(ObjectId id);
 }

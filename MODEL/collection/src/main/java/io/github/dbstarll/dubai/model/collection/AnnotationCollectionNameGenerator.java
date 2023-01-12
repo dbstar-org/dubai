@@ -9,7 +9,7 @@ import java.lang.annotation.Annotation;
 
 public class AnnotationCollectionNameGenerator implements CollectionNameGenerator {
     @Override
-    public final <E extends Entity> String generateCollectionName(Class<E> entityClass)
+    public final <E extends Entity> String generateCollectionName(final Class<E> entityClass)
             throws CollectionInitializeException {
         final Table table = entityClass.getAnnotation(Table.class);
         if (null == table) {
@@ -27,22 +27,22 @@ public class AnnotationCollectionNameGenerator implements CollectionNameGenerato
         }
     }
 
-    private <A extends Annotation> A getAnnotation(Class<?> entityClass, Class<A> annotationClass) {
-        final A a;
-        if ((a = entityClass.getAnnotation(annotationClass)) != null) {
+    private <A extends Annotation> A getAnnotation(final Class<?> entityClass, final Class<A> annotationClass) {
+        final A a = entityClass.getAnnotation(annotationClass);
+        if (a != null) {
             return a;
         }
 
         if (entityClass.getSuperclass() != null && Entity.class.isAssignableFrom(entityClass.getSuperclass())) {
-            final A b;
-            if ((b = getAnnotation(entityClass.getSuperclass(), annotationClass)) != null) {
+            final A b = getAnnotation(entityClass.getSuperclass(), annotationClass);
+            if (b != null) {
                 return b;
             }
         }
         for (Class<?> i : entityClass.getInterfaces()) {
             if (Entity.class.isAssignableFrom(i)) {
-                final A b;
-                if ((b = getAnnotation(i, annotationClass)) != null) {
+                final A b = getAnnotation(i, annotationClass);
+                if (b != null) {
                     return b;
                 }
             }
@@ -51,25 +51,42 @@ public class AnnotationCollectionNameGenerator implements CollectionNameGenerato
         return null;
     }
 
-    private <E extends Entity> String generateNamespace(Class<E> entityClass, Namespace namespace)
+    private <E extends Entity> String generateNamespace(final Class<E> entityClass, final Namespace namespace)
             throws CollectionInitializeException {
-        final String annotationNamespace;
-        if (namespace == null || StringUtils.isBlank(annotationNamespace = generateNamespace(namespace))) {
-            return generateNamespace(entityClass);
-        } else {
-            return annotationNamespace;
+        if (namespace != null) {
+            final String annotationNamespace = generateNamespace(namespace);
+            if (StringUtils.isNotBlank(annotationNamespace)) {
+                return annotationNamespace;
+            }
         }
+        return generateNamespace(entityClass);
     }
 
-    protected String generateNamespace(Namespace namespace) throws CollectionInitializeException {
+    /**
+     * 根据namespace注解来生成namespace.
+     *
+     * @param namespace namespace注解
+     * @return 生成的namespace
+     * @throws CollectionInitializeException 集合初始化异常
+     */
+    protected String generateNamespace(final Namespace namespace) throws CollectionInitializeException {
         return namespace.value();
     }
 
-    protected <E extends Entity> String generateNamespace(Class<E> entityClass) throws CollectionInitializeException {
+    /**
+     * 根据实体类来生成namespace.
+     *
+     * @param entityClass 实体类
+     * @param <E>         实体类的类型
+     * @return 生成的namespace
+     * @throws CollectionInitializeException 集合初始化异常
+     */
+    protected <E extends Entity> String generateNamespace(final Class<E> entityClass)
+            throws CollectionInitializeException {
         return null;
     }
 
-    private <E extends Entity> String generateName(Class<E> entityClass, Table table)
+    private <E extends Entity> String generateName(final Class<E> entityClass, final Table table)
             throws CollectionInitializeException {
         final String annotationName = generateName(table);
         if (StringUtils.isNotBlank(annotationName)) {
@@ -79,11 +96,26 @@ public class AnnotationCollectionNameGenerator implements CollectionNameGenerato
         }
     }
 
-    protected String generateName(Table table) throws CollectionInitializeException {
+    /**
+     * 根据table注解来生成表名.
+     *
+     * @param table table注解
+     * @return 生成的表名
+     * @throws CollectionInitializeException 集合初始化异常
+     */
+    protected String generateName(final Table table) throws CollectionInitializeException {
         return table.value();
     }
 
-    protected <E extends Entity> String generateName(Class<E> entityClass) throws CollectionInitializeException {
+    /**
+     * 根据实体类来生成表名.
+     *
+     * @param entityClass 实体类
+     * @param <E>         实体类的类型
+     * @return 生成的表名
+     * @throws CollectionInitializeException 集合初始化异常
+     */
+    protected <E extends Entity> String generateName(final Class<E> entityClass) throws CollectionInitializeException {
         final StringBuilder builder = new StringBuilder();
         for (char ch : entityClass.getSimpleName().toCharArray()) {
             if (Character.isUpperCase(ch)) {

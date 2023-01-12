@@ -13,72 +13,81 @@ import java.util.List;
 public class BaseCollection<E extends Entity> extends AbstractCollection<E> {
     private final MongoCollection<E> mongoCollection;
 
-    public BaseCollection(MongoCollection<E> mongoCollection) {
+    /**
+     * 构建BaseCollection.
+     *
+     * @param mongoCollection MongoCollection
+     */
+    public BaseCollection(final MongoCollection<E> mongoCollection) {
         this.mongoCollection = mongoCollection;
     }
 
-    protected Bson queryFilter(Bson filter) {
-        BsonDocument ret;
+    /**
+     * 将Bson包装成查询用的BsonDocument.
+     *
+     * @param filter 查询过滤器
+     * @return 包装后的BsonDocument
+     */
+    protected Bson queryFilter(final Bson filter) {
         if (null == filter) {
-            ret = new BsonDocument();
+            return new BsonDocument();
         } else {
-            ret = filter.toBsonDocument(this.getEntityClass(), this.mongoCollection.getCodecRegistry());
+            return filter.toBsonDocument(getEntityClass(), mongoCollection.getCodecRegistry());
         }
-        return ret;
     }
 
     @Override
-    public long count(Bson filter, CountOptions options) {
+    public long count(final Bson filter, final CountOptions options) {
         return mongoCollection.countDocuments(queryFilter(filter), options);
     }
 
     @Override
-    public <T> DistinctIterable<T> distinct(String fieldName, Bson filter, Class<T> resultClass) {
+    public <T> DistinctIterable<T> distinct(final String fieldName, final Bson filter, final Class<T> resultClass) {
         return mongoCollection.distinct(fieldName, queryFilter(filter), resultClass);
     }
 
     @Override
-    public <T> FindIterable<T> find(Bson filter, Class<T> resultClass) {
+    public <T> FindIterable<T> find(final Bson filter, final Class<T> resultClass) {
         return mongoCollection.find(queryFilter(filter), resultClass);
     }
 
     @Override
-    public DeleteResult deleteOne(Bson filter, DeleteOptions options) {
+    public DeleteResult deleteOne(final Bson filter, final DeleteOptions options) {
         return mongoCollection.deleteOne(filter, options);
     }
 
     @Override
-    public DeleteResult deleteMany(Bson filter, DeleteOptions options) {
+    public DeleteResult deleteMany(final Bson filter, final DeleteOptions options) {
         return mongoCollection.deleteMany(filter, options);
     }
 
     @Override
-    public UpdateResult replaceOne(Bson filter, E replacement, ReplaceOptions replaceOptions) {
+    public UpdateResult replaceOne(final Bson filter, final E replacement, final ReplaceOptions replaceOptions) {
         return mongoCollection.replaceOne(queryFilter(filter), replacement, replaceOptions);
     }
 
     @Override
-    public UpdateResult updateOne(Bson filter, Bson update, UpdateOptions updateOptions) {
+    public UpdateResult updateOne(final Bson filter, final Bson update, final UpdateOptions updateOptions) {
         return mongoCollection.updateOne(queryFilter(filter), update, updateOptions);
     }
 
     @Override
-    public UpdateResult updateMany(Bson filter, Bson update, UpdateOptions updateOptions) {
+    public UpdateResult updateMany(final Bson filter, final Bson update, final UpdateOptions updateOptions) {
         return mongoCollection.updateMany(queryFilter(filter), update, updateOptions);
     }
 
     @Override
-    public E findOneAndDelete(Bson filter, FindOneAndDeleteOptions options) {
+    public E findOneAndDelete(final Bson filter, final FindOneAndDeleteOptions options) {
         return mongoCollection.findOneAndDelete(queryFilter(filter), options);
     }
 
     @Override
-    public E findOneAndReplace(Bson filter, E replacement, FindOneAndReplaceOptions options) {
+    public E findOneAndReplace(final Bson filter, final E replacement, final FindOneAndReplaceOptions options) {
         return mongoCollection.findOneAndReplace(queryFilter(filter), replacement, options);
     }
 
     @Override
-    public E findOneAndUpdate(Bson filter, Bson update, FindOneAndUpdateOptions options) {
+    public E findOneAndUpdate(final Bson filter, final Bson update, final FindOneAndUpdateOptions options) {
         return mongoCollection.findOneAndUpdate(queryFilter(filter), update, options);
     }
 
@@ -88,30 +97,42 @@ public class BaseCollection<E extends Entity> extends AbstractCollection<E> {
     }
 
     @Override
-    public <T> AggregateIterable<T> aggregate(List<? extends Bson> pipeline, Class<T> resultClass) {
+    public <T> AggregateIterable<T> aggregate(final List<? extends Bson> pipeline, final Class<T> resultClass) {
         return mongoCollection.aggregate(pipeline, resultClass);
     }
 
     @Override
-    public <T> MapReduceIterable<T> mapReduce(String mapFunction, String reduceFunction, Class<T> resultClass) {
+    public <T> MapReduceIterable<T> mapReduce(final String mapFunction,
+                                              final String reduceFunction,
+                                              final Class<T> resultClass) {
         return mongoCollection.mapReduce(mapFunction, reduceFunction, resultClass);
     }
 
     @Override
-    public void insertOne(E document, InsertOneOptions options) {
+    public void insertOne(final E document, final InsertOneOptions options) {
         mongoCollection.insertOne(document, options);
     }
 
     @Override
-    public void insertMany(List<? extends E> documents, InsertManyOptions options) {
+    public void insertMany(final List<? extends E> documents, final InsertManyOptions options) {
         mongoCollection.insertMany(documents, options);
     }
 
-    public String getNamespace() {
+    /**
+     * 获得namespace信息.
+     *
+     * @return namespace
+     */
+    public final String getNamespace() {
         return mongoCollection.getNamespace().getFullName();
     }
 
-    public MongoCollection<E> getMongoCollection() {
+    /**
+     * 获得MongoCollection实例.
+     *
+     * @return MongoCollection
+     */
+    public final MongoCollection<E> getMongoCollection() {
         return mongoCollection;
     }
 

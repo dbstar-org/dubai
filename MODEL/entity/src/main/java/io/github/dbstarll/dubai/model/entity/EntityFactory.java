@@ -28,12 +28,12 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
 
     private EntityFactory(Class<E> entityClass, Map<String, Object> fields) {
         this.entityClass = entityClass;
-        this.fields = fields == null ? new ConcurrentHashMap<String, Object>() : new ConcurrentHashMap<>(fields);
+        this.fields = fields == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(fields);
         setDefaultValue(this.fields, getDefaultPrimitiveFields(entityClass));
     }
 
     private static Map<Class<?>, Object> getDefaultValues() {
-        final Map<Class<?>, Object> values = new HashMap<Class<?>, Object>();
+        final Map<Class<?>, Object> values = new HashMap<>();
         values.put(Byte.TYPE, (byte) 0);
         values.put(Short.TYPE, (short) 0);
         values.put(Integer.TYPE, 0);
@@ -47,7 +47,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
 
     private static Map<String, Object> getDefaultPrimitiveFields(Class<?> entityClass) {
         if (!DEFAULT_FIELDS.containsKey(entityClass)) {
-            final Map<String, Object> fileds = new HashMap<String, Object>();
+            final Map<String, Object> fileds = new HashMap<>();
             for (Method method : entityClass.getMethods()) {
                 final String fieldName = getWriteProperty(method);
                 if (null != fieldName) {

@@ -30,6 +30,6 @@ public class DebugCodecRegistry implements CodecRegistry {
 
     @Override
     public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
-        return registry.get(clazz, registry);
+        return this.registry.get(clazz, registry);
     }
 }

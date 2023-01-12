@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.Validate.notNull;
 public abstract class AbstractValidation<E extends Entity> implements Validation<E> {
     protected final Class<E> entityClass;
 
-    public AbstractValidation(Class<E> entityClass) {
+    protected AbstractValidation(final Class<E> entityClass) {
         this.entityClass = notNull(entityClass, "entityClass is null");
     }
 
@@ -21,7 +21,7 @@ public abstract class AbstractValidation<E extends Entity> implements Validation
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

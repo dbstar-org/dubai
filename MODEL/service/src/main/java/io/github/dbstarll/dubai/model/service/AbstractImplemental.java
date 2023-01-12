@@ -29,6 +29,10 @@ import static org.apache.commons.lang3.Validate.*;
 public abstract class AbstractImplemental<E extends Entity, S extends Service<E>> implements Implemental {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractImplemental.class);
 
+    private static final int NAME_MIN_LENGTH = 2;
+    private static final int NAME_MAX_LENGTH = 16;
+    private static final int DESCRIPTION_MAX_LENGTH = 50;
+
     protected final S service;
     protected final Class<E> entityClass;
     private final Collection<E> collection;
@@ -39,7 +43,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
      * @param service    service
      * @param collection collection
      */
-    public AbstractImplemental(S service, Collection<E> collection) {
+    public AbstractImplemental(final S service, final Collection<E> collection) {
         this.service = notNull(service, "service is null");
         this.collection = notNull(collection, "collection is null");
         this.entityClass = collection.getEntityClass();
@@ -124,7 +128,9 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                     return null;
                 }
             } else {
-                LOGGER.debug("validateAndSave with ActionErrors: {}, FieldErrors: {}", v.hasActionErrors(), v.hasFieldErrors());
+                LOGGER.debug("validateAndSave with ActionErrors: {}, FieldErrors: {}",
+                        v.hasActionErrors(),
+                        v.hasFieldErrors());
             }
         } catch (Throwable ex) {
             v.addActionError(ex.getMessage());
@@ -184,16 +190,16 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     @Deprecated
-    protected void onEntitySaved(E entity, Validate validate) {
+    protected void onEntitySaved(final E entity, final Validate validate) {
     }
 
-    protected void onEntitySaved(E entity, Validate validate, NotifyType notifyType) {
+    protected void onEntitySaved(final E entity, final Validate validate, final NotifyType notifyType) {
     }
 
-    protected void onEntityDeleted(E entity, Validate validate) {
+    protected void onEntityDeleted(final E entity, final Validate validate) {
     }
 
-    protected final Bson aggregateMatchFilter(Bson filter) {
+    protected final Bson aggregateMatchFilter(final Bson filter) {
         if (Defunctable.class.isAssignableFrom(entityClass)) {
             final Bson defunctFilter = Filters.eq(Defunctable.FIELD_NAME_DEFUNCT, false);
             if (filter == null) {
@@ -206,14 +212,24 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         }
     }
 
+    /**
+     * 默认的名称校验.
+     *
+     * @return NameValidation
+     */
     @GeneralValidation(Namable.class)
     public Validation<E> nameValidation() {
-        return new NameValidation(2, 16);
+        return new NameValidation(NAME_MIN_LENGTH, NAME_MAX_LENGTH);
     }
 
+    /**
+     * 默认的描述校验.
+     *
+     * @return DescriptionValidation
+     */
     @GeneralValidation(Describable.class)
     public Validation<E> descriptionValidation() {
-        return new DescriptionValidation(50);
+        return new DescriptionValidation(DESCRIPTION_MAX_LENGTH);
     }
 
     protected abstract class AbstractEntityValidation extends AbstractValidation<E> {
@@ -224,13 +240,13 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
 
     protected abstract class AbstractBaseEntityValidation<B extends Base>
             extends AbstractEntityValidation {
-        public AbstractBaseEntityValidation(Class<B> baseClass) {
+        public AbstractBaseEntityValidation(final Class<B> baseClass) {
             isAssignableFrom(baseClass, entityClass);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public final void validate(E entity, E original, Validate validate) {
+        public final void validate(final E entity, final E original, final Validate validate) {
             validate((B) entity, (B) original, validate);
         }
 
@@ -241,7 +257,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         private final int minLength;
         private final int maxLength;
 
-        public NameValidation(int minLength, int maxLength) {
+        public NameValidation(final int minLength, final int maxLength) {
             super(Namable.class);
             isTrue(minLength < 0 || maxLength >= minLength, "maxLength: %d 必须>= minLength: %d", maxLength, minLength);
             this.minLength = minLength;
@@ -249,7 +265,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         }
 
         @Override
-        protected void validate(Namable entity, Namable original, Validate validate) {
+        protected void validate(final Namable entity, final Namable original, final Validate validate) {
             final String name = entity.getName();
             if (original == null || !StringUtils.equals(name, original.getName())) {
                 if (StringUtils.isBlank(name)) {
@@ -284,13 +300,13 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     protected class DescriptionValidation extends AbstractBaseEntityValidation<Describable> {
         private final int maxLength;
 
-        public DescriptionValidation(int maxLength) {
+        public DescriptionValidation(final int maxLength) {
             super(Describable.class);
             this.maxLength = maxLength;
         }
 
         @Override
-        protected void validate(Describable entity, Describable original, Validate validate) {
+        protected void validate(final Describable entity, final Describable original, final Validate validate) {
             final String description = entity.getDescription();
             if (original == null ? description != null : !StringUtils.equals(description, original.getDescription())) {
                 if (StringUtils.isBlank(description)) {

@@ -11,11 +11,21 @@ import org.bson.types.ObjectId;
 public class CacheableCollection<E extends Entity> extends NotifiableCollection<E> {
     private EntityCacheManager entityCacheManager = new DefaultCacheManager();
 
-    public CacheableCollection(Collection<E> collection) {
+    /**
+     * 为collection叠加缓存功能.
+     *
+     * @param collection collection
+     */
+    public CacheableCollection(final Collection<E> collection) {
         super(collection);
     }
 
-    public final void setEntityCacheManager(EntityCacheManager entityCacheManager) {
+    /**
+     * 设置外部的缓存管理器，替代默认实现.
+     *
+     * @param entityCacheManager 缓存管理器
+     */
+    public final void setEntityCacheManager(final EntityCacheManager entityCacheManager) {
         this.entityCacheManager = entityCacheManager;
     }
 
@@ -27,7 +37,7 @@ public class CacheableCollection<E extends Entity> extends NotifiableCollection<
     public E findOne(final Bson filter) {
         final E val = entityCacheManager.find(getEntityClass(), filter.toString(), new UpdateCacheHandler<E>() {
             @Override
-            public E updateCache(String key) {
+            public E updateCache(final String key) {
                 return collection.findOne(filter);
             }
         });
@@ -37,17 +47,21 @@ public class CacheableCollection<E extends Entity> extends NotifiableCollection<
 
     private static class DefaultCacheManager implements EntityCacheManager {
         @Override
-        public <E extends Entity> E find(Class<E> entityClass, String key, UpdateCacheHandler<E> updateCacheHandler) {
+        public <E extends Entity> E find(final Class<E> entityClass,
+                                         final String key,
+                                         final UpdateCacheHandler<E> updateCacheHandler) {
             return updateCacheHandler.updateCache(key);
         }
 
         @Override
-        public <E extends Entity> void update(Class<E> entityClass, ObjectId entityId, NotifyType notifyType) {
+        public <E extends Entity> void update(final Class<E> entityClass,
+                                              final ObjectId entityId,
+                                              final NotifyType notifyType) {
             // do nothing
         }
 
         @Override
-        public <E extends Entity> void set(String key, E entity) {
+        public <E extends Entity> void set(final String key, final E entity) {
             // do nothing
         }
     }
