@@ -39,12 +39,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-autoconfigure</artifactId>
         <version>${version.spring-boot}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -60,7 +54,7 @@
       <properties>
         <version.junit>4.13.2</version.junit>
         <version.jmockit>1.49</version.jmockit>
-        <version.surefire-junit47>3.0.0-M8</version.surefire-junit47>
+        <version.surefire-junit47>3.0.0-M7</version.surefire-junit47>
       </properties>
       <dependencyManagement>
         <dependencies>
