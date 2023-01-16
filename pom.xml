@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.dbstarll.parent</groupId>
     <artifactId>base</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.9</version>
   </parent>
   <groupId>io.github.dbstarll.dubai</groupId>
   <artifactId>dubai</artifactId>
@@ -30,12 +30,10 @@
 
   <properties>
     <project.git.project>dubai</project.git.project>
-    <sonar.coverage.jacoco.xmlReportPaths>report-aggregate/target/site/jacoco-aggregate/jacoco.xml
-    </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>report-aggregate/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <!-- module version -->
-    <version.utils-lang>1.0.4</version.utils-lang>
-    <version.mongodb>4.8.1</version.mongodb>
-    <version.spring>5.3.24</version.spring>
+    <version.utils-lang>1.0.6</version.utils-lang>
+    <version.mongodb>4.8.2</version.mongodb>
     <version.spring-boot>2.7.7</version.spring-boot>
   </properties>
 
