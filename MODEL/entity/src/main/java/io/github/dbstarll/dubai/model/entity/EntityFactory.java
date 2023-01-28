@@ -20,20 +20,20 @@ import java.util.concurrent.ConcurrentMap;
 public final class EntityFactory<E extends Entity> implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1190830425462840117L;
 
-    private static final Map<Class<?>, Object> DEFAULT_VALUES = getDefaultValues();
-    private static final ConcurrentMap<Class<?>, Map<String, Object>> DEFAULT_FIELDS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Serializable> DEFAULT_VALUES = getDefaultValues();
+    private static final ConcurrentMap<Class<?>, Map<String, Serializable>> DEFAULT_FIELDS = new ConcurrentHashMap<>();
 
     private final Class<E> entityClass;
-    private final ConcurrentMap<String, Object> fields;
+    private final ConcurrentMap<String, Serializable> fields;
 
-    private EntityFactory(Class<E> entityClass, Map<String, Object> fields) {
+    private EntityFactory(Class<E> entityClass, Map<String, Serializable> fields) {
         this.entityClass = entityClass;
         this.fields = fields == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(fields);
         setDefaultValue(this.fields, getDefaultPrimitiveFields(entityClass));
     }
 
-    private static Map<Class<?>, Object> getDefaultValues() {
-        final Map<Class<?>, Object> values = new HashMap<>();
+    private static Map<Class<?>, Serializable> getDefaultValues() {
+        final Map<Class<?>, Serializable> values = new HashMap<>();
         values.put(Byte.TYPE, (byte) 0);
         values.put(Short.TYPE, (short) 0);
         values.put(Integer.TYPE, 0);
@@ -45,9 +45,9 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         return values;
     }
 
-    private static Map<String, Object> getDefaultPrimitiveFields(Class<?> entityClass) {
+    private static Map<String, Serializable> getDefaultPrimitiveFields(Class<?> entityClass) {
         if (!DEFAULT_FIELDS.containsKey(entityClass)) {
-            final Map<String, Object> fileds = new HashMap<>();
+            final Map<String, Serializable> fileds = new HashMap<>();
             for (Method method : entityClass.getMethods()) {
                 final String fieldName = getWriteProperty(method);
                 if (null != fieldName) {
@@ -86,8 +86,8 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         return "id".equals(property) ? Entity.FIELD_NAME_ID : property;
     }
 
-    private static void setDefaultValue(ConcurrentMap<String, Object> fields, Map<String, Object> values) {
-        for (Entry<String, Object> entry : values.entrySet()) {
+    private static void setDefaultValue(ConcurrentMap<String, Serializable> fields, Map<String, Serializable> values) {
+        for (Entry<String, Serializable> entry : values.entrySet()) {
             fields.putIfAbsent(entry.getKey(), entry.getValue());
         }
     }
@@ -105,10 +105,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         if (argsLangth == 1 && StringUtils.isNotBlank(property = getWriteProperty(method))) {
             if (null == args[0]) {
                 fields.remove(property);
-            } else {
-                fields.put(property, args[0]);
+                return null;
+            } else if (args[0] instanceof Serializable) {
+                fields.put(property, (Serializable) args[0]);
+                return null;
             }
-            return null;
         } else if (argsLangth == 0) {
             if (StringUtils.isNotBlank(property = getReadProperty(method))) {
                 return fields.get(property);
@@ -162,7 +163,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * @return 实体
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> E newInstance(Class<E> entityClass, Map<String, Object> fields) {
+    public static <E extends Entity> E newInstance(Class<E> entityClass, Map<String, Serializable> fields) {
         if (isEntityClass(entityClass)) {
             if (entityClass.isInterface()) {
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(entityClass, Package.class);

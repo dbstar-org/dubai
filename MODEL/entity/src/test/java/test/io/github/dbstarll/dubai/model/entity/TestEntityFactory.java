@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Map;
@@ -114,7 +115,7 @@ public class TestEntityFactory {
     @Test
     public void testNewInstanceWithFields() {
         final ObjectId id = new ObjectId();
-        final Map<String, Object> fields = Collections.singletonMap(Entity.FIELD_NAME_ID, id);
+        final Map<String, Serializable> fields = Collections.singletonMap(Entity.FIELD_NAME_ID, id);
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class, fields);
         Assert.assertSame(id, entity.getId());
         Assert.assertNull(entity.getDateCreated());
