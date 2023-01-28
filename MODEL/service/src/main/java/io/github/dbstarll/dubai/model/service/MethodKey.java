@@ -16,9 +16,7 @@ class MethodKey {
     }
 
     private static String toString(Method method, Class<?> entityClass) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(method.getName()).append('(').append(parameterToString(method, entityClass)).append(')');
-        return sb.toString();
+        return method.getName() + '(' + parameterToString(method, entityClass) + ')';
     }
 
     private static String parameterToString(Method method, Class<?> entityClass) {
@@ -27,9 +25,9 @@ class MethodKey {
         for (int j = 0, length = parameterTypes.length; j < length; j++) {
             final Type type = parameterTypes[j];
             String param;
-            if (Class.class.isInstance(type)) {
+            if (type instanceof Class) {
                 param = getTypeName((Class<?>) type);
-            } else if (TypeVariable.class.isInstance(type) && isEntityTypeVariable((TypeVariable<?>) type, entityClass)) {
+            } else if (type instanceof TypeVariable && isEntityTypeVariable((TypeVariable<?>) type, entityClass)) {
                 param = entityClass.getName();
             } else {
                 param = type.toString();
@@ -48,7 +46,7 @@ class MethodKey {
 
     private static boolean isEntityTypeVariable(TypeVariable<?> typeVariable, Class<?> entityClass) {
         for (Type bound : typeVariable.getBounds()) {
-            if (!Class.class.isInstance(bound)) {
+            if (!(bound instanceof Class)) {
                 return false;
             }
             final Class<?> boundClass = (Class<?>) bound;
@@ -58,7 +56,7 @@ class MethodKey {
                 return false;
             }
         }
-        if (!Class.class.isInstance(typeVariable.getGenericDeclaration())) {
+        if (!(typeVariable.getGenericDeclaration() instanceof Class)) {
             return false;
         }
         return true;
@@ -72,7 +70,7 @@ class MethodKey {
                 dimensions++;
                 cl = cl.getComponentType();
             }
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(cl.getName());
             for (int i = 0; i < dimensions; i++) {
                 sb.append("[]");

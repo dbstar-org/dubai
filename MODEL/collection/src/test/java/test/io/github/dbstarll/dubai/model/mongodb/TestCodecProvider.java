@@ -29,8 +29,6 @@ import org.bson.types.ObjectId;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -47,9 +45,7 @@ public class TestCodecProvider extends TestCase {
         this.client = MongoClients.create(
                 new MongoClientFactory(new Bytes(EncryptUtils.sha("y1cloud.com", 256))).getMongoClientSettingsbuilder()
                         .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
-                        .applyToClusterSettings(s -> {
-                            s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS);
-                        }).build()
+                        .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
         );
         this.database = client.getDatabase("test");
         this.collectionFactory = new CollectionFactory(database);
@@ -101,12 +97,7 @@ public class TestCodecProvider extends TestCase {
     public void testProxyNoPojoFields() {
         final Collection<SimpleEntity> collection = collectionFactory.newInstance(SimpleEntity.class);
         final SimpleEntity entity = (SimpleEntity) Proxy.newProxyInstance(SimpleEntity.class.getClassLoader(),
-                new Class[]{SimpleEntity.class, EntityModifier.class}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                new Class[]{SimpleEntity.class, EntityModifier.class}, (proxy, method, args) -> null);
 
         try {
             collection.save(entity);
@@ -202,9 +193,7 @@ public class TestCodecProvider extends TestCase {
         this.client = MongoClients.create(
                 new MongoClientFactory().getMongoClientSettingsbuilder()
                         .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
-                        .applyToClusterSettings(s -> {
-                            s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS);
-                        }).build()
+                        .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
         );
         final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
         final Codec<byte[]> codec = registry.get(byte[].class);
@@ -250,17 +239,15 @@ public class TestCodecProvider extends TestCase {
     }
 
     private byte[] read(String resource) throws IOException {
-        final InputStream in = ClassLoader.getSystemResourceAsStream(resource);
-        try {
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try {
-                IOUtils.copy(in, out);
-            } finally {
-                out.close();
+        try (InputStream in = ClassLoader.getSystemResourceAsStream(resource)) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                try {
+                    IOUtils.copy(in, out);
+                } finally {
+                    out.close();
+                }
+                return out.toByteArray();
             }
-            return out.toByteArray();
-        } finally {
-            in.close();
         }
     }
 

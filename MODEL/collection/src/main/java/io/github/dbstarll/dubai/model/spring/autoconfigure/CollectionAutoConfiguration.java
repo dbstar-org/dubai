@@ -59,6 +59,6 @@ public class CollectionAutoConfiguration {
                 packages.add(packageClass);
             }
         }
-        return packages.toArray(new Class<?>[packages.size()]);
+        return packages.toArray(new Class<?>[0]);
     }
 }

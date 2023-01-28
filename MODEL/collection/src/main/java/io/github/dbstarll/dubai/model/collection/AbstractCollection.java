@@ -219,7 +219,7 @@ public abstract class AbstractCollection<E extends Entity> implements Collection
      * @param <E>          实体类型
      */
     private static <E extends Entity> void setEntityLastModified(final E entity, final Date lastModified) {
-        if (EntityModifier.class.isInstance(entity)) {
+        if (entity instanceof EntityModifier) {
             ((EntityModifier) entity).setLastModified(lastModified);
         } else {
             throw new IllegalArgumentException("UnModify entity: " + entity.getClass().getName());

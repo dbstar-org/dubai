@@ -86,7 +86,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     private static Class<?> getClass(Type type) {
-        if (ParameterizedType.class.isInstance(type)) {
+        if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
         } else {
             return (Class<?>) type;
@@ -272,7 +272,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     public static <E extends Entity, S extends Service<E>> Class<S> getServiceClass(S proxy) {
         if (Proxy.isProxyClass(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
-            if (ServiceFactory.class.isInstance(handler)) {
+            if (handler instanceof ServiceFactory) {
                 return ((ServiceFactory<E, S>) handler).serviceClass;
             }
         }

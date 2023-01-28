@@ -18,8 +18,6 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.*;
@@ -128,12 +126,7 @@ public class TestServiceFactory {
     public void testGetServiceClassNoServiceFactory() {
         final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
                 new Class[]{InterfaceService.class, ImplementalAutowirerAware.class, GeneralValidateable.class},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                (proxy, method, args) -> null);
         assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
         assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
     }
@@ -433,7 +426,7 @@ public class TestServiceFactory {
             }
         };
         final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertTrue(GeneralValidateable.class.isInstance(service));
+        assertTrue(service instanceof GeneralValidateable);
         final java.util.Collection<PositionValidation<InterfaceEntity>> validation = ((GeneralValidateable) service)
                 .generalValidations();
         assertNotNull(validation);

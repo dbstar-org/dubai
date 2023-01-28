@@ -10,8 +10,6 @@ import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Map;
@@ -108,7 +106,7 @@ public class TestEntityFactory extends TestCase {
      */
     public void testNewInstanceWithFields() {
         final ObjectId id = new ObjectId();
-        final Map<String, Object> fields = Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id);
+        final Map<String, Object> fields = Collections.singletonMap(Entity.FIELD_NAME_ID, id);
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class, fields);
         assertTrue(id == entity.getId());
         assertNull(entity.getDateCreated());
@@ -119,12 +117,7 @@ public class TestEntityFactory extends TestCase {
      */
     public void testGetEntityClassNoEntityFactory() {
         final InterfaceEntity entity = (InterfaceEntity) Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
-                new Class[]{EntityModifier.class, InterfaceEntity.class}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                new Class[]{EntityModifier.class, InterfaceEntity.class}, (proxy, method, args) -> null);
         assertNotEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity));
         assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
         assertEquals(entity.getClass(), EntityFactory.getEntityClass(entity));
@@ -138,11 +131,11 @@ public class TestEntityFactory extends TestCase {
         final ObjectId id2 = new ObjectId();
         final InterfaceEntity entity1 = EntityFactory.newInstance(InterfaceEntity.class);
         final InterfaceEntity entity2 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id1));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id1));
         final InterfaceEntity entity3 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id1));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id1));
         final InterfaceEntity entity4 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id2));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id2));
         assertNotEquals(entity1.hashCode(), entity2.hashCode());
         assertEquals(entity2.hashCode(), entity3.hashCode());
         assertNotEquals(entity1.hashCode(), entity2.hashCode());
@@ -158,11 +151,11 @@ public class TestEntityFactory extends TestCase {
         final ObjectId id2 = new ObjectId();
         final InterfaceEntity entity1 = EntityFactory.newInstance(InterfaceEntity.class);
         final InterfaceEntity entity2 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id1));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id1));
         final InterfaceEntity entity3 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id1));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id1));
         final InterfaceEntity entity4 = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap(Entity.FIELD_NAME_ID, (Object) id2));
+                Collections.singletonMap(Entity.FIELD_NAME_ID, id2));
         assertNotEquals(entity1, entity2);
         assertEquals(entity2, entity3);
         assertNotEquals(entity1, entity2);
@@ -173,12 +166,7 @@ public class TestEntityFactory extends TestCase {
         assertNotEquals(entity1, new Object());
         assertEquals(entity1, entity1);
         assertNotEquals(entity1, Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
-                new Class[]{InterfaceEntity.class}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                }));
+                new Class[]{InterfaceEntity.class}, (proxy, method, args) -> null));
         assertNotEquals(entity1, EntityFactory.newInstance(ClassPackageInterfaceEntity.class));
     }
 
@@ -187,7 +175,7 @@ public class TestEntityFactory extends TestCase {
      */
     public void testDefaultPrimitiveFields() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class,
-                Collections.singletonMap("booleanFromNoTableEntity", (Object) true));
+                Collections.singletonMap("booleanFromNoTableEntity", true));
         final Map<String, Object> fields = ((PojoFields) entity).fields();
         assertEquals(0, fields.get("intFromInterfaceEntity"));
         assertEquals(true, fields.get("booleanFromNoTableEntity"));

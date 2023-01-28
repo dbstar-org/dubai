@@ -76,9 +76,7 @@ public final class MongoClientFactory {
         if (mongoCredential != null) {
             settings.credential(mongoCredential);
         }
-        return MongoClients.create(settings.applyToClusterSettings(s -> {
-            s.hosts(parseServers(servers));
-        }).build());
+        return MongoClients.create(settings.applyToClusterSettings(s -> s.hosts(parseServers(servers))).build());
     }
 
     /**
@@ -99,7 +97,7 @@ public final class MongoClientFactory {
     }
 
     private static List<ServerAddress> parseServers(final String servers) {
-        final List<ServerAddress> seeds = new LinkedList<ServerAddress>();
+        final List<ServerAddress> seeds = new LinkedList<>();
         for (String server : StringUtils.split(servers, ',')) {
             final int index = server.indexOf(':');
             if (index < 0) {
@@ -127,7 +125,7 @@ public final class MongoClientFactory {
         @Override
         public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
             if (Enum.class.isAssignableFrom(clazz)) {
-                return new EnumCodec((Class<Enum<?>>) clazz);
+                return new EnumCodec(clazz);
             } else if (byte[].class.isAssignableFrom(clazz)) {
                 return (Codec<T>) new ImageCodec();
             }

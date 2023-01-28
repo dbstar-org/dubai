@@ -204,20 +204,10 @@ public class TestServiceImplemental {
 
     @Test
     public void testDelay() throws InterruptedException {
-        final AtomicReference<Object> lock1 = new AtomicReference<Object>();
-        final AtomicReference<Object> lock2 = new AtomicReference<Object>();
-        final Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                lock1.set(service.delay());
-            }
-        });
-        final Thread t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                lock2.set(service.delay());
-            }
-        });
+        final AtomicReference<Object> lock1 = new AtomicReference<>();
+        final AtomicReference<Object> lock2 = new AtomicReference<>();
+        final Thread t1 = new Thread(() -> lock1.set(service.delay()));
+        final Thread t2 = new Thread(() -> lock2.set(service.delay()));
         t1.start();
         t2.start();
         t1.join();

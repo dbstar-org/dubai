@@ -47,7 +47,7 @@ public class TestEntityInstanceCreatorFactory {
     @Test
     public void testSet() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
-        final Integer value = new Integer(100);
+        final Integer value = 100;
 
         new Expectations() {
             {

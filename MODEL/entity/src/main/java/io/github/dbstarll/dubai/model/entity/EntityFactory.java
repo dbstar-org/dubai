@@ -236,7 +236,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
     public static <E extends Entity> Class<E> getEntityClass(E proxy) {
         if (Proxy.isProxyClass(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
-            if (EntityFactory.class.isInstance(handler)) {
+            if (handler instanceof EntityFactory) {
                 return ((EntityFactory<E>) handler).entityClass;
             }
         }

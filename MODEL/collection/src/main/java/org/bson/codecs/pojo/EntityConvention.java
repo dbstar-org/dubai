@@ -32,10 +32,10 @@ public final class EntityConvention implements Convention {
     private <T extends Entity> void processEntity(final ClassModelBuilder<T> classModelBuilder) {
         final Class<T> entityClass = classModelBuilder.getType();
 
-        final Set<String> propertyNames = new TreeSet<String>();
-        final Map<String, PropertyMetadata<?>> propertyNameMap = new HashMap<String, PropertyMetadata<?>>();
-        final ArrayList<Annotation> annotations = new ArrayList<Annotation>();
-        final Map<String, TypeParameterMap> propertyTypeParameterMap = new HashMap<String, TypeParameterMap>();
+        final Set<String> propertyNames = new TreeSet<>();
+        final Map<String, PropertyMetadata<?>> propertyNameMap = new HashMap<>();
+        final ArrayList<Annotation> annotations = new ArrayList<>();
+        final Map<String, TypeParameterMap> propertyTypeParameterMap = new HashMap<>();
 
         collectMethods(EntityModifier.class, propertyNames, propertyNameMap, annotations, propertyTypeParameterMap, null);
         collectMethods(entityClass, propertyNames, propertyNameMap, annotations, propertyTypeParameterMap, null);
@@ -71,7 +71,7 @@ public final class EntityConvention implements Convention {
         }
 
         final String declaringClassName = entityInterface.toString();
-        final List<String> genericTypeNames = new ArrayList<String>();
+        final List<String> genericTypeNames = new ArrayList<>();
         for (TypeVariable<? extends Class<? super T>> classTypeVariable : entityInterface.getTypeParameters()) {
             genericTypeNames.add(classTypeVariable.getName());
         }
@@ -135,7 +135,7 @@ public final class EntityConvention implements Convention {
                                                                        final TypeData<T> typeData) {
         PropertyMetadata<T> propertyMetadata = (PropertyMetadata<T>) propertyNameMap.get(propertyName);
         if (propertyMetadata == null) {
-            propertyMetadata = new PropertyMetadata<T>(propertyName, declaringClassName, typeData);
+            propertyMetadata = new PropertyMetadata<>(propertyName, declaringClassName, typeData);
             propertyNameMap.put(propertyName, propertyMetadata);
         }
         return propertyMetadata;
@@ -168,7 +168,7 @@ public final class EntityConvention implements Convention {
         index++;
         if (propertyType instanceof TypeVariable) {
             final TypeVariable<?> tv = (TypeVariable<?>) propertyType;
-            if (Class.class.isInstance(tv.getGenericDeclaration())) {
+            if (tv.getGenericDeclaration() instanceof Class) {
                 final int classParamIndex = genericTypeNames.indexOf(tv.getName());
                 if (index == 1) {
                     builder.addIndex(classParamIndex);
@@ -194,8 +194,8 @@ public final class EntityConvention implements Convention {
         propertyModelBuilder.propertyName(propertyMetadata.getName()).readName(propertyMetadata.getName())
                 .writeName(propertyMetadata.getName()).typeData(propertyMetadata.getTypeData())
                 .readAnnotations(propertyMetadata.getReadAnnotations()).writeAnnotations(propertyMetadata.getWriteAnnotations())
-                .propertySerialization(new PropertyModelSerializationImpl<T>())
-                .propertyAccessor(new PropertyAccessorImpl<T>(propertyMetadata));
+                .propertySerialization(new PropertyModelSerializationImpl<>())
+                .propertyAccessor(new PropertyAccessorImpl<>(propertyMetadata));
 
         if (propertyMetadata.getTypeParameters() != null) {
             //TODO 检查这一段代码的逻辑

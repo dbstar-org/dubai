@@ -27,12 +27,9 @@ public class TestDefaultCacheManager {
 
         final AtomicBoolean call = new AtomicBoolean(false);
         entityCacheManager.find(SimpleEntity.class, new ObjectId().toHexString(),
-                new EntityCacheManager.UpdateCacheHandler<SimpleEntity>() {
-                    @Override
-                    public SimpleEntity updateCache(String key) {
-                        call.set(true);
-                        return null;
-                    }
+                key -> {
+                    call.set(true);
+                    return null;
                 });
         assertTrue(call.get());
 

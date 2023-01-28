@@ -20,8 +20,6 @@ import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -217,12 +215,7 @@ public class TestComplexCollection {
     @Test
     public void testSaveNoEntityModifier() {
         final CacheableEntity entity = (CacheableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
-                new Class[]{entityClass}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                new Class[]{entityClass}, (proxy, method, args) -> null);
 
         try {
             collection.save(entity, new ObjectId());
@@ -514,7 +507,7 @@ public class TestComplexCollection {
                 mongoCollection.getCodecRegistry();
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
                 findIterable.iterator();
-                result = new MockMongoCursor<>(Arrays.asList(EntityFactory.newInstance(entityClass)).iterator());
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
             }
         };
 

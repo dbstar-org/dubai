@@ -21,8 +21,6 @@ import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -221,12 +219,7 @@ public class TestSimpleNotifiableCollection {
     @Test
     public void testSaveNoEntityModifier() {
         final SimpleNotifiableEntity entity = (SimpleNotifiableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
-                new Class[]{entityClass}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                new Class[]{entityClass}, (proxy, method, args) -> null);
 
         try {
             collection.save(entity, new ObjectId());

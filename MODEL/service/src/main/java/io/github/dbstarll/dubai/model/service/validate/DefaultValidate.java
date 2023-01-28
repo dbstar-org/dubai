@@ -8,12 +8,12 @@ public class DefaultValidate implements Validate {
 
     @Override
     public Collection<String> getActionErrors() {
-        return new LinkedList<String>(internalGetActionErrors());
+        return new LinkedList<>(internalGetActionErrors());
     }
 
     @Override
     public Map<String, List<String>> getFieldErrors() {
-        return new LinkedHashMap<String, List<String>>(internalGetFieldErrors());
+        return new LinkedHashMap<>(internalGetFieldErrors());
     }
 
     @Override
@@ -27,12 +27,7 @@ public class DefaultValidate implements Validate {
     @Override
     public void addFieldError(String fieldName, String errorMessage) {
         final Map<String, List<String>> errors = internalGetFieldErrors();
-        List<String> thisFieldErrors = errors.get(fieldName);
-
-        if (thisFieldErrors == null) {
-            thisFieldErrors = new ArrayList<String>();
-            errors.put(fieldName, thisFieldErrors);
-        }
+        List<String> thisFieldErrors = errors.computeIfAbsent(fieldName, k -> new ArrayList<>());
 
         if (!thisFieldErrors.contains(errorMessage)) {
             thisFieldErrors.add(errorMessage);
@@ -56,7 +51,7 @@ public class DefaultValidate implements Validate {
 
     private Collection<String> internalGetActionErrors() {
         if (actionErrors == null) {
-            actionErrors = new ArrayList<String>();
+            actionErrors = new ArrayList<>();
         }
 
         return actionErrors;
@@ -64,7 +59,7 @@ public class DefaultValidate implements Validate {
 
     private Map<String, List<String>> internalGetFieldErrors() {
         if (fieldErrors == null) {
-            fieldErrors = new LinkedHashMap<String, List<String>>();
+            fieldErrors = new LinkedHashMap<>();
         }
 
         return fieldErrors;
