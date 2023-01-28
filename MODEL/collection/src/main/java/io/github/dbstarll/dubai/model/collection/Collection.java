@@ -459,7 +459,7 @@ public interface Collection<E extends Entity> {
     /**
      * 返回不带defunct字段过滤的Collection对象，以便进行物理删除和全量查询.
      *
-     * @return
+     * @return 原始未封装的Collection对象
      */
     Collection<E> original();
 
