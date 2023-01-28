@@ -130,7 +130,7 @@ public class NotifiableCollection<E extends Entity> extends CollectionWrapper<E>
 
     private static <E extends Entity> List<E> toList(FindIterable<E> iterable) {
         List<E> ret = new ArrayList<>();
-        for (Iterator<E> iterator = iterable.iterator(); iterator.hasNext(); ) {
+        for (Iterator<E> iterator = iterable.iterator(); iterator != null && iterator.hasNext(); ) {
             ret.add(iterator.next());
         }
         return ret;
