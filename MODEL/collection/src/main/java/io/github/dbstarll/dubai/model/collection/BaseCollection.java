@@ -1,7 +1,18 @@
 package io.github.dbstarll.dubai.model.collection;
 
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.entity.Entity;
@@ -99,13 +110,6 @@ public class BaseCollection<E extends Entity> extends AbstractCollection<E> {
     @Override
     public <T> AggregateIterable<T> aggregate(final List<? extends Bson> pipeline, final Class<T> resultClass) {
         return mongoCollection.aggregate(pipeline, resultClass);
-    }
-
-    @Override
-    public <T> MapReduceIterable<T> mapReduce(final String mapFunction,
-                                              final String reduceFunction,
-                                              final Class<T> resultClass) {
-        return mongoCollection.mapReduce(mapFunction, reduceFunction, resultClass);
     }
 
     @Override

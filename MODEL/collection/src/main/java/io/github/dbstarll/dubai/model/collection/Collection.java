@@ -3,11 +3,20 @@ package io.github.dbstarll.dubai.model.collection;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MapReduceIterable;
-import com.mongodb.client.model.*;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.entity.Entity;
+import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
@@ -26,7 +35,9 @@ public interface Collection<E extends Entity> {
      *
      * @return the number of documents in the collection
      */
-    long count();
+    default long count() {
+        return count(new BsonDocument(), new CountOptions());
+    }
 
     /**
      * Counts the number of documents in the collection according to the given options.
@@ -34,7 +45,9 @@ public interface Collection<E extends Entity> {
      * @param filter the query filter
      * @return the number of documents in the collection
      */
-    long count(Bson filter);
+    default long count(Bson filter) {
+        return count(filter, new CountOptions());
+    }
 
     /**
      * Counts the number of documents in the collection according to the given options.
@@ -53,7 +66,9 @@ public interface Collection<E extends Entity> {
      * @param <T>         the target type of the iterable.
      * @return an iterable of distinct values
      */
-    <T> DistinctIterable<T> distinct(String fieldName, Class<T> resultClass);
+    default <T> DistinctIterable<T> distinct(String fieldName, Class<T> resultClass) {
+        return distinct(fieldName, new BsonDocument(), resultClass);
+    }
 
     /**
      * Gets the distinct values of the specified field name.
@@ -71,7 +86,9 @@ public interface Collection<E extends Entity> {
      *
      * @return the find iterable interface
      */
-    FindIterable<E> find();
+    default FindIterable<E> find() {
+        return find(new BsonDocument(), this.getEntityClass());
+    }
 
     /**
      * Finds all documents in the collection.
@@ -80,7 +97,9 @@ public interface Collection<E extends Entity> {
      * @param <T>         the target document type of the iterable.
      * @return the find iterable interface
      */
-    <T> FindIterable<T> find(Class<T> resultClass);
+    default <T> FindIterable<T> find(Class<T> resultClass) {
+        return find(new BsonDocument(), resultClass);
+    }
 
     /**
      * Finds all documents in the collection.
@@ -88,7 +107,9 @@ public interface Collection<E extends Entity> {
      * @param filter the query filter
      * @return the find iterable interface
      */
-    FindIterable<E> find(Bson filter);
+    default FindIterable<E> find(Bson filter) {
+        return find(filter, this.getEntityClass());
+    }
 
     /**
      * Finds all documents in the collection.
@@ -106,7 +127,9 @@ public interface Collection<E extends Entity> {
      * @param pipeline the aggregate pipeline
      * @return an iterable containing the result of the aggregation operation
      */
-    AggregateIterable<E> aggregate(List<? extends Bson> pipeline);
+    default AggregateIterable<E> aggregate(List<? extends Bson> pipeline) {
+        return aggregate(pipeline, this.getEntityClass());
+    }
 
     /**
      * Aggregates documents according to the specified aggregation pipeline.
@@ -119,30 +142,6 @@ public interface Collection<E extends Entity> {
     <T> AggregateIterable<T> aggregate(List<? extends Bson> pipeline, Class<T> resultClass);
 
     /**
-     * Aggregates documents according to the specified map-reduce function.
-     *
-     * @param mapFunction    A JavaScript function that associates or "maps" a value with a key and emits
-     *                       the key and value pair.
-     * @param reduceFunction A JavaScript function that "reduces" to a single object all the values
-     *                       associated with a particular key.
-     * @return an iterable containing the result of the map-reduce operation
-     */
-    MapReduceIterable<E> mapReduce(String mapFunction, String reduceFunction);
-
-    /**
-     * Aggregates documents according to the specified map-reduce function.
-     *
-     * @param mapFunction    A JavaScript function that associates or "maps" a value with a key and emits
-     *                       the key and value pair.
-     * @param reduceFunction A JavaScript function that "reduces" to a single object all the values
-     *                       associated with a particular key.
-     * @param resultClass    the class to decode each resulting document into.
-     * @param <T>            the target document type of the iterable.
-     * @return an iterable containing the result of the map-reduce operation
-     */
-    <T> MapReduceIterable<T> mapReduce(String mapFunction, String reduceFunction, Class<T> resultClass);
-
-    /**
      * Inserts the provided document. If the document is missing an identifier, the driver should
      * generate one.
      *
@@ -153,7 +152,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    void insertOne(E document);
+    default void insertOne(E document) {
+        insertOne(document, new InsertOneOptions());
+    }
 
     /**
      * Inserts the provided document. If the document is missing an identifier, the driver should
@@ -181,7 +182,9 @@ public interface Collection<E extends Entity> {
      * @throws com.mongodb.MongoException          if the write failed due some other failure
      * @see com.mongodb.client.MongoCollection#bulkWrite
      */
-    void insertMany(List<? extends E> documents);
+    default void insertMany(List<? extends E> documents) {
+        insertMany(documents, new InsertManyOptions());
+    }
 
     /**
      * Inserts one or more documents. A call to this method is equivalent to a call to the
@@ -208,7 +211,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    DeleteResult deleteOne(Bson filter);
+    default DeleteResult deleteOne(Bson filter) {
+        return deleteOne(filter, new DeleteOptions());
+    }
 
     /**
      * Removes at most one document from the collection that matches the given filter. If no documents
@@ -238,7 +243,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    DeleteResult deleteMany(Bson filter);
+    default DeleteResult deleteMany(Bson filter) {
+        return deleteMany(filter, new DeleteOptions());
+    }
 
     /**
      * Removes all documents from the collection that match the given query filter. If no documents
@@ -268,7 +275,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    UpdateResult replaceOne(Bson filter, E replacement);
+    default UpdateResult replaceOne(Bson filter, E replacement) {
+        return replaceOne(filter, replacement, new ReplaceOptions());
+    }
 
     /**
      * Replace a document in the collection according to the specified arguments.
@@ -298,7 +307,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    UpdateResult updateOne(Bson filter, Bson update);
+    default UpdateResult updateOne(Bson filter, Bson update) {
+        return updateOne(filter, update, new UpdateOptions());
+    }
 
     /**
      * Update a single document in the collection according to the specified arguments.
@@ -329,7 +340,9 @@ public interface Collection<E extends Entity> {
      *                                                the write concern
      * @throws com.mongodb.MongoException             if the write failed due some other failure
      */
-    UpdateResult updateMany(Bson filter, Bson update);
+    default UpdateResult updateMany(Bson filter, Bson update) {
+        return updateMany(filter, update, new UpdateOptions());
+    }
 
     /**
      * Update all documents in the collection according to the specified arguments.
@@ -354,7 +367,9 @@ public interface Collection<E extends Entity> {
      * @return the document that was removed. If no documents matched the query filter, then null will
      * be returned
      */
-    E findOneAndDelete(Bson filter);
+    default E findOneAndDelete(Bson filter) {
+        return findOneAndDelete(filter, new FindOneAndDeleteOptions());
+    }
 
     /**
      * Atomically find a document and remove it.
@@ -375,7 +390,9 @@ public interface Collection<E extends Entity> {
      * property, this will either be the document as it was before the update or as it is
      * after the update. If no documents matched the query filter, then null will be returned
      */
-    E findOneAndReplace(Bson filter, E replacement);
+    default E findOneAndReplace(Bson filter, E replacement) {
+        return findOneAndReplace(filter, replacement, new FindOneAndReplaceOptions());
+    }
 
     /**
      * Atomically find a document and replace it.
@@ -398,7 +415,9 @@ public interface Collection<E extends Entity> {
      * @return the document that was updated before the update was applied. If no documents matched
      * the query filter, then null will be returned
      */
-    E findOneAndUpdate(Bson filter, Bson update);
+    default E findOneAndUpdate(Bson filter, Bson update) {
+        return findOneAndUpdate(filter, update, new FindOneAndUpdateOptions());
+    }
 
     /**
      * Atomically find a document and update it.
@@ -413,21 +432,91 @@ public interface Collection<E extends Entity> {
      */
     E findOneAndUpdate(Bson filter, Bson update, FindOneAndUpdateOptions options);
 
-    E findOne();
+    /**
+     * 查找第一个的实体.
+     *
+     * @return 第一个实体
+     */
+    default E findOne() {
+        return findOne(new BsonDocument());
+    }
 
-    E findOne(Bson filter);
+    /**
+     * 按照过滤条件来查找第一个匹配的实体.
+     *
+     * @param filter a document describing the query filter, which may not be null.
+     * @return 第一个匹配的实体
+     */
+    default E findOne(Bson filter) {
+        return find(filter).limit(1).first();
+    }
 
-    E findById(ObjectId id);
+    /**
+     * 按实体ID来查询匹配的实体.
+     *
+     * @param id 实体ID
+     * @return 匹配的实体
+     */
+    default E findById(ObjectId id) {
+        if (id == null) {
+            return null;
+        }
+        return findOne(Filters.eq(Entity.FIELD_NAME_ID, id));
+    }
 
-    FindIterable<E> findByIds(java.util.Collection<ObjectId> ids);
+    /**
+     * 根据实例ID集合来查询所有匹配的实体.
+     *
+     * @param ids 实例ID集合
+     * @return 所有匹配的实体
+     */
+    default FindIterable<E> findByIds(java.util.Collection<ObjectId> ids) {
+        return find(Filters.in(Entity.FIELD_NAME_ID, ids));
+    }
 
-    E updateById(ObjectId id, Bson update);
+    /**
+     * 查找指定实体ID的实体并更新.
+     *
+     * @param id     实体ID
+     * @param update 更新
+     * @return 更新后的实体
+     */
+    default E updateById(ObjectId id, Bson update) {
+        return updateById(id, update, new FindOneAndUpdateOptions());
+    }
 
-    E updateById(ObjectId id, Bson update, FindOneAndUpdateOptions updateOptions);
+    /**
+     * 查找指定实体ID的实体并更新.
+     *
+     * @param id            实体ID
+     * @param update        更新
+     * @param updateOptions 选项参数
+     * @return 更新后的实体
+     */
+    default E updateById(ObjectId id, Bson update, FindOneAndUpdateOptions updateOptions) {
+        return id == null ? null : findOneAndUpdate(Filters.eq(Entity.FIELD_NAME_ID, id), update, updateOptions);
+    }
 
-    E deleteById(ObjectId id);
+    /**
+     * 查找指定实体ID的实体并删除.
+     *
+     * @param id 实体ID
+     * @return 被删除的实体
+     */
+    default E deleteById(ObjectId id) {
+        return deleteById(id, new FindOneAndDeleteOptions());
+    }
 
-    E deleteById(ObjectId id, FindOneAndDeleteOptions options);
+    /**
+     * 查找指定实体ID的实体并删除.
+     *
+     * @param id      实体ID
+     * @param options 选项参数
+     * @return 被删除的实体
+     */
+    default E deleteById(ObjectId id, FindOneAndDeleteOptions options) {
+        return id == null ? null : findOneAndDelete(Filters.eq(Entity.FIELD_NAME_ID, id), options);
+    }
 
     /**
      * 插入或更新一个实体.
@@ -440,7 +529,9 @@ public interface Collection<E extends Entity> {
      * @param entity 需要插入或更新的实体
      * @return 返回更新后的实体
      */
-    E save(E entity);
+    default E save(E entity) {
+        return save(entity, null);
+    }
 
     /**
      * 插入或更新一个实体.
@@ -469,5 +560,7 @@ public interface Collection<E extends Entity> {
      * @param id id of entity
      * @return 仓库中是否包含指定id的entity
      */
-    boolean contains(ObjectId id);
+    default boolean contains(ObjectId id) {
+        return count(Filters.eq(id)) > 0;
+    }
 }

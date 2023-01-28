@@ -15,7 +15,11 @@ import io.github.dbstarll.dubai.model.entity.test.ClassNoTableEntity;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.NoTableEntity;
 import io.github.dbstarll.dubai.model.notify.NotifyProvider;
-import mockit.*;
+import mockit.Expectations;
+import mockit.Injectable;
+import mockit.Mocked;
+import mockit.Tested;
+import mockit.Verifications;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

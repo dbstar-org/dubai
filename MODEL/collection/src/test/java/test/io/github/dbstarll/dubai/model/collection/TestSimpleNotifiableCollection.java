@@ -1,7 +1,20 @@
 package test.io.github.dbstarll.dubai.model.collection;
 
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
@@ -29,7 +42,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestSimpleNotifiableCollection {
     @Injectable
@@ -52,9 +71,6 @@ public class TestSimpleNotifiableCollection {
 
     @Mocked
     AggregateIterable<SimpleNotifiableEntity> aggregateIterable;
-
-    @Mocked
-    MapReduceIterable<SimpleNotifiableEntity> mapReduceIterable;
 
     private final Class<SimpleNotifiableEntity> entityClass = SimpleNotifiableEntity.class;
 
@@ -594,18 +610,6 @@ public class TestSimpleNotifiableCollection {
         new Verifications() {
             {
                 mongoCollection.aggregate((List<Bson>) any, (Class<?>) any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void testMapReduce() {
-        assertSame(mapReduceIterable, collection.mapReduce("mapFunction", "reduceFunction"));
-
-        new Verifications() {
-            {
-                mongoCollection.mapReduce(anyString, anyString, (Class<?>) any);
                 times = 1;
             }
         };

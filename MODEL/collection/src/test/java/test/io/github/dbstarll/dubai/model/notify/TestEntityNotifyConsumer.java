@@ -3,7 +3,12 @@ package test.io.github.dbstarll.dubai.model.notify;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.join.CompanyBase;
-import io.github.dbstarll.dubai.model.notify.*;
+import io.github.dbstarll.dubai.model.notify.EntityNotifyConsumer;
+import io.github.dbstarll.dubai.model.notify.EntityNotifyListener;
+import io.github.dbstarll.dubai.model.notify.NotifyConsumer;
+import io.github.dbstarll.dubai.model.notify.NotifyListener;
+import io.github.dbstarll.dubai.model.notify.NotifyParser;
+import io.github.dbstarll.dubai.model.notify.NotifyType;
 import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 
