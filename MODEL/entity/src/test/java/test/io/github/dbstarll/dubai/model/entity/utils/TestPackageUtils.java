@@ -15,7 +15,7 @@ public class TestPackageUtils extends TestCase {
      * 测试创建实例.
      */
     public void testNewInstance() {
-        assertThrows(IllegalAccessException.class, () -> PackageUtils.class.newInstance());
+        assertThrows(IllegalAccessException.class, PackageUtils.class::newInstance);
     }
 
     /**

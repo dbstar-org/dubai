@@ -15,7 +15,7 @@ import static org.junit.Assert.assertThrows;
 public class TestEntityUtils {
     @Test
     public void testNewInstance() {
-        assertThrows(IllegalAccessException.class, () -> EntityUtils.class.newInstance());
+        assertThrows(IllegalAccessException.class, EntityUtils.class::newInstance);
     }
 
     @Test

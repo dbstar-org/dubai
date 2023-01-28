@@ -62,7 +62,7 @@ public class TestIntrospectionContextWrapper {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         this.context = null;
         this.result = null;
     }
