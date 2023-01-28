@@ -7,6 +7,7 @@ import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.CollectionWrapper;
+import io.github.dbstarll.dubai.model.collection.test.MockMongoCursor;
 import io.github.dbstarll.dubai.model.collection.test.SimpleNotifiableEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.info.Namable;
@@ -420,6 +421,8 @@ public class TestSimpleNotifiableCollection {
             {
                 mongoCollection.getCodecRegistry();
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                findIterable.iterator();
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
                 deleteResult.getDeletedCount();
                 result = 10;
             }
@@ -492,6 +495,8 @@ public class TestSimpleNotifiableCollection {
             {
                 mongoCollection.getCodecRegistry();
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                findIterable.iterator();
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
             }
         };
 

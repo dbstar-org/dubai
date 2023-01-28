@@ -427,6 +427,8 @@ public class TestComplexCollection {
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
                 updateResult.getModifiedCount();
                 result = 10;
+                findIterable.iterator();
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
             }
         };
 

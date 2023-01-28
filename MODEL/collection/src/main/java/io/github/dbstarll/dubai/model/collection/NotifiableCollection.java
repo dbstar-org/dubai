@@ -10,7 +10,6 @@ import io.github.dbstarll.dubai.model.notify.NotifyType;
 import org.bson.conversions.Bson;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class NotifiableCollection<E extends Entity> extends CollectionWrapper<E> {
@@ -130,9 +129,7 @@ public class NotifiableCollection<E extends Entity> extends CollectionWrapper<E>
 
     private static <E extends Entity> List<E> toList(FindIterable<E> iterable) {
         List<E> ret = new ArrayList<>();
-        for (Iterator<E> iterator = iterable.iterator(); iterator != null && iterator.hasNext(); ) {
-            ret.add(iterator.next());
-        }
+        iterable.iterator().forEachRemaining(e -> ret.add(e));
         return ret;
     }
 
