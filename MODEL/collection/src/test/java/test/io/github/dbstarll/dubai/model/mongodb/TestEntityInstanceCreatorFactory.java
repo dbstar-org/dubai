@@ -27,7 +27,7 @@ public class TestEntityInstanceCreatorFactory {
     @Test
     public void testCreate() {
         assertNotNull(instanceCreatorFactory.create());
-        assertTrue(instanceCreatorFactory.create() != instanceCreatorFactory.create());
+        assertNotSame(instanceCreatorFactory.create(), instanceCreatorFactory.create());
     }
 
     /**
@@ -37,8 +37,8 @@ public class TestEntityInstanceCreatorFactory {
     public void testGetInstance() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         assertNotNull(instanceCreator.getInstance());
-        assertTrue(instanceCreator.getInstance() == instanceCreator.getInstance());
-        assertTrue(instanceCreator.getInstance() != instanceCreatorFactory.create().getInstance());
+        assertSame(instanceCreator.getInstance(), instanceCreator.getInstance());
+        assertNotSame(instanceCreator.getInstance(), instanceCreatorFactory.create().getInstance());
     }
 
     /**

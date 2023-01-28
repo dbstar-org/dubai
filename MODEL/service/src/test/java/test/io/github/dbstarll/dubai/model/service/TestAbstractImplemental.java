@@ -174,6 +174,6 @@ public class TestAbstractImplemental {
         entity.setDefunct(true);
         final DefaultValidate validate = new DefaultValidate();
         assertNotNull(service.save(entity, validate));
-        assertEquals(false, validate.hasErrors());
+        assertFalse(validate.hasErrors());
     }
 }

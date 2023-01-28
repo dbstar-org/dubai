@@ -215,7 +215,7 @@ public class TestServiceFactory {
 
         final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
 
-        assertEquals(true, service.contains(new ObjectId()));
+        assertTrue(service.contains(new ObjectId()));
 
         new Verifications() {
             {
@@ -432,7 +432,7 @@ public class TestServiceFactory {
         assertNotNull(validation);
         final java.util.Collection<PositionValidation<InterfaceEntity>> validation2 = ((GeneralValidateable) service)
                 .generalValidations();
-        assertTrue(validation == validation2);
+        assertSame(validation, validation2);
         new Verifications() {
             {
                 collection.getEntityClass();

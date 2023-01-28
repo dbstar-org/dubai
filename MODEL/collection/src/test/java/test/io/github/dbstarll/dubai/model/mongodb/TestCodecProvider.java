@@ -33,6 +33,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class TestCodecProvider extends TestCase {
@@ -225,15 +226,15 @@ public class TestCodecProvider extends TestCase {
         reader.readName();
         final byte[] load = codec.decode(reader, DecoderContext.builder().build());
         assertEquals(!encode, Arrays.equals(load, save));
-        assertTrue(Arrays.equals(load, data));
+        assertArrayEquals(load, data);
 
         reader.readName();
         final byte[] original = codec.decode(reader, DecoderContext.builder().build());
         if (image) {
             assertEquals(!encode, Arrays.equals(original, save));
-            assertTrue(Arrays.equals(original, data));
+            assertArrayEquals(original, data);
         } else {
-            assertTrue(Arrays.equals(original, save));
+            assertArrayEquals(original, save);
             assertEquals(!encode, Arrays.equals(original, data));
         }
     }

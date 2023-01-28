@@ -56,10 +56,7 @@ class MethodKey {
                 return false;
             }
         }
-        if (!(typeVariable.getGenericDeclaration() instanceof Class)) {
-            return false;
-        }
-        return true;
+        return typeVariable.getGenericDeclaration() instanceof Class;
     }
 
     private static String getTypeName(Class<?> type) {

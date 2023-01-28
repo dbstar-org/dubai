@@ -87,12 +87,7 @@ public class ClassEntity implements Entity, EntityModifier {
             return false;
         }
         if (lastModified == null) {
-            if (other.lastModified != null) {
-                return false;
-            }
-        } else if (!lastModified.equals(other.lastModified)) {
-            return false;
-        }
-        return true;
+            return other.lastModified == null;
+        } else return lastModified.equals(other.lastModified);
     }
 }

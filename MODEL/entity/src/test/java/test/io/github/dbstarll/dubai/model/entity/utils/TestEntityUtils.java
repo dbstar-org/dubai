@@ -3,14 +3,14 @@ package test.io.github.dbstarll.dubai.model.entity.utils;
 import io.github.dbstarll.dubai.model.entity.test.ClassEntity;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.utils.EntityUtils;
-import junit.framework.TestCase;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.beans.PropertyDescriptor;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class TestEntityUtils extends TestCase {
+public class TestEntityUtils {
     @Test
     public void testNew() {
         new EntityUtils();
@@ -22,21 +22,21 @@ public class TestEntityUtils extends TestCase {
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(InterfaceEntity.class)) {
             keys.add(pd.getName());
         }
-        assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, id, intFromInterfaceEntity,"
+        Assert.assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, id, intFromInterfaceEntity,"
                 + " intWithParam, lastModified, stringFromInterfaceEntity, type]", keys.toString());
     }
 
     @Test
     public void testPropertyDescriptor() {
         final PropertyDescriptor id = EntityUtils.propertyDescriptor(InterfaceEntity.class, "id");
-        assertNotNull(id);
-        assertNotNull(id.getReadMethod());
-        assertNull(id.getWriteMethod());
+        Assert.assertNotNull(id);
+        Assert.assertNotNull(id.getReadMethod());
+        Assert.assertNull(id.getWriteMethod());
 
-        assertNotNull(EntityUtils.getReadMethod(id));
-        assertNull(EntityUtils.getWriteMethod(id));
+        Assert.assertNotNull(EntityUtils.getReadMethod(id));
+        Assert.assertNull(EntityUtils.getWriteMethod(id));
 
-        assertNull(EntityUtils.propertyDescriptor(InterfaceEntity.class, "oid"));
+        Assert.assertNull(EntityUtils.propertyDescriptor(InterfaceEntity.class, "oid"));
     }
 
     @Test
@@ -45,6 +45,6 @@ public class TestEntityUtils extends TestCase {
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(ClassEntity.class)) {
             keys.add(pd.getName());
         }
-        assertEquals("[dateCreated, id, lastModified]", keys.toString());
+        Assert.assertEquals("[dateCreated, id, lastModified]", keys.toString());
     }
 }

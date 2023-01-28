@@ -60,24 +60,24 @@ public class TestAnnotationCollectionNameGenerator extends TestCase {
     }
 
     @Table
-    public static interface One extends Entity {
+    public interface One extends Entity {
     }
 
     @Table
-    public static interface TwoTwo extends Entity {
+    public interface TwoTwo extends Entity {
     }
 
     @Namespace("t1")
-    public static interface NoTable extends Entity {
+    public interface NoTable extends Entity {
     }
 
     @Table("abc")
-    public static interface Three extends NoTable {
+    public interface Three extends NoTable {
     }
 
     @Table
     @Namespace("t2_")
-    public static interface Four extends NoTable {
+    public interface Four extends NoTable {
     }
 
     @Namespace("t3_")
@@ -112,6 +112,6 @@ public class TestAnnotationCollectionNameGenerator extends TestCase {
 
     @Table
     @Namespace
-    public static interface Six extends Entity {
+    public interface Six extends Entity {
     }
 }

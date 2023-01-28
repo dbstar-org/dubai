@@ -7,7 +7,7 @@ import com.mongodb.client.MongoCursor;
 import java.util.Iterator;
 
 public class MockMongoCursor<T> implements MongoCursor<T> {
-    private Iterator<T> it;
+    private final Iterator<T> it;
 
     public MockMongoCursor(Iterator<T> it) {
         this.it = it;

@@ -150,11 +150,11 @@ public class TestComplexCollection {
 
         final ObjectId id = new ObjectId();
         final CacheableEntity savedEntity = collection.save(entity, id);
-        assertTrue(entity == savedEntity);
+        assertSame(entity, savedEntity);
         assertNotNull(savedEntity.getId());
         assertNotNull(savedEntity.getDateCreated());
         assertNotNull(savedEntity.getLastModified());
-        assertTrue(id == savedEntity.getId());
+        assertSame(id, savedEntity.getId());
         assertEquals(savedEntity.getDateCreated(), id.getDate());
 
         new Verifications() {
@@ -180,7 +180,7 @@ public class TestComplexCollection {
         assertNull(entity.getLastModified());
 
         final CacheableEntity savedEntity = collection.save(entity);
-        assertTrue(entity == savedEntity);
+        assertSame(entity, savedEntity);
         assertNotNull(savedEntity.getId());
         assertNotNull(savedEntity.getDateCreated());
         assertNotNull(savedEntity.getLastModified());
@@ -190,10 +190,10 @@ public class TestComplexCollection {
         final Date lastModified = entity.getLastModified();
         Thread.sleep(10);
         final CacheableEntity savedAgainEntity = collection.save(savedEntity);
-        assertTrue(entity == savedAgainEntity);
-        assertTrue(id == savedAgainEntity.getId());
-        assertTrue(dateCreated == savedAgainEntity.getDateCreated());
-        assertTrue(savedAgainEntity.getLastModified().compareTo(lastModified) == 1);
+        assertSame(entity, savedAgainEntity);
+        assertSame(id, savedAgainEntity.getId());
+        assertSame(dateCreated, savedAgainEntity.getDateCreated());
+        assertEquals(1, savedAgainEntity.getLastModified().compareTo(lastModified));
 
         new Verifications() {
             {
@@ -240,7 +240,7 @@ public class TestComplexCollection {
         };
 
         assertNull(collection.deleteById(null));
-        assertTrue(entity == collection.deleteById(new ObjectId()));
+        assertSame(entity, collection.deleteById(new ObjectId()));
 
         new Verifications() {
             {
@@ -267,7 +267,7 @@ public class TestComplexCollection {
         };
 
         assertNull(collection.findById(null));
-        assertTrue(entity.equals(collection.findById(new ObjectId())));
+        assertEquals(entity, collection.findById(new ObjectId()));
 
         new Verifications() {
             {
@@ -295,7 +295,7 @@ public class TestComplexCollection {
             }
         };
 
-        assertTrue(entity.equals(collection.findOne()));
+        assertEquals(entity, collection.findOne());
 
         new Verifications() {
             {
@@ -320,7 +320,7 @@ public class TestComplexCollection {
             }
         };
 
-        assertTrue(findIterable == collection.findByIds(Collections.singleton(new ObjectId())));
+        assertSame(findIterable, collection.findByIds(Collections.singleton(new ObjectId())));
 
         new Verifications() {
             {
@@ -341,8 +341,8 @@ public class TestComplexCollection {
             }
         };
 
-        assertTrue(findIterable == collection.find());
-        assertTrue(findIterable == collection.find(entityClass));
+        assertSame(findIterable, collection.find());
+        assertSame(findIterable, collection.find(entityClass));
 
         new Verifications() {
             {
@@ -638,6 +638,6 @@ public class TestComplexCollection {
 
     @Test
     public void testOriginal() {
-        assertFalse(collection == collection.original());
+        assertNotSame(collection, collection.original());
     }
 }

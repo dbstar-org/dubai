@@ -5,6 +5,8 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
 
+import static org.junit.Assert.assertNotEquals;
+
 public class TestMethodValue extends TestCase {
     /**
      * 测试equals方法.
@@ -17,8 +19,8 @@ public class TestMethodValue extends TestCase {
 
         final MethodValue mv = new MethodValue(serviceInterface, method);
 
-        assertEquals(true, mv.equals(mv));
-        assertEquals(false, mv.equals(null));
-        assertEquals(false, mv.equals(new Object()));
+        assertEquals(mv, mv);
+        assertNotEquals(mv, null);
+        assertNotEquals(mv, new Object());
     }
 }
