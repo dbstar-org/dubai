@@ -5,25 +5,53 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public final class EntityUtils {
-    private static final ConcurrentMap<Class<?>, Map<String, PropertyDescriptor>> PROPERTIES = new ConcurrentHashMap<>();
+    private EntityUtils() {
+        // 工具类禁止实例化
+    }
 
-    public static PropertyDescriptor propertyDescriptor(Class<?> entityClass, String name) {
+    private static final Map<Class<?>, Map<String, PropertyDescriptor>> PROPERTIES = new ConcurrentHashMap<>();
+
+    /**
+     * 获得实体类中指定属性的描述符.
+     *
+     * @param entityClass 实体类
+     * @param name        指定的属性名称
+     * @return 属性的描述符
+     */
+    public static PropertyDescriptor propertyDescriptor(final Class<?> entityClass, final String name) {
         return cachePropertyDescriptors(entityClass).get(name);
     }
 
+    /**
+     * 获得实体类中所有属性的描述符的遍历.
+     *
+     * @param entityClass 实体类
+     * @return 所有属性的描述符的遍历
+     */
     public static Iterable<PropertyDescriptor> propertyDescriptors(final Class<?> entityClass) {
         return cachePropertyDescriptors(entityClass).values();
     }
 
-    public static Method getReadMethod(PropertyDescriptor descriptor) {
-        return EntityPropertyUtilsBean.instance.getReadMethod(descriptor);
+    /**
+     * 根据属性描述符获取属性的读方法.
+     *
+     * @param descriptor 属性描述符
+     * @return 属性的读方法
+     */
+    public static Method getReadMethod(final PropertyDescriptor descriptor) {
+        return EntityPropertyUtilsBean.INSTANCE.getReadMethod(descriptor);
     }
 
-    public static Method getWriteMethod(PropertyDescriptor descriptor) {
-        return EntityPropertyUtilsBean.instance.getWriteMethod(descriptor);
+    /**
+     * 根据属性描述符获取属性的写方法.
+     *
+     * @param descriptor 属性描述符
+     * @return 属性的写方法
+     */
+    public static Method getWriteMethod(final PropertyDescriptor descriptor) {
+        return EntityPropertyUtilsBean.INSTANCE.getWriteMethod(descriptor);
     }
 
     private static Map<String, PropertyDescriptor> cachePropertyDescriptors(final Class<?> entityClass) {
@@ -38,7 +66,7 @@ public final class EntityUtils {
 
     private static Map<String, PropertyDescriptor> getPropertyDescriptors(final Class<?> entityClass) {
         final Map<String, PropertyDescriptor> pds = new HashMap<>();
-        for (PropertyDescriptor pd : EntityPropertyUtilsBean.instance.getPropertyDescriptors(entityClass)) {
+        for (PropertyDescriptor pd : EntityPropertyUtilsBean.INSTANCE.getPropertyDescriptors(entityClass)) {
             pds.put(pd.getName(), pd);
         }
         return pds;

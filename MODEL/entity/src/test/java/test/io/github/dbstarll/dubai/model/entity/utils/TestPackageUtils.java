@@ -8,12 +8,14 @@ import io.github.dbstarll.dubai.model.entity.test.o4.ClassPackageInterfaceEntity
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
 import junit.framework.TestCase;
 
+import static org.junit.Assert.assertThrows;
+
 public class TestPackageUtils extends TestCase {
     /**
      * 测试创建实例.
      */
-    public void testNewInstance() throws Exception {
-        PackageUtils.class.newInstance();
+    public void testNewInstance() {
+        assertThrows(IllegalAccessException.class, () -> PackageUtils.class.newInstance());
     }
 
     /**

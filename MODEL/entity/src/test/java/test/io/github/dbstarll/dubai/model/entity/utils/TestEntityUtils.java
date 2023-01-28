@@ -10,10 +10,12 @@ import java.beans.PropertyDescriptor;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.junit.Assert.assertThrows;
+
 public class TestEntityUtils {
     @Test
-    public void testNew() {
-        new EntityUtils();
+    public void testNewInstance() {
+        assertThrows(IllegalAccessException.class, () -> EntityUtils.class.newInstance());
     }
 
     @Test

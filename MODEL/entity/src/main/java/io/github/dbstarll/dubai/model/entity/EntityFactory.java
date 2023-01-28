@@ -20,13 +20,20 @@ import java.util.concurrent.ConcurrentMap;
 public final class EntityFactory<E extends Entity> implements InvocationHandler, Serializable {
     private static final long serialVersionUID = 1190830425462840117L;
 
+    private static final String PREFIX_READ = "get";
+    private static final String PREFIX_READ_BOOL = "is";
+    private static final String PREFIX_WRITE = "set";
+    private static final int LEN_PREFIX_READ = PREFIX_READ.length();
+    private static final int LEN_PREFIX_READ_BOOL = PREFIX_READ_BOOL.length();
+    private static final int LEN_PREFIX_WRITE = PREFIX_WRITE.length();
+
     private static final Map<Class<?>, Serializable> DEFAULT_VALUES = getDefaultValues();
     private static final ConcurrentMap<Class<?>, Map<String, Serializable>> DEFAULT_FIELDS = new ConcurrentHashMap<>();
 
     private final Class<E> entityClass;
     private final ConcurrentMap<String, Serializable> fields;
 
-    private EntityFactory(Class<E> entityClass, Map<String, Serializable> fields) {
+    private EntityFactory(final Class<E> entityClass, final Map<String, Serializable> fields) {
         this.entityClass = entityClass;
         this.fields = fields == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(fields);
         setDefaultValue(this.fields, getDefaultPrimitiveFields(entityClass));
@@ -45,7 +52,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         return values;
     }
 
-    private static Map<String, Serializable> getDefaultPrimitiveFields(Class<?> entityClass) {
+    private static Map<String, Serializable> getDefaultPrimitiveFields(final Class<?> entityClass) {
         if (!DEFAULT_FIELDS.containsKey(entityClass)) {
             final Map<String, Serializable> fileds = new HashMap<>();
             for (Method method : entityClass.getMethods()) {
@@ -62,56 +69,60 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         return DEFAULT_FIELDS.get(entityClass);
     }
 
-    private static String getWriteProperty(Method method) {
+    private static String getWriteProperty(final Method method) {
         if (method.getReturnType() == Void.TYPE && method.getParameterTypes().length == 1
-                && method.getName().startsWith("set")) {
-            return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(3)));
+                && method.getName().startsWith(PREFIX_WRITE)) {
+            return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(LEN_PREFIX_WRITE)));
         } else {
             return null;
         }
     }
 
-    private static String getReadProperty(Method method) {
+    private static String getReadProperty(final Method method) {
         if (method.getReturnType() != Void.TYPE) {
-            if (method.getName().startsWith("get")) {
-                return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(3)));
-            } else if (method.getName().startsWith("is")) {
-                return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(2)));
+            if (method.getName().startsWith(PREFIX_READ)) {
+                return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(LEN_PREFIX_READ)));
+            } else if (method.getName().startsWith(PREFIX_READ_BOOL)) {
+                return getReplaceProperty(StringUtils.uncapitalize(method.getName().substring(LEN_PREFIX_READ_BOOL)));
             }
         }
         return null;
     }
 
-    private static String getReplaceProperty(String property) {
+    private static String getReplaceProperty(final String property) {
         return "id".equals(property) ? Entity.FIELD_NAME_ID : property;
     }
 
-    private static void setDefaultValue(ConcurrentMap<String, Serializable> fields, Map<String, Serializable> values) {
+    private static void setDefaultValue(final ConcurrentMap<String, Serializable> fields,
+                                        final Map<String, Serializable> values) {
         for (Entry<String, Serializable> entry : values.entrySet()) {
             fields.putIfAbsent(entry.getKey(), entry.getValue());
         }
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == PojoFields.class) {
             return fields;
         }
 
-        String property;
         final int argsLangth = ArrayUtils.getLength(args);
-        if (argsLangth == 1 && StringUtils.isNotBlank(property = getWriteProperty(method))) {
-            if (null == args[0]) {
-                fields.remove(property);
-                return null;
-            } else if (args[0] instanceof Serializable) {
-                fields.put(property, (Serializable) args[0]);
-                return null;
+        if (argsLangth == 1) {
+            final String property = getWriteProperty(method);
+            if (StringUtils.isNotBlank(property)) {
+                if (null == args[0]) {
+                    fields.remove(property);
+                    return null;
+                } else if (args[0] instanceof Serializable) {
+                    fields.put(property, (Serializable) args[0]);
+                    return null;
+                }
             }
         } else if (argsLangth == 0) {
-            if (StringUtils.isNotBlank(property = getReadProperty(method))) {
+            final String property = getReadProperty(method);
+            if (StringUtils.isNotBlank(property)) {
                 return fields.get(property);
             } else if ("clone".equals(method.getName())) {
                 return EntityFactory.newInstance(entityClass, fields);
@@ -131,7 +142,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null || !Proxy.isProxyClass(obj.getClass())) {
             return false;
         }
@@ -151,7 +162,14 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
         return entityClass.getName() + fields;
     }
 
-    public static <E extends Entity> E newInstance(Class<E> entityClass) {
+    /**
+     * 根据实体类来创建一个实例.
+     *
+     * @param entityClass 实体类
+     * @param <E>         实体类
+     * @return 实体类的一个实例
+     */
+    public static <E extends Entity> E newInstance(final Class<E> entityClass) {
         return newInstance(entityClass, null);
     }
 
@@ -160,10 +178,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      *
      * @param entityClass 实体类
      * @param fields      属性集
+     * @param <E>         实体类
      * @return 实体
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> E newInstance(Class<E> entityClass, Map<String, Serializable> fields) {
+    public static <E extends Entity> E newInstance(final Class<E> entityClass, final Map<String, Serializable> fields) {
         if (isEntityClass(entityClass)) {
             if (entityClass.isInterface()) {
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(entityClass, Package.class);
@@ -186,9 +205,10 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * 判断是否有效的实体类.
      *
      * @param entityClass 实体类
+     * @param <E>         实体类
      * @return 如果是一个有效的实体类，返回true，否则返回false
      */
-    public static <E extends Entity> boolean isEntityClass(Class<E> entityClass) {
+    public static <E extends Entity> boolean isEntityClass(final Class<E> entityClass) {
         if (!Modifier.isAbstract(entityClass.getModifiers())) {
             if (entityClass.getAnnotation(Table.class) != null) {
                 try {
@@ -208,10 +228,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * Clone an entity.
      *
      * @param proxy the entity to clone, null returns null
+     * @param <E>   实体类
      * @return the clone of entity
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> E clone(E proxy) {
+    public static <E extends Entity> E clone(final E proxy) {
         try {
             if (proxy == null) {
                 return null;
@@ -231,10 +252,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * 获得代理对象的原始接口.
      *
      * @param proxy 代理对象
+     * @param <E>   实体类
      * @return 代理对象的原始接口
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> Class<E> getEntityClass(E proxy) {
+    public static <E extends Entity> Class<E> getEntityClass(final E proxy) {
         if (Proxy.isProxyClass(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof EntityFactory) {
@@ -248,10 +270,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * 获得代理类的原始接口.
      *
      * @param proxyClass 代理类
+     * @param <E>        实体类
      * @return 代理类的原始接口
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> Class<E> getEntityClass(Class<E> proxyClass) {
+    public static <E extends Entity> Class<E> getEntityClass(final Class<E> proxyClass) {
         Class<E> c = proxyClass;
         if (Proxy.isProxyClass(proxyClass)) {
             for (Class<?> i : proxyClass.getInterfaces()) {
@@ -264,6 +287,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
     }
 
     public interface PojoFields {
+        /**
+         * 获得实体中所有字段的map.
+         *
+         * @return 所有字段的map
+         */
         Map<String, Object> fields();
     }
 }
