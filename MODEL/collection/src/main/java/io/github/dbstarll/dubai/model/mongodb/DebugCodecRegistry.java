@@ -2,11 +2,14 @@ package io.github.dbstarll.dubai.model.mongodb;
 
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class DebugCodecRegistry implements CodecRegistry {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DebugCodecRegistry.class);
     private static final ConcurrentMap<Class<?>, String> map = new ConcurrentHashMap<>();
 
     private final CodecRegistry registry;
@@ -21,7 +24,7 @@ public class DebugCodecRegistry implements CodecRegistry {
         map.computeIfAbsent(clazz, c -> {
             if (codec == null) return null;
             else {
-                System.out.println(c + " -> " + codec);
+                LOGGER.debug(c + " -> " + codec);
                 return codec.toString();
             }
         });

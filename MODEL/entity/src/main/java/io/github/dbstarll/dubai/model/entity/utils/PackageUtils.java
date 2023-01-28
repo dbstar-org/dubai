@@ -30,8 +30,8 @@ public final class PackageUtils {
         return PACKAGES.get(packageName);
     }
 
-    private static <E> Class<?> loadPackageInterface(ClassLoader classLoader, String packageInterfaceName,
-                                                     Class<?> defaultPackageInterface) {
+    private static Class<?> loadPackageInterface(ClassLoader classLoader, String packageInterfaceName,
+                                                 Class<?> defaultPackageInterface) {
         try {
             final Class<?> packageInterface = classLoader.loadClass(packageInterfaceName);
             if (packageInterface.isInterface()) {

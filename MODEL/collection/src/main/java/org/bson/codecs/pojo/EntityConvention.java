@@ -133,12 +133,7 @@ public final class EntityConvention implements Convention {
     private static <T> PropertyMetadata<T> getOrCreatePropertyMetadata(final String propertyName,
                                                                        final String declaringClassName, final Map<String, PropertyMetadata<?>> propertyNameMap,
                                                                        final TypeData<T> typeData) {
-        PropertyMetadata<T> propertyMetadata = (PropertyMetadata<T>) propertyNameMap.get(propertyName);
-        if (propertyMetadata == null) {
-            propertyMetadata = new PropertyMetadata<>(propertyName, declaringClassName, typeData);
-            propertyNameMap.put(propertyName, propertyMetadata);
-        }
-        return propertyMetadata;
+        return (PropertyMetadata<T>) propertyNameMap.computeIfAbsent(propertyName, k -> new PropertyMetadata<>(k, declaringClassName, typeData));
     }
 
     private static <T, S> void cachePropertyTypeData(final PropertyMetadata<T> propertyMetadata,

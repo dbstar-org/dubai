@@ -115,7 +115,7 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
         return null;
     }
 
-    private <E extends Entity, S extends Service<E>> Class<E> getEntityClassFromGeneric(Type genericType) {
+    private <E extends Entity> Class<E> getEntityClassFromGeneric(Type genericType) {
         if (genericType instanceof ParameterizedType) {
             for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
                 if (Entity.class.isAssignableFrom((Class<?>) type)) {
