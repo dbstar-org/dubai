@@ -56,7 +56,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             S extends Service<E>> Entry<Map<String, MethodValue>, java.util.Collection<PositionMethod>> getMethods(
             final Class<S> serviceClass, final Class<E> entityClass) {
         final Map<String, MethodValue> methods = new HashMap<>();
-        final Map<String, PositionMethod> validationMethods = new HashMap<>();
+        final Map<String, PositionMethod> validations = new HashMap<>();
         final java.util.Collection<PositionMethod> positionMethods = new LinkedList<>();
 
         for (Type type : getAllImplementationInterface(serviceClass)) {
@@ -64,38 +64,40 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             for (Method m : typeClass.getMethods()) {
                 methods.put(new MethodKey(m, entityClass).getKey(), new MethodValue(typeClass, m));
             }
-
             for (Method m : typeClass.getAnnotation(Implementation.class).value().getMethods()) {
-                if (Validation.class != m.getReturnType()) {
-                    continue;
-                }
-                final Entry<String, PositionMethod> entry = getPositionMethod(m, typeClass, entityClass);
-                if (entry == null) {
-                    continue;
-                }
-                final PositionMethod newValue = entry.getValue();
-                final PositionMethod oldValue = validationMethods.get(entry.getKey());
-                if (!newValue.equals(oldValue)) {
-                    validationMethods.put(entry.getKey(), newValue);
-                    if (oldValue != null) {
-                        positionMethods.remove(oldValue);
-                    }
-                    positionMethods.add(newValue);
-                }
+                collectPositionMethods(findPositionMethod(m, typeClass, entityClass), validations, positionMethods);
             }
         }
 
         return EntryWrapper.wrap(methods, positionMethods);
     }
 
-    private static <E extends Entity> Entry<String, PositionMethod> getPositionMethod(
+    private static void collectPositionMethods(final Entry<String, PositionMethod> entry,
+                                               final Map<String, PositionMethod> validationMethods,
+                                               final java.util.Collection<PositionMethod> positionMethods) {
+        if (entry != null) {
+            final PositionMethod newValue = entry.getValue();
+            final PositionMethod oldValue = validationMethods.get(entry.getKey());
+            if (!newValue.equals(oldValue)) {
+                validationMethods.put(entry.getKey(), newValue);
+                if (oldValue != null) {
+                    positionMethods.remove(oldValue);
+                }
+                positionMethods.add(newValue);
+            }
+        }
+    }
+
+    private static <E extends Entity> Entry<String, PositionMethod> findPositionMethod(
             final Method m, final Class<?> typeClass, final Class<E> entityClass) {
-        final GeneralValidation validation = m.getAnnotation(GeneralValidation.class);
-        if (isValidGeneralValidation(validation, entityClass)) {
-            final MethodKey key = new MethodKey(m, entityClass);
-            final MethodValue value = new MethodValue(typeClass, m);
-            final PositionMethod newValue = new PositionMethod(validation.position(), value);
-            return EntryWrapper.wrap(key.getKey(), newValue);
+        if (Validation.class == m.getReturnType()) {
+            final GeneralValidation validation = m.getAnnotation(GeneralValidation.class);
+            if (isValidGeneralValidation(validation, entityClass)) {
+                final MethodKey key = new MethodKey(m, entityClass);
+                final MethodValue value = new MethodValue(typeClass, m);
+                final PositionMethod newValue = new PositionMethod(validation.position(), value);
+                return EntryWrapper.wrap(key.getKey(), newValue);
+            }
         }
         return null;
     }
