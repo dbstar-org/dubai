@@ -12,7 +12,6 @@ import io.github.dbstarll.dubai.model.notify.NotifyType;
 import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,10 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试缺省的NotifyConsumer.
-     *
-     * @throws IOException IOException
      */
-    public void testDefaultNotifyConsumer() throws IOException {
+    public void testDefaultNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         consumer.start();
         consumer.close();
@@ -32,9 +29,8 @@ public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试自定义的NotifyConsumer.
      *
-     * @throws IOException IOException
      */
-    public void testNotifyConsumer() throws IOException {
+    public void testNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         final AtomicBoolean regist = new AtomicBoolean(false);
         final AtomicBoolean unRegist = new AtomicBoolean(false);
@@ -64,9 +60,8 @@ public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试onNotify方法.
      *
-     * @throws IOException IOException
      */
-    public void testOnNotify() throws IOException {
+    public void testOnNotify() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         consumer.onNotify(SimpleEntity.class.getName(), "value1", new NotifyParser() {
             @Override
@@ -118,9 +113,8 @@ public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试设置listener.
      *
-     * @throws IOException IOException
      */
-    public void testListener() throws IOException {
+    public void testListener() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
 
         final AtomicInteger calls = new AtomicInteger(0);
@@ -177,9 +171,8 @@ public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试设置listener抛出异常.
      *
-     * @throws IOException IOException
      */
-    public void testListenerException() throws IOException {
+    public void testListenerException() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
 
         final EntityNotifyListener listener = new EntityNotifyListener() {

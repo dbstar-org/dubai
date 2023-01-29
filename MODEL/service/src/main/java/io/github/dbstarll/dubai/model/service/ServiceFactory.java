@@ -1,5 +1,6 @@
 package io.github.dbstarll.dubai.model.service;
 
+import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
@@ -9,8 +10,19 @@ import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -21,7 +33,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
     private final Class<S> serviceClass;
-    private final io.github.dbstarll.dubai.model.collection.Collection<E> collection;
+    private final Collection<E> collection;
     private final Class<E> entityClass;
     private final ConcurrentMap<Class<?>, Implemental> implementals = new ConcurrentHashMap<>();
     private final Map<String, MethodValue> methods;
@@ -30,7 +42,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
 
     private ImplementalAutowirer autowirer;
 
-    private ServiceFactory(Class<S> serviceClass, io.github.dbstarll.dubai.model.collection.Collection<E> collection) {
+    private ServiceFactory(final Class<S> serviceClass, final Collection<E> collection) {
         this.serviceClass = serviceClass;
         this.collection = collection;
         this.entityClass = collection.getEntityClass();
@@ -42,7 +54,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
 
     private static <E extends Entity,
             S extends Service<E>> Entry<Map<String, MethodValue>, java.util.Collection<PositionMethod>> getMethods(
-            Class<S> serviceClass, Class<E> entityClass) {
+            final Class<S> serviceClass, final Class<E> entityClass) {
         final Map<String, MethodValue> methods = new HashMap<>();
         final Map<String, PositionMethod> validationMethods = new HashMap<>();
         final java.util.Collection<PositionMethod> positionMethods = new LinkedList<>();
@@ -50,7 +62,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         for (Type type : getAllImplementationInterface(serviceClass)) {
             final Class<?> typeClass = getClass(type);
             for (Method m : typeClass.getMethods()) {
-                methods.put(new MethodKey(m, entityClass).key, new MethodValue(typeClass, m));
+                methods.put(new MethodKey(m, entityClass).getKey(), new MethodValue(typeClass, m));
             }
 
             for (Method m : typeClass.getAnnotation(Implementation.class).value().getMethods()) {
@@ -58,10 +70,11 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                 if (validation != null && validation.value().isAssignableFrom(entityClass)
                         && Validation.class == m.getReturnType()) {
                     final MethodKey key = new MethodKey(m, entityClass);
-                    final PositionMethod newValue = new PositionMethod(validation.position(), new MethodValue(typeClass, m));
-                    final PositionMethod oldValue = validationMethods.get(key.key);
+                    final MethodValue value = new MethodValue(typeClass, m);
+                    final PositionMethod newValue = new PositionMethod(validation.position(), value);
+                    final PositionMethod oldValue = validationMethods.get(key.getKey());
                     if (!newValue.equals(oldValue)) {
-                        validationMethods.put(key.key, newValue);
+                        validationMethods.put(key.getKey(), newValue);
                         if (oldValue != null) {
                             positionMethods.remove(oldValue);
                         }
@@ -74,7 +87,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         return EntryWrapper.wrap(methods, positionMethods);
     }
 
-    private static List<Type> getAllImplementationInterface(Type serviceType) {
+    private static List<Type> getAllImplementationInterface(final Type serviceType) {
         final List<Type> list = new LinkedList<>();
         for (Type type : getClass(serviceType).getGenericInterfaces()) {
             list.addAll(getAllImplementationInterface(type));
@@ -85,7 +98,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         return list;
     }
 
-    private static Class<?> getClass(Type type) {
+    private static Class<?> getClass(final Type type) {
         if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
         } else {
@@ -94,20 +107,20 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     @Override
-    public void setImplementalAutowirer(ImplementalAutowirer implementalAutowirer) {
+    public void setImplementalAutowirer(final ImplementalAutowirer implementalAutowirer) {
         this.autowirer = implementalAutowirer;
     }
 
     @SuppressWarnings("unchecked")
-    private java.util.Collection<PositionValidation<E>> buildGeneralValidation(Object proxy) throws Throwable {
+    private java.util.Collection<PositionValidation<E>> buildGeneralValidation(final Object proxy) throws Throwable {
         if (validationRef.get() == null) {
             final java.util.Collection<PositionValidation<E>> validations = new LinkedList<>();
             for (PositionMethod entry : positionMethods) {
-                final Implemental implemental = findOrPutImplemental(proxy, entry.getValue().key);
+                final Implemental implemental = findOrPutImplemental(proxy, entry.getValue().getKey());
                 if (implemental != null) {
                     final Validation<E> validation;
                     try {
-                        validation = (Validation<E>) entry.getValue().value.invoke(implemental);
+                        validation = (Validation<E>) entry.getValue().getValue().invoke(implemental);
                     } catch (InvocationTargetException ex) {
                         throw ex.getTargetException();
                     }
@@ -122,7 +135,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == ImplementalAutowirerAware.class) {
@@ -131,10 +144,10 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             return buildGeneralValidation(proxy);
         }
 
-        final MethodValue entry = methods.get(new MethodKey(method, entityClass).key);
+        final MethodValue entry = methods.get(new MethodKey(method, entityClass).getKey());
         if (entry != null) {
-            final Class<?> serviceInterface = entry.key;
-            final Method overrideMethod = entry.value;
+            final Class<?> serviceInterface = entry.getKey();
+            final Method overrideMethod = entry.getValue();
             if (!overrideMethod.equals(method)) {
                 LOGGER.debug("Override Method [{}] with [{}]", method, serviceInterface.getName());
             }
@@ -151,22 +164,22 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         throw new UnsupportedOperationException(method.toString());
     }
 
-    private Implemental findOrPutImplemental(Object proxy, Class<?> serviceInterface) {
+    private Implemental findOrPutImplemental(final Object proxy, final Class<?> serviceInterface) {
         if (!implementals.containsKey(serviceInterface)) {
             putImplemental(proxy, serviceInterface, getImplementalClass(serviceInterface));
         }
         return implementals.get(serviceInterface);
     }
 
-    private <I extends Implemental> void putImplemental(Object proxy, final Class<?> serviceInterface,
+    private <I extends Implemental> void putImplemental(final Object proxy, final Class<?> serviceInterface,
                                                         final Class<I> implementalClass) {
         final Constructor<I> constructor = getConstructor(implementalClass, serviceClass);
         if (constructor != null) {
             try {
                 final I implemental = constructor.newInstance(proxy, collection);
                 if (implementals.putIfAbsent(serviceInterface, implemental) == null) {
-                    LOGGER.debug("Implemental of service: {}[{}] use {}", serviceClass.getName(), serviceInterface.getName(),
-                            implementalClass.getName());
+                    LOGGER.debug("Implemental of service: {}[{}] use {}",
+                            serviceClass.getName(), serviceInterface.getName(), implementalClass.getName());
                     if (autowirer != null) {
                         autowirer.autowire(implemental);
                     }
@@ -204,7 +217,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                                                                           final Class<?> serviceClass) {
         for (Constructor<?> constructor : implementalClass.getConstructors()) {
             final Class<?>[] parameterTypes = constructor.getParameterTypes();
-            if (parameterTypes.length == 2 && io.github.dbstarll.dubai.model.collection.Collection.class == parameterTypes[1]
+            if (parameterTypes.length == 2 && Collection.class == parameterTypes[1]
                     && parameterTypes[0].isAssignableFrom(serviceClass)) {
                 return (Constructor<I>) constructor;
             }
@@ -217,16 +230,19 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      *
      * @param serviceClass {@link Service}类
      * @param collection   {@link io.github.dbstarll.dubai.model.collection.Collection}实例
+     * @param <E>          实体类
+     * @param <S>          服务类
      * @return {@link Service}实例
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity, S extends Service<E>> S newInstance(Class<S> serviceClass,
-                                                                         io.github.dbstarll.dubai.model.collection.Collection<E> collection) {
+    public static <E extends Entity, S extends Service<E>> S newInstance(final Class<S> serviceClass,
+                                                                         final Collection<E> collection) {
         if (isServiceClass(serviceClass)) {
             if (serviceClass.isInterface()) {
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(serviceClass, Package.class);
                 return (S) Proxy.newProxyInstance(serviceClass.getClassLoader(),
-                        new Class[]{serviceClass, ImplementalAutowirerAware.class, GeneralValidateable.class, packageInterface},
+                        new Class[]{serviceClass, ImplementalAutowirerAware.class, GeneralValidateable.class,
+                                packageInterface},
                         new ServiceFactory<>(serviceClass, collection));
             } else {
                 try {
@@ -241,12 +257,14 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     /**
-     * 判断是否有效的实体类.
+     * 判断是否有效的服务类.
      *
-     * @param serviceClass 实体类
-     * @return 如果是一个有效的实体类，返回true，否则返回false
+     * @param serviceClass 服务类
+     * @param <E>          实体类
+     * @param <S>          服务类
+     * @return 如果是一个有效的服务类，返回true，否则返回false
      */
-    public static <E extends Entity, S extends Service<E>> boolean isServiceClass(Class<S> serviceClass) {
+    public static <E extends Entity, S extends Service<E>> boolean isServiceClass(final Class<S> serviceClass) {
         if (!Modifier.isAbstract(serviceClass.getModifiers())) {
             if (serviceClass.getAnnotation(EntityService.class) != null) {
                 try {
@@ -266,10 +284,12 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      * 获得代理对象的原始接口.
      *
      * @param proxy 代理对象
+     * @param <E>   实体类
+     * @param <S>   服务类
      * @return 代理对象的原始接口
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity, S extends Service<E>> Class<S> getServiceClass(S proxy) {
+    public static <E extends Entity, S extends Service<E>> Class<S> getServiceClass(final S proxy) {
         if (Proxy.isProxyClass(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof ServiceFactory) {
@@ -280,17 +300,28 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     public interface GeneralValidateable<E extends Entity> {
+        /**
+         * 获得常规校验集合.
+         *
+         * @return 常规校验集合
+         */
         java.util.Collection<PositionValidation<E>> generalValidations();
     }
 
     public static class PositionValidation<E extends Entity> extends EntryWrapper<Position, Validation<E>> {
-        public PositionValidation(Position key, Validation<E> value) {
+        /**
+         * 构造一个带位置属性的校验.
+         *
+         * @param key   位置
+         * @param value 校验
+         */
+        public PositionValidation(final Position key, final Validation<E> value) {
             super(key, value);
         }
     }
 
     private static class PositionMethod extends EntryWrapper<Position, MethodValue> {
-        public PositionMethod(Position key, MethodValue value) {
+        PositionMethod(final Position key, final MethodValue value) {
             super(key, value);
         }
     }

@@ -36,7 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -82,7 +81,7 @@ public class TestSimpleNotifiableCollection {
      * 初始化collection.
      */
     @Before
-    public void initialize() throws NoSuchAlgorithmException {
+    public void initialize() {
         final CollectionFactory collectionFactory = new CollectionFactory(mongoDatabase);
         this.collection = collectionFactory.newInstance(entityClass);
         this.mongoClientFactory = new MongoClientFactory();

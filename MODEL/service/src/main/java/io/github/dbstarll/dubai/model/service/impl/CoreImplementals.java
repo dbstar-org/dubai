@@ -6,7 +6,13 @@ import io.github.dbstarll.dubai.model.service.AbstractImplemental;
 import io.github.dbstarll.dubai.model.service.Service;
 
 public abstract class CoreImplementals<E extends Entity, S extends Service<E>> extends AbstractImplemental<E, S> {
-    public CoreImplementals(S service, Collection<E> collection) {
+    /**
+     * 构建CoreImplementals.
+     *
+     * @param service    service
+     * @param collection collection
+     */
+    public CoreImplementals(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 }

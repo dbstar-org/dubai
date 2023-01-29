@@ -13,6 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class ContentAttachImplemental<E extends Entity & Contentable, S extends Service<E>>
         extends CoreImplementals<E, S> implements ContentAttach<E> {
+    /**
+     * 构建ContentAttachImplemental.
+     *
+     * @param service    service
+     * @param collection collection
+     */
     public ContentAttachImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
     }

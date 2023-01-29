@@ -27,9 +27,11 @@ public interface EntityCacheManager {
     <E extends Entity> void update(Class<E> entityClass, ObjectId entityId, NotifyType notifyType);
 
     /**
-     * @param key
-     * @param entity
-     * @param <E>
+     * 向缓存中添加实体.
+     *
+     * @param key    缓存key
+     * @param entity 实体对象
+     * @param <E>    实体类
      */
     <E extends Entity> void set(String key, E entity);
 

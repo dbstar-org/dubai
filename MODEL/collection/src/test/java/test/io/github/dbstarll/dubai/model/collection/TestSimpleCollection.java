@@ -3,7 +3,6 @@ package test.io.github.dbstarll.dubai.model.collection;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
@@ -35,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -71,9 +69,6 @@ public class TestSimpleCollection {
     @Mocked
     AggregateIterable<SimpleEntity> aggregateIterable;
 
-    @Mocked
-    MapReduceIterable<SimpleEntity> mapReduceIterable;
-
     private final Class<SimpleEntity> entityClass = SimpleEntity.class;
 
     private Collection<SimpleEntity> collection;
@@ -84,7 +79,7 @@ public class TestSimpleCollection {
      * 初始化collection.
      */
     @Before
-    public void initialize() throws NoSuchAlgorithmException {
+    public void initialize() {
         final CollectionFactory collectionFactory = new CollectionFactory(mongoDatabase);
         this.collection = collectionFactory.newInstance(entityClass);
         this.mongoClientFactory = new MongoClientFactory();

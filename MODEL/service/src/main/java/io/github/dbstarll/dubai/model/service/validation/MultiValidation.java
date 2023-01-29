@@ -24,7 +24,7 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
      * @param validations 从属的Validation
      */
     @SafeVarargs
-    public MultiValidation(Class<E> entityClass, Validation<E>... validations) {
+    public MultiValidation(final Class<E> entityClass, final Validation<E>... validations) {
         super(entityClass);
         this.validations = new LinkedList<>();
         addValidation(validations);
@@ -33,12 +33,13 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
     /**
      * 添加从属的Validation.
      *
-     * @param validations 从属的Validation
+     * @param subValidations 从属的Validation
      */
     @SafeVarargs
-    public final void addValidation(Validation<E>... validations) {
-        noNullElements(notNull(validations, "validations is null"), "validations contains null element at index: %d");
-        for (Validation<E> validation : validations) {
+    public final void addValidation(final Validation<E>... subValidations) {
+        notNull(subValidations, "validations is null");
+        noNullElements(subValidations, "validations contains null element at index: %d");
+        for (Validation<E> validation : subValidations) {
             if (validation instanceof MultiValidation) {
                 for (Validation<E> sub : (MultiValidation<E>) validation) {
                     addValidation(sub);
@@ -51,10 +52,20 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
         }
     }
 
+    /**
+     * 获取从属的Validation的数量.
+     *
+     * @return 从属的Validation的数量
+     */
     public int size() {
         return validations.size();
     }
 
+    /**
+     * 检测是否包含从属的Validation.
+     *
+     * @return 是否包含从属的Validation
+     */
     public boolean isEmpty() {
         return validations.isEmpty();
     }
@@ -65,7 +76,7 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
     }
 
     @Override
-    public void validate(E entity, E original, Validate validate) {
+    public void validate(final E entity, final E original, final Validate validate) {
         for (Validation<E> validation : validations) {
             validation.validate(entity, original, validate);
             LOGGER.debug("validate: <{}>{}", entityClass.getName(), validation.getClass().getName());
@@ -81,7 +92,7 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

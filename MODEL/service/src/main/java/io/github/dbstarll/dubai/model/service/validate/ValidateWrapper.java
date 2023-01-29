@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ValidateWrapper extends DefaultValidate {
+public final class ValidateWrapper extends DefaultValidate {
     private final Validate validate;
 
-    private ValidateWrapper(Validate validate) {
+    private ValidateWrapper(final Validate validate) {
         this.validate = validate;
     }
 
@@ -22,7 +22,7 @@ public class ValidateWrapper extends DefaultValidate {
     }
 
     @Override
-    public void addActionError(String anErrorMessage) {
+    public void addActionError(final String anErrorMessage) {
         if (validate != null) {
             validate.addActionError(anErrorMessage);
         } else {
@@ -31,7 +31,7 @@ public class ValidateWrapper extends DefaultValidate {
     }
 
     @Override
-    public void addFieldError(String fieldName, String errorMessage) {
+    public void addFieldError(final String fieldName, final String errorMessage) {
         if (validate != null) {
             validate.addFieldError(fieldName, errorMessage);
         } else {
@@ -54,7 +54,13 @@ public class ValidateWrapper extends DefaultValidate {
         return validate != null ? validate.hasFieldErrors() : super.hasFieldErrors();
     }
 
-    public static Validate wrap(Validate validate) {
+    /**
+     * 封装一个Validate实例.
+     *
+     * @param validate 被封装的Validate实例
+     * @return 封装后的Validate实例
+     */
+    public static Validate wrap(final Validate validate) {
         return new ValidateWrapper(validate);
     }
 }

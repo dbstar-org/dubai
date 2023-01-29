@@ -17,8 +17,6 @@ import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.security.NoSuchAlgorithmException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -43,7 +41,7 @@ public class TestCacheableCollectionCloneNotSupported {
      * 初始化collection.
      */
     @Before
-    public void initialize() throws NoSuchAlgorithmException {
+    public void initialize() {
         final CollectionFactory collectionFactory = new CollectionFactory(mongoDatabase);
         this.collection = collectionFactory.newInstance(entityClass);
         this.mongoClientFactory = new MongoClientFactory();

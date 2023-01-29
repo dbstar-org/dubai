@@ -5,12 +5,20 @@ import java.lang.reflect.Method;
 import static org.apache.commons.lang3.Validate.notNull;
 
 class MethodValue {
-    final Class<?> key;
-    final Method value;
+    private final Class<?> key;
+    private final Method value;
 
-    MethodValue(Class<?> key, Method value) {
+    MethodValue(final Class<?> key, final Method value) {
         this.key = notNull(key);
         this.value = notNull(value);
+    }
+
+    Class<?> getKey() {
+        return key;
+    }
+
+    Method getValue() {
+        return value;
     }
 
     @Override
@@ -22,7 +30,7 @@ class MethodValue {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }

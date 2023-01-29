@@ -9,17 +9,21 @@ import java.lang.reflect.TypeVariable;
 import static org.apache.commons.lang3.Validate.notNull;
 
 class MethodKey {
-    final String key;
+    private final String key;
 
-    MethodKey(Method method, Class<?> entityClass) {
+    MethodKey(final Method method, final Class<?> entityClass) {
         this.key = toString(notNull(method), notNull(entityClass));
     }
 
-    private static String toString(Method method, Class<?> entityClass) {
+    String getKey() {
+        return key;
+    }
+
+    private static String toString(final Method method, final Class<?> entityClass) {
         return method.getName() + '(' + parameterToString(method, entityClass) + ')';
     }
 
-    private static String parameterToString(Method method, Class<?> entityClass) {
+    private static String parameterToString(final Method method, final Class<?> entityClass) {
         final StringBuilder sb = new StringBuilder();
         final Type[] parameterTypes = method.getGenericParameterTypes();
         for (int j = 0, length = parameterTypes.length; j < length; j++) {
@@ -44,7 +48,7 @@ class MethodKey {
         return sb.toString();
     }
 
-    private static boolean isEntityTypeVariable(TypeVariable<?> typeVariable, Class<?> entityClass) {
+    private static boolean isEntityTypeVariable(final TypeVariable<?> typeVariable, final Class<?> entityClass) {
         for (Type bound : typeVariable.getBounds()) {
             if (!(bound instanceof Class)) {
                 return false;
@@ -59,7 +63,7 @@ class MethodKey {
         return typeVariable.getGenericDeclaration() instanceof Class;
     }
 
-    private static String getTypeName(Class<?> type) {
+    private static String getTypeName(final Class<?> type) {
         if (type.isArray()) {
             Class<?> cl = type;
             int dimensions = 0;

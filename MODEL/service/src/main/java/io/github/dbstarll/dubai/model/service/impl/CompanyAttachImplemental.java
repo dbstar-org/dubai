@@ -14,27 +14,33 @@ import static com.mongodb.client.model.Filters.eq;
 
 public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S extends Service<E>>
         extends CoreImplementals<E, S> implements CompanyAttach<E> {
-    public CompanyAttachImplemental(S service, Collection<E> collection) {
+    /**
+     * 构建CompanyAttachImplemental.
+     *
+     * @param service    service
+     * @param collection collection
+     */
+    public CompanyAttachImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 
     @Override
-    public Bson filterByCompanyId(ObjectId companyId) {
+    public Bson filterByCompanyId(final ObjectId companyId) {
         return eq(CompanyBase.FIELD_NAME_COMPANY_ID, companyId);
     }
 
     @Override
-    public long countByCompanyId(ObjectId companyId) {
+    public long countByCompanyId(final ObjectId companyId) {
         return service.count(filterByCompanyId(companyId));
     }
 
     @Override
-    public FindIterable<E> findByCompanyId(ObjectId companyId) {
+    public FindIterable<E> findByCompanyId(final ObjectId companyId) {
         return service.find(filterByCompanyId(companyId));
     }
 
     @Override
-    public DeleteResult deleteByCompanyId(ObjectId companyId) {
+    public DeleteResult deleteByCompanyId(final ObjectId companyId) {
         return getCollection().deleteMany(filterByCompanyId(companyId));
     }
 }

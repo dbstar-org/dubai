@@ -69,7 +69,7 @@ public class TestCodecProvider extends TestCase {
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         this.collectionFactory = null;
         this.database = null;
         this.client.close();

@@ -15,12 +15,12 @@ public class TestAnnotationCollectionNameGenerator extends TestCase {
     private CollectionNameGenerator collectionNameGenerator;
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() {
         this.collectionNameGenerator = new AnnotationCollectionNameGenerator();
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         this.collectionNameGenerator = null;
     }
 
