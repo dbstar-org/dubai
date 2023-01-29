@@ -271,28 +271,36 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 if (StringUtils.isBlank(name)) {
                     validate.addFieldError(Namable.FIELD_NAME_NAME, "名称未设置");
                 } else {
-                    boolean lastWhitespace = false;
-                    for (int i = 0, size = name.length(); i < size; i++) {
-                        if (Character.isWhitespace(name.charAt(i))) {
-                            if (i == 0) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符开头");
-                            } else if (i == size - 1) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符结尾");
-                            } else if (lastWhitespace) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能包含连续的空字符");
-                            } else {
-                                lastWhitespace = true;
-                            }
-                        } else {
-                            lastWhitespace = false;
-                        }
-                    }
-                    if (minLength >= 0 && name.length() < minLength) {
-                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能少于 " + minLength + " 字符");
-                    } else if (maxLength >= 0 && name.length() > maxLength) {
-                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能超过 " + maxLength + " 字符");
-                    }
+                    checkWhitespace(name, validate);
+                    checkLength(name, validate);
                 }
+            }
+        }
+
+        private void checkWhitespace(final String name, final Validate validate) {
+            boolean lastWhitespace = false;
+            for (int i = 0, size = name.length(); i < size; i++) {
+                if (Character.isWhitespace(name.charAt(i))) {
+                    if (i == 0) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符开头");
+                    } else if (i == size - 1) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符结尾");
+                    } else if (lastWhitespace) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能包含连续的空字符");
+                    } else {
+                        lastWhitespace = true;
+                    }
+                } else {
+                    lastWhitespace = false;
+                }
+            }
+        }
+
+        private void checkLength(final String name, final Validate validate) {
+            if (minLength >= 0 && name.length() < minLength) {
+                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能少于 " + minLength + " 字符");
+            } else if (maxLength >= 0 && name.length() > maxLength) {
+                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能超过 " + maxLength + " 字符");
             }
         }
 

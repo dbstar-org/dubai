@@ -66,25 +66,43 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             }
 
             for (Method m : typeClass.getAnnotation(Implementation.class).value().getMethods()) {
-                final GeneralValidation validation = m.getAnnotation(GeneralValidation.class);
-                if (validation != null && validation.value().isAssignableFrom(entityClass)
-                        && Validation.class == m.getReturnType()) {
-                    final MethodKey key = new MethodKey(m, entityClass);
-                    final MethodValue value = new MethodValue(typeClass, m);
-                    final PositionMethod newValue = new PositionMethod(validation.position(), value);
-                    final PositionMethod oldValue = validationMethods.get(key.getKey());
-                    if (!newValue.equals(oldValue)) {
-                        validationMethods.put(key.getKey(), newValue);
-                        if (oldValue != null) {
-                            positionMethods.remove(oldValue);
-                        }
-                        positionMethods.add(newValue);
+                if (Validation.class != m.getReturnType()) {
+                    continue;
+                }
+                final Entry<String, PositionMethod> entry = getPositionMethod(m, typeClass, entityClass);
+                if (entry == null) {
+                    continue;
+                }
+                final PositionMethod newValue = entry.getValue();
+                final PositionMethod oldValue = validationMethods.get(entry.getKey());
+                if (!newValue.equals(oldValue)) {
+                    validationMethods.put(entry.getKey(), newValue);
+                    if (oldValue != null) {
+                        positionMethods.remove(oldValue);
                     }
+                    positionMethods.add(newValue);
                 }
             }
         }
 
         return EntryWrapper.wrap(methods, positionMethods);
+    }
+
+    private static <E extends Entity> Entry<String, PositionMethod> getPositionMethod(
+            final Method m, final Class<?> typeClass, final Class<E> entityClass) {
+        final GeneralValidation validation = m.getAnnotation(GeneralValidation.class);
+        if (isValidGeneralValidation(validation, entityClass)) {
+            final MethodKey key = new MethodKey(m, entityClass);
+            final MethodValue value = new MethodValue(typeClass, m);
+            final PositionMethod newValue = new PositionMethod(validation.position(), value);
+            return EntryWrapper.wrap(key.getKey(), newValue);
+        }
+        return null;
+    }
+
+    private static <E extends Entity> boolean isValidGeneralValidation(final GeneralValidation validation,
+                                                                       final Class<E> entityClass) {
+        return validation != null && validation.value().isAssignableFrom(entityClass);
     }
 
     private static List<Type> getAllImplementationInterface(final Type serviceType) {
