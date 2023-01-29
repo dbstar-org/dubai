@@ -202,7 +202,9 @@ public class TestComplexCollection {
         final ObjectId id = entity.getId();
         final Date dateCreated = entity.getDateCreated();
         final Date lastModified = entity.getLastModified();
+
         Thread.sleep(10);
+
         final CacheableEntity savedAgainEntity = collection.save(savedEntity);
         assertSame(entity, savedAgainEntity);
         assertSame(id, savedAgainEntity.getId());

@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class EntityConvention implements Convention {
     @Override
@@ -80,20 +81,18 @@ public final class EntityConvention implements Convention {
         }
 
         final String declaringClassName = entityInterface.toString();
-        final List<String> genericTypeNames = new ArrayList<>();
-        for (TypeVariable<? extends Class<? super T>> classTypeVariable : entityInterface.getTypeParameters()) {
-            genericTypeNames.add(classTypeVariable.getName());
-        }
+        final List<String> genericTypeNames = Arrays.stream(entityInterface.getTypeParameters())
+                .map(TypeVariable::getName).collect(Collectors.toList());
 
         final PropertyMethods propertyMethods = PropertyReflectionUtils.getPropertyMethods(entityInterface);
-        for (Method method : propertyMethods.getSetterMethods()) {
-            propertyNames.add(collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                    parentClassTypeData, genericTypeNames, method, false));
-        }
-        for (Method method : propertyMethods.getGetterMethods()) {
-            propertyNames.add(collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                    parentClassTypeData, genericTypeNames, method, true));
-        }
+        propertyMethods.getSetterMethods().stream()
+                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
+                        parentClassTypeData, genericTypeNames, method, false))
+                .forEach(propertyNames::add);
+        propertyMethods.getGetterMethods().stream()
+                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
+                        parentClassTypeData, genericTypeNames, method, true))
+                .forEach(propertyNames::add);
 
         annotations.addAll(Arrays.asList(entityInterface.getDeclaredAnnotations()));
     }

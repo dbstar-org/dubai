@@ -22,6 +22,7 @@ public class TestEntityNotifyConsumer extends TestCase {
      */
     public void testDefaultNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
         consumer.start();
         consumer.close();
     }
@@ -61,6 +62,7 @@ public class TestEntityNotifyConsumer extends TestCase {
      */
     public void testOnNotify() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
         consumer.onNotify(SimpleEntity.class.getName(), "value1", new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {
@@ -170,6 +172,7 @@ public class TestEntityNotifyConsumer extends TestCase {
      */
     public void testListenerException() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
 
         final EntityNotifyListener listener = new EntityNotifyListener() {
             @Override

@@ -41,7 +41,7 @@ public class TestSpringImplementalAutowirer extends TestCase {
         final AtomicReference<ObjectId> idRef = new AtomicReference<>();
         final Implemental implemental = new Implemental() {
             @Override
-            public void afterPropertiesSet() throws Exception {
+            public void afterPropertiesSet() {
             }
 
             public void setObjectId(ObjectId id) {
@@ -63,7 +63,7 @@ public class TestSpringImplementalAutowirer extends TestCase {
         autowirer.setApplicationContext(context);
         final Implemental implemental = new Implemental() {
             @Override
-            public void afterPropertiesSet() throws Exception {
+            public void afterPropertiesSet() {
             }
 
             public void setObjectId(ObjectId id) {

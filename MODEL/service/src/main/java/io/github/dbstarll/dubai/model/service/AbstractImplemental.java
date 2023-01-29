@@ -54,7 +54,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         // do nothing
     }
 
@@ -191,10 +191,6 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 mv.addValidation(pv.getValue());
             }
         }
-    }
-
-    @Deprecated
-    protected void onEntitySaved(final E entity, final Validate validate) {
     }
 
     protected void onEntitySaved(final E entity, final Validate validate, final NotifyType notifyType) {

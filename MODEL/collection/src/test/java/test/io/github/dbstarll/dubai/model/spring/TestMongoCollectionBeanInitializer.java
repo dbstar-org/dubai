@@ -43,7 +43,11 @@ public class TestMongoCollectionBeanInitializer {
 
     @Test
     public void testPostProcessBeanFactory() {
-        initializer.postProcessBeanFactory(configurableListableBeanFactory);
+        try {
+            initializer.postProcessBeanFactory(configurableListableBeanFactory);
+        } catch (Exception ex) {
+            fail("catch Exception");
+        }
     }
 
     @Test

@@ -27,11 +27,20 @@ public class TestServiceBeanInitializer extends TestCase {
     }
 
     public void testNew() {
-        new ServiceBeanInitializer();
+        try {
+            new ServiceBeanInitializer();
+        } catch (Exception ex) {
+            fail("catch exception");
+        }
     }
 
     public void testPostProcessBeanFactory() {
-        new ServiceBeanInitializer().postProcessBeanFactory(null);
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        try {
+            initializer.postProcessBeanFactory(null);
+        } catch (Exception ex) {
+            fail("catch exception");
+        }
     }
 
     /**
