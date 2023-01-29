@@ -405,33 +405,6 @@ public class TestServiceFactory {
         };
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSave() throws Exception {
-        final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
-
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-                collection.save(entity, (ObjectId) any);
-                result = entity;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertEquals(entity, service.save(entity));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 4;
-                collection.save(entity, (ObjectId) any);
-                times = 1;
-            }
-        };
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testGeneralValidation() {

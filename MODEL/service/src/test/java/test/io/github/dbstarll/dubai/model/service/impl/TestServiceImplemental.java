@@ -184,21 +184,6 @@ public class TestServiceImplemental {
         };
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSave() {
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        assertNotNull(service.save(entity));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSaveWithId() {
-        final ObjectId newEntityId = new ObjectId();
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        assertNotNull(service.save(entity, newEntityId));
-    }
-
     @Test
     public void testSaveWithValidate() {
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);

@@ -72,16 +72,6 @@ public final class ServiceImplemental<E extends Entity, S extends Service<E>> ex
     }
 
     @Override
-    public E save(final E entity) {
-        return save(entity, null, null);
-    }
-
-    @Override
-    public E save(final E entity, final ObjectId newEntityId) {
-        return save(entity, newEntityId, null);
-    }
-
-    @Override
     public E save(final E entity, final Validate validate) {
         return save(entity, null, validate);
     }

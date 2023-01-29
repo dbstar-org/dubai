@@ -66,37 +66,6 @@ public interface Service<E extends Entity> extends Base {
     E deleteById(ObjectId id);
 
     /**
-     * 插入或更新一个实体.
-     *
-     * <p>
-     * 在entity的id不为null时，执行更新操作，将lastModified更新为当前时间。
-     * 在entity的id为null时，执行插入操作，生成一个新的id，并且则设置entity的dateCreated为当前时间。
-     * </p>
-     *
-     * @param entity 需要插入或更新的实体
-     * @return 返回更新后的实体
-     * @deprecated Use {@link Service#save(Entity, Validate)}.
-     */
-    @Deprecated
-    E save(E entity);
-
-    /**
-     * 插入或更新一个实体.
-     *
-     * <p>
-     * 在entity的id不为null时，执行更新操作，将lastModified更新为当前时间。 在entity的id为null时，执行插入操作：
-     * 这时如果传入的newEntityId也为null，则生成一个新的id，否则使用传入的newEntityId。
-     * </p>
-     *
-     * @param entity      需要插入或更新的实体
-     * @param newEntityId 插入时指定entity的id
-     * @return 返回更新后的实体
-     * @deprecated Use {@link ServiceSaver#save(Entity, ObjectId, Validate)}.
-     */
-    @Deprecated
-    E save(E entity, ObjectId newEntityId);
-
-    /**
      * 对实体进行校验然后保存. 有以下几种情况：
      * <ol>
      * <li>校验通过，且有被修改的内容，返回更新后的实体</li>

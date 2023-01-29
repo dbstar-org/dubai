@@ -50,16 +50,6 @@ public class InheritClassService extends AbstractClassService<InterfaceEntity> {
     }
 
     @Override
-    public InterfaceEntity save(InterfaceEntity entity) {
-        return null;
-    }
-
-    @Override
-    public InterfaceEntity save(InterfaceEntity entity, ObjectId newEntityId) {
-        return null;
-    }
-
-    @Override
     public InterfaceEntity save(InterfaceEntity entity, Validate validate) throws ValidateException {
         return null;
     }
