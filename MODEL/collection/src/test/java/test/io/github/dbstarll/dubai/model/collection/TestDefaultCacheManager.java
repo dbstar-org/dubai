@@ -33,6 +33,6 @@ public class TestDefaultCacheManager {
                 });
         assertTrue(call.get());
 
-        entityCacheManager.update(SimpleEntity.class, new ObjectId(), NotifyType.insert);
+        entityCacheManager.update(SimpleEntity.class, new ObjectId(), NotifyType.INSERT);
     }
 }

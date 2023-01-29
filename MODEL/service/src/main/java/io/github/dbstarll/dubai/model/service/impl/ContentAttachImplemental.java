@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class ContentAttachImplemental<E extends Entity & Contentable, S extends Service<E>>
         extends CoreImplementals<E, S> implements ContentAttach<E> {
-    public ContentAttachImplemental(S service, Collection<E> collection) {
+    public ContentAttachImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 
@@ -26,7 +26,7 @@ public final class ContentAttachImplemental<E extends Entity & Contentable, S ex
     public Validation<E> contentValidation() {
         return new AbstractBaseEntityValidation<Contentable>(Contentable.class) {
             @Override
-            protected void validate(Contentable entity, Contentable original, Validate validate) {
+            protected void validate(final Contentable entity, final Contentable original, final Validate validate) {
                 if (ArrayUtils.isEmpty(entity.getContent())) {
                     validate.addFieldError(Contentable.FIELD_NAME_CONTENT, "内容未设置");
                 }

@@ -32,13 +32,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class MongoClientFactory {
+    private static final int CREDENTIAL_FIELD_COUNT = 3;
+
     private final Bytes encryptedKey;
 
+    /**
+     * 构造一个无加密的MongoClient工厂类.
+     */
     public MongoClientFactory() {
         this(null);
     }
 
-    public MongoClientFactory(Bytes encryptedKey) {
+    /**
+     * 构造一个加密的MongoClient工厂类，并指定加密密钥.
+     *
+     * @param encryptedKey 加密密钥
+     */
+    public MongoClientFactory(final Bytes encryptedKey) {
         this.encryptedKey = encryptedKey;
     }
 
@@ -48,8 +58,10 @@ public final class MongoClientFactory {
      * @param mongoUri mongodb的连接uri
      * @return 返回创建的MongoClient对象
      */
-    public MongoClient createWithPojoCodec(String mongoUri) {
-        return MongoClients.create(getMongoClientSettingsbuilder().applyConnectionString(new ConnectionString(mongoUri)).build());
+    public MongoClient createWithPojoCodec(final String mongoUri) {
+        return MongoClients.create(getMongoClientSettingsbuilder()
+                .applyConnectionString(new ConnectionString(mongoUri))
+                .build());
     }
 
     /**
@@ -92,10 +104,11 @@ public final class MongoClientFactory {
         final List<Convention> conventions = new LinkedList<>();
         conventions.add(new EntityConvention());
         conventions.addAll(Conventions.DEFAULT_CONVENTIONS);
-        final CodecProvider pojoCodecProvider = PojoCodecProvider.builder().conventions(conventions).automatic(true)
-                .build();
+        final CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
+                .conventions(conventions).automatic(true).build();
+        final CodecRegistry defaultCodecRegistry = MongoClientSettings.getDefaultCodecRegistry();
         final CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
-                CodecRegistries.fromProviders(new DefaultCodecProvider()), MongoClientSettings.getDefaultCodecRegistry(),
+                CodecRegistries.fromProviders(new DefaultCodecProvider()), defaultCodecRegistry,
                 CodecRegistries.fromProviders(new EntityCodecProvider(), pojoCodecProvider));
         return MongoClientSettings.builder().codecRegistry(new DebugCodecRegistry(pojoCodecRegistry));
     }
@@ -114,8 +127,8 @@ public final class MongoClientFactory {
     }
 
     private static MongoCredential parseCredential(final String defaultAuthDatabase, final String credential) {
-        final String[] ps = StringUtils.splitPreserveAllTokens(credential, ":", 3);
-        if (ps != null && ps.length == 3) {
+        final String[] ps = StringUtils.splitPreserveAllTokens(credential, ":", CREDENTIAL_FIELD_COUNT);
+        if (ps != null && ps.length == CREDENTIAL_FIELD_COUNT) {
             final String authDatabase = StringUtils.isBlank(ps[0]) ? defaultAuthDatabase : ps[0];
             final String userName = ps[1];
             final char[] password = ps[2].toCharArray();
@@ -127,7 +140,7 @@ public final class MongoClientFactory {
     class DefaultCodecProvider implements CodecProvider {
         @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
-        public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
+        public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
             if (Enum.class.isAssignableFrom(clazz)) {
                 return new EnumCodec(clazz);
             } else if (byte[].class.isAssignableFrom(clazz)) {
@@ -140,14 +153,14 @@ public final class MongoClientFactory {
     static class EntityCodecProvider implements CodecProvider {
         @SuppressWarnings("unchecked")
         @Override
-        public <T> Codec<T> get(Class<T> clazz, CodecRegistry registry) {
+        public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
             if (Entity.class.isAssignableFrom(clazz) && isProxy(clazz)) {
                 return (Codec<T>) new EntityCodec<>((Class<? extends Entity>) clazz, registry);
             }
             return null;
         }
 
-        private <T> boolean isProxy(Class<T> clazz) {
+        private <T> boolean isProxy(final Class<T> clazz) {
             return Proxy.isProxyClass(clazz) && PojoFields.class.isAssignableFrom(clazz);
         }
     }
@@ -156,18 +169,18 @@ public final class MongoClientFactory {
         private final Class<E> entityClass;
         private final MapCodec codec;
 
-        EntityCodec(Class<E> entityClass, CodecRegistry registry) {
+        EntityCodec(final Class<E> entityClass, final CodecRegistry registry) {
             this.entityClass = entityClass;
             this.codec = new MapCodec(registry);
         }
 
         @Override
-        public void encode(BsonWriter writer, E value, EncoderContext encoderContext) {
+        public void encode(final BsonWriter writer, final E value, final EncoderContext encoderContext) {
             codec.encode(writer, ((PojoFields) value).fields(), encoderContext);
         }
 
         @Override
-        public E decode(BsonReader reader, DecoderContext decoderContext) {
+        public E decode(final BsonReader reader, final DecoderContext decoderContext) {
             throw new UnsupportedOperationException();
         }
 
@@ -209,12 +222,12 @@ public final class MongoClientFactory {
         private final Bytes pngHeader = new Bytes(BytesUtils.decodeHexString("89504e470d0a1a0a"));
 
         @Override
-        public void encode(BsonWriter writer, byte[] value, EncoderContext encoderContext) {
+        public void encode(final BsonWriter writer, final byte[] value, final EncoderContext encoderContext) {
             super.encode(writer, encodeImage(value), encoderContext);
         }
 
         @Override
-        public byte[] decode(BsonReader reader, DecoderContext decoderContext) {
+        public byte[] decode(final BsonReader reader, final DecoderContext decoderContext) {
             return decodeImage(super.decode(reader, decoderContext));
         }
 
@@ -229,7 +242,7 @@ public final class MongoClientFactory {
             return value;
         }
 
-        private boolean isImage(final byte[] value, Bytes header) {
+        private boolean isImage(final byte[] value, final Bytes header) {
             return value.length > header.length() && header.compareTo(new Bytes(value, 0, header.length())) == 0;
         }
     }

@@ -1,7 +1,17 @@
 package io.github.dbstarll.dubai.model.notify;
 
 public interface NotifyConsumer {
-    void regist(NotifyListener listener);
+    /**
+     * 注册通知监听器.
+     *
+     * @param listener 通知监听器
+     */
+    void register(NotifyListener listener);
 
-    void unRegist(NotifyListener listener);
+    /**
+     * 注销通知监听器.
+     *
+     * @param listener 通知监听器
+     */
+    void unRegister(NotifyListener listener);
 }

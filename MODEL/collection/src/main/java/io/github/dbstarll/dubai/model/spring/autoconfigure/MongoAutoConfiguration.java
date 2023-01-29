@@ -19,25 +19,31 @@ import java.security.NoSuchAlgorithmException;
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
 public class MongoAutoConfiguration {
+    private static final int SHA_STRENGTH = 256;
+
+    private MongoAutoConfiguration() {
+        // 工具类禁止实例化
+    }
+
     @Bean
     @ConditionalOnMissingBean(MongoClientFactory.class)
-    MongoClientFactory mongoClientFactory(@Value("${dubai.mongodb.encryptedKey:}") String encryptedKey)
+    static MongoClientFactory mongoClientFactory(@Value("${dubai.mongodb.encryptedKey:}") final String encryptedKey)
             throws NoSuchAlgorithmException {
         return new MongoClientFactory(
-                StringUtils.isBlank(encryptedKey) ? null : new Bytes(EncryptUtils.sha(encryptedKey, 256)));
+                StringUtils.isBlank(encryptedKey) ? null : new Bytes(EncryptUtils.sha(encryptedKey, SHA_STRENGTH)));
     }
 
     @Bean
     @ConditionalOnMissingBean(MongoClientSettings.Builder.class)
-    MongoClientSettings.Builder clientOptions(MongoClientFactory mongoClientFactory) {
+    static MongoClientSettings.Builder clientOptions(final MongoClientFactory mongoClientFactory) {
         return mongoClientFactory.getMongoClientSettingsbuilder();
     }
 
     @Bean
     @ConditionalOnMissingBean(MongoClient.class)
-    MongoClient mongoClient(MongoClientFactory mongoClientFactory, MongoProperties mongoProperties,
-                            MongoClientSettings.Builder options) {
-        final String authDatabase = StringUtils.isNotBlank(mongoProperties.getAuthenticationDatabase())
+    static MongoClient mongoClient(final MongoClientFactory mongoClientFactory, final MongoProperties mongoProperties,
+                                   final MongoClientSettings.Builder options) {
+        final String authDB = StringUtils.isNotBlank(mongoProperties.getAuthenticationDatabase())
                 ? mongoProperties.getAuthenticationDatabase()
                 : mongoProperties.getMongoClientDatabase();
         final String credential;
@@ -45,14 +51,15 @@ public class MongoAutoConfiguration {
             credential = null;
         } else {
             credential = StringUtils.join(
-                    new Object[]{authDatabase, mongoProperties.getUsername(), new String(mongoProperties.getPassword())}, ':');
+                    new Object[]{authDB, mongoProperties.getUsername(), new String(mongoProperties.getPassword())},
+                    ':');
         }
-        return mongoClientFactory.createWithPojoCodecSplit(mongoProperties.getHost(), authDatabase, credential, options);
+        return mongoClientFactory.createWithPojoCodecSplit(mongoProperties.getHost(), authDB, credential, options);
     }
 
     @Bean
     @ConditionalOnMissingBean(MongoDatabase.class)
-    MongoDatabase mongoDatabase(MongoClient client, MongoProperties properties) {
+    static MongoDatabase mongoDatabase(final MongoClient client, final MongoProperties properties) {
         return client.getDatabase(properties.getMongoClientDatabase());
     }
 }

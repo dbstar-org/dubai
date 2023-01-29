@@ -40,12 +40,12 @@ public class TestEntityNotifyConsumer extends TestCase {
         final AtomicBoolean unRegist = new AtomicBoolean(false);
         consumer.setNotifyConsumer(new NotifyConsumer() {
             @Override
-            public void unRegist(NotifyListener listener) {
+            public void unRegister(NotifyListener listener) {
                 unRegist.set(true);
             }
 
             @Override
-            public void regist(NotifyListener listener) {
+            public void register(NotifyListener listener) {
                 regist.set(true);
             }
         });
@@ -98,7 +98,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
             @Override
             public NotifyType getNotifyType() {
-                return NotifyType.insert;
+                return NotifyType.INSERT;
             }
         });
         consumer.onNotify(SimpleEntity.class.getName(), "value4", new NotifyParser() {
@@ -109,7 +109,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
             @Override
             public NotifyType getNotifyType() {
-                return NotifyType.insert;
+                return NotifyType.INSERT;
             }
         });
         consumer.close();
@@ -143,7 +143,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
-        final NotifyType type = NotifyType.insert;
+        final NotifyType type = NotifyType.INSERT;
         final NotifyParser notifyParser = new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {
@@ -193,7 +193,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
-        final NotifyType type = NotifyType.insert;
+        final NotifyType type = NotifyType.INSERT;
         final NotifyParser notifyParser = new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {

@@ -19,12 +19,17 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Posit
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.commons.lang3.Validate.*;
+import static org.apache.commons.lang3.Validate.isAssignableFrom;
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.noNullElements;
+import static org.apache.commons.lang3.Validate.notNull;
 
 public abstract class AbstractImplemental<E extends Entity, S extends Service<E>> implements Implemental {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractImplemental.class);
@@ -120,7 +125,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             if (!v.hasErrors()) {
                 LOGGER.debug("validateAndSave with change: {}", save);
                 if (save) {
-                    final NotifyType notifyType = entity.getId() == null ? NotifyType.insert : NotifyType.update;
+                    final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
                     final E saved = collection.save(entity, newEntityId);
                     onEntitySaved(saved, validate, notifyType);
                     return saved;
@@ -295,6 +300,32 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 }
             }
         }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            } else if (!(NameValidation.class.isInstance(o))) {
+                return false;
+            }
+
+            NameValidation that = (NameValidation) o;
+
+            return new EqualsBuilder()
+                    .appendSuper(super.equals(o))
+                    .append(minLength, that.minLength)
+                    .append(maxLength, that.maxLength)
+                    .isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(minLength)
+                    .append(maxLength)
+                    .toHashCode();
+        }
     }
 
     protected class DescriptionValidation extends AbstractBaseEntityValidation<Describable> {
@@ -315,6 +346,30 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                     validate.addFieldError(Describable.FIELD_NAME_DESCRIPTION, "备注不能超过 " + maxLength + " 字符");
                 }
             }
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            } else if (!(DescriptionValidation.class.isInstance(o))) {
+                return false;
+            }
+
+            DescriptionValidation that = (DescriptionValidation) o;
+
+            return new EqualsBuilder()
+                    .appendSuper(super.equals(o))
+                    .append(maxLength, that.maxLength)
+                    .isEquals();
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(maxLength)
+                    .toHashCode();
         }
     }
 }
