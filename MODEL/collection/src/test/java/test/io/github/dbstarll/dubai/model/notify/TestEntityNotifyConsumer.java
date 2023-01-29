@@ -28,7 +28,6 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试自定义的NotifyConsumer.
-     *
      */
     public void testNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
@@ -59,7 +58,6 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试onNotify方法.
-     *
      */
     public void testOnNotify() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
@@ -112,7 +110,6 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试设置listener.
-     *
      */
     public void testListener() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
@@ -170,7 +167,6 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试设置listener抛出异常.
-     *
      */
     public void testListenerException() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();

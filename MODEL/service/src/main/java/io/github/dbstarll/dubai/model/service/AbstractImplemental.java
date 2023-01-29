@@ -19,7 +19,6 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Posit
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -303,19 +302,11 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            } else if (!(NameValidation.class.isInstance(o))) {
+            if (!super.equals(o)) {
                 return false;
             }
-
-            NameValidation that = (NameValidation) o;
-
-            return new EqualsBuilder()
-                    .appendSuper(super.equals(o))
-                    .append(minLength, that.minLength)
-                    .append(maxLength, that.maxLength)
-                    .isEquals();
+            final NameValidation that = (NameValidation) o;
+            return this.minLength == that.minLength && this.maxLength == that.maxLength;
         }
 
         @Override
@@ -350,18 +341,11 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            } else if (!(DescriptionValidation.class.isInstance(o))) {
+            if (!super.equals(o)) {
                 return false;
             }
-
-            DescriptionValidation that = (DescriptionValidation) o;
-
-            return new EqualsBuilder()
-                    .appendSuper(super.equals(o))
-                    .append(maxLength, that.maxLength)
-                    .isEquals();
+            final DescriptionValidation that = (DescriptionValidation) o;
+            return this.maxLength == that.maxLength;
         }
 
         @Override
