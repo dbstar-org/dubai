@@ -20,6 +20,7 @@ import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.CollectionWrapper;
+import io.github.dbstarll.dubai.model.collection.test.Delay;
 import io.github.dbstarll.dubai.model.collection.test.MockMongoCursor;
 import io.github.dbstarll.dubai.model.collection.test.SimpleNotifiableEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
@@ -208,7 +209,9 @@ public class TestSimpleNotifiableCollection {
         final ObjectId id = entity.getId();
         final Date dateCreated = entity.getDateCreated();
         final Date lastModified = entity.getLastModified();
-        Thread.sleep(10);
+
+        Delay.delay();
+
         final SimpleNotifiableEntity savedAgainEntity = collection.save(savedEntity);
         assertSame(entity, savedAgainEntity);
         assertSame(id, savedAgainEntity.getId());

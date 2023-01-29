@@ -19,6 +19,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
+import io.github.dbstarll.dubai.model.collection.test.Delay;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.info.Namable;
@@ -206,7 +207,9 @@ public class TestSimpleCollection {
         final ObjectId id = entity.getId();
         final Date dateCreated = entity.getDateCreated();
         final Date lastModified = entity.getLastModified();
-        Thread.sleep(10);
+
+        Delay.delay();
+
         final SimpleEntity savedAgainEntity = collection.save(savedEntity);
         assertSame(entity, savedAgainEntity);
         assertSame(id, savedAgainEntity.getId());

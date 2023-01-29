@@ -17,6 +17,7 @@ import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.test.CacheableEntity;
+import io.github.dbstarll.dubai.model.collection.test.Delay;
 import io.github.dbstarll.dubai.model.collection.test.MockMongoCursor;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.info.Namable;
@@ -203,7 +204,7 @@ public class TestComplexCollection {
         final Date dateCreated = entity.getDateCreated();
         final Date lastModified = entity.getLastModified();
 
-        Thread.sleep(10);
+        Delay.delay();
 
         final CacheableEntity savedAgainEntity = collection.save(savedEntity);
         assertSame(entity, savedAgainEntity);
