@@ -23,7 +23,7 @@ public class TestSourceAttach {
     @Mocked
     Collection<TestEntity> collection;
 
-    SourceAttach<TestEntity> service;
+    SourceAttach service;
 
     /**
      * 测试初始化.

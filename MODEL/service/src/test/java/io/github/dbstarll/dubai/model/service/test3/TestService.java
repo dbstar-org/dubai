@@ -6,6 +6,6 @@ import io.github.dbstarll.dubai.model.service.attach.SourceAttach;
 import io.github.dbstarll.dubai.model.service.test.TestServices;
 
 @EntityService
-public interface TestService extends TestServices<TestEntity>, DefunctAttach<TestEntity>, SourceAttach<TestEntity>,
+public interface TestService extends TestServices<TestEntity>, DefunctAttach<TestEntity>, SourceAttach,
         DelayAttach, TestServiceAttach {
 }

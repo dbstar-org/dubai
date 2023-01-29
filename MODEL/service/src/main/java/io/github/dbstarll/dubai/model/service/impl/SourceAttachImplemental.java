@@ -25,7 +25,7 @@ import static org.apache.commons.lang3.Validate.notBlank;
 import static org.apache.commons.lang3.Validate.notNull;
 
 public final class SourceAttachImplemental<E extends Entity & Sourceable, S extends Service<E>>
-        extends CoreImplementals<E, S> implements SourceAttach<E> {
+        extends CoreImplementals<E, S> implements SourceAttach {
     private static final String EMPTY_KEY_OR_VALUE = "来源不能包含空的key或者value";
 
     /**

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ContentAttachImplemental<E extends Entity & Contentable, S extends Service<E>>
-        extends CoreImplementals<E, S> implements ContentAttach<E> {
+        extends CoreImplementals<E, S> implements ContentAttach {
     /**
      * 构建ContentAttachImplemental.
      *
