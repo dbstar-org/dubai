@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -85,67 +86,24 @@ public class TestContentValidation {
     }
 
     @Test
-    public void testInsertWithContentTypeNotSet() {
-        final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
-        entity.setContent("content".getBytes());
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("内容类型未设置"),
-                validate.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
-    }
-
-    @Test
-    public void testInsertWithContentTypeNoSlash() {
-        final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
-        entity.setContent("content".getBytes());
-        entity.setContentType("text");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("不符合格式：主类型/子类型"),
-                validate.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
-    }
-
-    @Test
-    public void testInsertWithContentTypeSlashStart() {
-        final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
-        entity.setContent("content".getBytes());
-        entity.setContentType("/xml");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("缺少主类型"),
-                validate.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
-    }
-
-    @Test
-    public void testInsertWithContentTypeSlashEnd() {
-        final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
-        entity.setContent("content".getBytes());
-        entity.setContentType("text/");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("缺少子类型"),
-                validate.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
-    }
-
-    @Test
-    public void testInsertWithContentTypeMoreSlash() {
-        final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
-        entity.setContent("content".getBytes());
-        entity.setContentType("text/plain/xml");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("只能有一个子类型"),
-                validate.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
+    public void testInsertWithContentTypeError() {
+        new HashMap<String, String>() {{
+            put(null, "内容类型未设置");
+            put("", "内容类型未设置");
+            put("text", "不符合格式：主类型/子类型");
+            put("/xml", "缺少主类型");
+            put("text/", "缺少子类型");
+            put("text/plain/xml", "只能有一个子类型");
+        }}.forEach((k, v) -> {
+            final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
+            entity.setContent("content".getBytes());
+            entity.setContentType(k);
+            final DefaultValidate valid = new DefaultValidate();
+            assertNull(service.save(entity, valid));
+            assertTrue(valid.hasFieldErrors());
+            assertEquals(1, valid.getFieldErrors().size());
+            assertEquals(Collections.singletonList(v), valid.getFieldErrors().get(Contentable.FIELD_NAME_CONTENT_TYPE));
+        });
     }
 
     @Test
