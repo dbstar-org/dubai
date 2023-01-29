@@ -36,6 +36,8 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertNotNull;
+
 public class TestMockCollection {
     private MongoDriverInformation mongoDriverInformation;
     private MongoClientSettings settings;
@@ -121,7 +123,7 @@ public class TestMockCollection {
                 }
             };
 
-            System.out.println(collection.save(entity));
+            assertNotNull(collection.save(entity));
         }
     }
 }

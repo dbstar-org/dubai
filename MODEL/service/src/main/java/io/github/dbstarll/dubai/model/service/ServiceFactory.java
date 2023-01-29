@@ -185,7 +185,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                     }
                     implemental.afterPropertiesSet();
                 }
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 implementals.remove(serviceInterface);
                 LOGGER.error("不能实例化Implemental：" + implementalClass, ex);
             }
@@ -246,8 +246,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                         new ServiceFactory<>(serviceClass, collection));
             } else {
                 try {
-                    return serviceClass.newInstance();
-                } catch (Throwable ex) {
+                    return serviceClass.getDeclaredConstructor().newInstance();
+                } catch (Exception ex) {
                     throw new UnsupportedOperationException("Instantiation fails: " + serviceClass, ex);
                 }
             }

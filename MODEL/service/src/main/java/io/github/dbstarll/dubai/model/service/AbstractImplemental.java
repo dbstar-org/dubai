@@ -47,7 +47,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
      * @param service    service
      * @param collection collection
      */
-    public AbstractImplemental(final S service, final Collection<E> collection) {
+    protected AbstractImplemental(final S service, final Collection<E> collection) {
         this.service = notNull(service, "service is null");
         this.collection = notNull(collection, "collection is null");
         this.entityClass = collection.getEntityClass();
@@ -85,7 +85,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 LOGGER.debug("validateAndDelete with ActionErrors: {}, FieldErrors: {}", v.hasActionErrors(),
                         v.hasFieldErrors());
             }
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             v.addActionError(ex.getMessage());
             LOGGER.error("validateAndDelete failed!", ex);
         }
@@ -136,7 +136,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                         v.hasActionErrors(),
                         v.hasFieldErrors());
             }
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             v.addActionError(ex.getMessage());
             LOGGER.error("validateAndSave failed!", ex);
         }
@@ -237,14 +237,14 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected abstract class AbstractEntityValidation extends AbstractValidation<E> {
-        public AbstractEntityValidation() {
+        protected AbstractEntityValidation() {
             super(AbstractImplemental.this.entityClass);
         }
     }
 
     protected abstract class AbstractBaseEntityValidation<B extends Base>
             extends AbstractEntityValidation {
-        public AbstractBaseEntityValidation(final Class<B> baseClass) {
+        protected AbstractBaseEntityValidation(final Class<B> baseClass) {
             isAssignableFrom(baseClass, entityClass);
         }
 

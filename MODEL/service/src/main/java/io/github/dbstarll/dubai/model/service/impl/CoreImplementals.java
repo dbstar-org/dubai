@@ -12,7 +12,7 @@ public abstract class CoreImplementals<E extends Entity, S extends Service<E>> e
      * @param service    service
      * @param collection collection
      */
-    public CoreImplementals(final S service, final Collection<E> collection) {
+    protected CoreImplementals(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 }

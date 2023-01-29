@@ -54,9 +54,7 @@ class MethodKey {
                 return false;
             }
             final Class<?> boundClass = (Class<?>) bound;
-            if (!Entity.class.isAssignableFrom(boundClass)) {
-                return false;
-            } else if (!boundClass.isAssignableFrom(entityClass)) {
+            if (!Entity.class.isAssignableFrom(boundClass) || !boundClass.isAssignableFrom(entityClass)) {
                 return false;
             }
         }

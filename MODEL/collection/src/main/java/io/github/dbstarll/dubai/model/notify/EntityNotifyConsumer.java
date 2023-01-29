@@ -61,7 +61,7 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
             for (EntityNotifyListener listener : listeners) {
                 try {
                     listener.onNotify(entityClass, id, notifyType, companyId, clientId);
-                } catch (Throwable ex) {
+                } catch (Exception ex) {
                     LOGGER.error("entity notify failed: " + listener, ex);
                 }
             }
@@ -73,9 +73,9 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
      *
      * @param listener 注册的监听器
      */
-    public void regist(final EntityNotifyListener listener) {
+    public void register(final EntityNotifyListener listener) {
         synchronized (listeners) {
-            LOGGER.info("regist: {}: {}", listener, listeners.add(listener));
+            LOGGER.info("register: {}: {}", listener, listeners.add(listener));
         }
     }
 
@@ -84,9 +84,9 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
      *
      * @param listener 注销的监听器
      */
-    public void unRegist(final EntityNotifyListener listener) {
+    public void unRegister(final EntityNotifyListener listener) {
         synchronized (listeners) {
-            LOGGER.info("unRegist: {}: {}", listener, listeners.remove(listener));
+            LOGGER.info("unRegister: {}: {}", listener, listeners.remove(listener));
         }
     }
 

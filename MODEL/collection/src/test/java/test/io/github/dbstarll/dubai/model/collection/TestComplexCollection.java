@@ -230,9 +230,9 @@ public class TestComplexCollection {
     public void testSaveNoEntityModifier() {
         final CacheableEntity entity = (CacheableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
                 new Class[]{entityClass}, (proxy, method, args) -> null);
-
+        final ObjectId id = new ObjectId();
         try {
-            collection.save(entity, new ObjectId());
+            collection.save(entity, id);
             fail("throw IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             assertTrue(ex.getMessage().startsWith("UnModify entity: "));

@@ -58,7 +58,7 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
                 doScan(basePackage, registry);
             } catch (BeansException ex) {
                 throw ex;
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
             }
         }

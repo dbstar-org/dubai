@@ -8,6 +8,7 @@ import org.apache.commons.lang3.exception.CloneFailedException;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -191,8 +192,10 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
                         new EntityFactory<>(entityClass, fields));
             } else {
                 try {
-                    return entityClass.newInstance();
-                } catch (Throwable ex) {
+                    return entityClass.getDeclaredConstructor().newInstance();
+                } catch (InvocationTargetException ex) {
+                    throw new UnsupportedOperationException("Instantiation fails: " + entityClass, ex.getCause());
+                } catch (Exception ex) {
                     throw new UnsupportedOperationException("Instantiation fails: " + entityClass, ex);
                 }
             }

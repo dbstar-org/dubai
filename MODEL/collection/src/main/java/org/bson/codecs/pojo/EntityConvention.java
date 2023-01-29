@@ -127,7 +127,7 @@ public final class EntityConvention implements Convention {
         return propertyName;
     }
 
-    private static <T, S> PropertyMetadata<T> getOrCreateMethodPropertyMetadata(
+    private static <T> PropertyMetadata<T> getOrCreateMethodPropertyMetadata(
             final String propertyName, final String declaringClassName,
             final Map<String, PropertyMetadata<?>> propertyNameMap, final TypeData<T> typeData) {
         final PropertyMetadata<T> propertyMetadata = getOrCreatePropertyMetadata(propertyName, declaringClassName,

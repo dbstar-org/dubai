@@ -62,7 +62,7 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
                 doScan(basePackage, registry);
             } catch (BeansException ex) {
                 throw ex;
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 throw new BeanDefinitionStoreException("failure during classpath scanning: " + basePackage, ex);
             }
         }

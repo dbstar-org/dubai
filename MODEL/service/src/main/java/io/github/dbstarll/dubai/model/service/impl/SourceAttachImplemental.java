@@ -26,6 +26,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 public final class SourceAttachImplemental<E extends Entity & Sourceable, S extends Service<E>>
         extends CoreImplementals<E, S> implements SourceAttach<E> {
+    private static final String EMPTY_KEY_OR_VALUE = "来源不能包含空的key或者value";
+
     /**
      * 构造SourceAttachImplemental.
      *
@@ -45,7 +47,7 @@ public final class SourceAttachImplemental<E extends Entity & Sourceable, S exte
     @Override
     public UpdateResult updateSource(final ObjectId entityId, final Map<String, ObjectId> sources) {
         if (hasEmptyKeyOrValue(notNull(sources))) {
-            throw new IllegalArgumentException("来源不能包含空的key或者value");
+            throw new IllegalArgumentException(EMPTY_KEY_OR_VALUE);
         }
         final List<Bson> updates = new ArrayList<>(sources.size());
         for (Entry<String, ObjectId> entry : sources.entrySet()) {
@@ -57,7 +59,7 @@ public final class SourceAttachImplemental<E extends Entity & Sourceable, S exte
     @Override
     public UpdateResult removeSource(final ObjectId entityId, final Map<String, ObjectId> sources) {
         if (hasEmptyKeyOrValue(notNull(sources))) {
-            throw new IllegalArgumentException("来源不能包含空的key或者value");
+            throw new IllegalArgumentException(EMPTY_KEY_OR_VALUE);
         }
         final List<Bson> filters = new ArrayList<>(sources.size() + 1);
         filters.add(eq(notNull(entityId)));
@@ -82,7 +84,7 @@ public final class SourceAttachImplemental<E extends Entity & Sourceable, S exte
             @Override
             protected void validate(final Sourceable entity, final Sourceable original, final Validate validate) {
                 if (hasEmptyKeyOrValue(entity.getSources())) {
-                    validate.addFieldError(Sourceable.FIELD_NAME_SOURCES, "来源不能包含空的key或者value");
+                    validate.addFieldError(Sourceable.FIELD_NAME_SOURCES, EMPTY_KEY_OR_VALUE);
                 }
             }
         };

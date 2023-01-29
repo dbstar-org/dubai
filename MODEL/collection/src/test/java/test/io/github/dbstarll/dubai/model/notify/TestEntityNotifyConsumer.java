@@ -130,7 +130,7 @@ public class TestEntityNotifyConsumer extends TestCase {
                 companyIdValue.set(companyId);
             }
         };
-        consumer.regist(listener);
+        consumer.register(listener);
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
@@ -155,7 +155,7 @@ public class TestEntityNotifyConsumer extends TestCase {
         consumer.onNotify(SimpleEntity.class.getName(), "value4", notifyParser);
         consumer.onNotify(String.class.getName(), "value", notifyParser);
         consumer.onNotify("io.github.dbstarll.dubai.notify.UnknownClass", "value", notifyParser);
-        consumer.unRegist(listener);
+        consumer.unRegister(listener);
         consumer.close();
 
         assertEquals(1, calls.get());
@@ -178,7 +178,7 @@ public class TestEntityNotifyConsumer extends TestCase {
                 throw new RuntimeException("test");
             }
         };
-        consumer.regist(listener);
+        consumer.register(listener);
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
@@ -201,7 +201,7 @@ public class TestEntityNotifyConsumer extends TestCase {
             }
         };
         consumer.onNotify(SimpleEntity.class.getName(), "value4", notifyParser);
-        consumer.unRegist(listener);
+        consumer.unRegister(listener);
         consumer.close();
     }
 }

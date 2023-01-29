@@ -10,6 +10,7 @@ public final class EmptyValidation<E extends Entity> extends AbstractValidation<
 
     @Override
     public void validate(final E entity, final E original, final Validate validate) {
+        // do nothing
     }
 
     /**

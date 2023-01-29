@@ -27,7 +27,7 @@ public abstract class CollectionWrapper<E extends Entity> extends AbstractCollec
      *
      * @param collection 被封装的Collection
      */
-    public CollectionWrapper(final Collection<E> collection) {
+    protected CollectionWrapper(final Collection<E> collection) {
         this.collection = collection;
     }
 
