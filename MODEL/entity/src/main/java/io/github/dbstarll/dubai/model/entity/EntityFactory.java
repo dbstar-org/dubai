@@ -192,7 +192,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
                         new EntityFactory<>(entityClass, fields));
             } else {
                 try {
-                    return entityClass.getDeclaredConstructor().newInstance();
+                    return entityClass.getConstructor().newInstance();
                 } catch (InvocationTargetException ex) {
                     throw new UnsupportedOperationException("Instantiation fails: " + entityClass, ex.getCause());
                 } catch (Exception ex) {

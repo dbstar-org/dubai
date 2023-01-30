@@ -24,8 +24,8 @@ public class TestEntityUtils {
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(InterfaceEntity.class)) {
             keys.add(pd.getName());
         }
-        Assert.assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, id, intFromInterfaceEntity,"
-                + " intWithParam, lastModified, stringFromInterfaceEntity, type]", keys.toString());
+        Assert.assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, field, id, intFromInterfaceEntity,"
+                + " intWithParam, lastModified, stringFromInterfaceEntity, twoParam, type]", keys.toString());
     }
 
     @Test

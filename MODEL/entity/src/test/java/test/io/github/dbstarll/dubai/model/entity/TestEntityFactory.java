@@ -7,6 +7,7 @@ import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.entity.test.AbstractEntity;
 import io.github.dbstarll.dubai.model.entity.test.ClassEntity;
 import io.github.dbstarll.dubai.model.entity.test.ClassNoTableEntity;
+import io.github.dbstarll.dubai.model.entity.test.FieldNoSerializable;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.NoCloneEntity;
 import io.github.dbstarll.dubai.model.entity.test.NoModifierCloneEntity;
@@ -90,6 +91,21 @@ public class TestEntityFactory {
             Assert.assertEquals("Instantiation fails: " + ThrowClassEntity.class, ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
             Assert.assertEquals("ThrowClassEntity", ex.getCause().getMessage());
+        }
+    }
+
+    /**
+     * 测试在newInstance一个包内可见的类时抛出UnsupportedOperationException异常.
+     */
+    @Test
+    public void testNewInstanceWithPackageClass() {
+        try {
+            EntityFactory.newInstance(PackageClassEntity.class);
+            Assert.fail("throw UnsupportedOperationException");
+        } catch (UnsupportedOperationException ex) {
+            Assert.assertNotNull(ex.getCause());
+            Assert.assertEquals("Instantiation fails: " + PackageClassEntity.class, ex.getMessage());
+            Assert.assertEquals(IllegalAccessException.class, ex.getCause().getClass());
         }
     }
 
@@ -238,21 +254,18 @@ public class TestEntityFactory {
             entity.getNoReturn();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.getIntWithParam(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.obtainInt();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
     }
@@ -267,21 +280,30 @@ public class TestEntityFactory {
             entity.setIntWithReturn(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.setNoParam();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
+            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+        }
+        try {
+            entity.setTwoParam(1, "2");
+            Assert.fail("throw UnsupportedOperationException");
+        } catch (Throwable ex) {
+            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+        }
+        try {
+            entity.setField(new FieldNoSerializable());
+            Assert.fail("throw UnsupportedOperationException");
+        } catch (Throwable ex) {
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.giveInt(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            System.out.println(ex.getMessage());
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
     }
