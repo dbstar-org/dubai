@@ -12,17 +12,24 @@ public final class PackageUtils {
 
     private static final ConcurrentMap<String, Class<?>> PACKAGES = new ConcurrentHashMap<>();
 
+    private PackageUtils() {
+        // 工具类禁止实例化
+    }
+
     /**
      * 根据指定的类，寻找用作代理包路径的Package.class.
      *
      * @param entityClass             在指定的类所在的包下寻找
      * @param defaultPackageInterface 若未找到对应的类，返回此缺省类
+     * @param <E>                     实体类
      * @return 可用作代理包路径的Package.class
      */
-    public static <E> Class<?> getPackageInterface(Class<E> entityClass, Class<?> defaultPackageInterface) {
+    public static <E> Class<?> getPackageInterface(final Class<E> entityClass, final Class<?> defaultPackageInterface) {
         final String packageName = entityClass.getPackage().getName();
         if (!PACKAGES.containsKey(packageName)) {
-            final Class<?> packageInterface = loadPackageInterface(entityClass.getClassLoader(), packageName + ".Package",
+            final Class<?> packageInterface = loadPackageInterface(
+                    entityClass.getClassLoader(),
+                    packageName + ".Package",
                     defaultPackageInterface);
             LOGGER.info("loadPackageInterface for: {} with: {}", packageName, packageInterface);
             PACKAGES.putIfAbsent(packageName, packageInterface);
@@ -30,8 +37,8 @@ public final class PackageUtils {
         return PACKAGES.get(packageName);
     }
 
-    private static <E> Class<?> loadPackageInterface(ClassLoader classLoader, String packageInterfaceName,
-                                                     Class<?> defaultPackageInterface) {
+    private static Class<?> loadPackageInterface(final ClassLoader classLoader, final String packageInterfaceName,
+                                                 final Class<?> defaultPackageInterface) {
         try {
             final Class<?> packageInterface = classLoader.loadClass(packageInterfaceName);
             if (packageInterface.isInterface()) {

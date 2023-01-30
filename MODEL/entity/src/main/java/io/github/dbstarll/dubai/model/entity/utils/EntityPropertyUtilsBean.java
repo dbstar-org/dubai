@@ -7,8 +7,8 @@ import org.apache.commons.beanutils.PropertyUtilsBean;
 
 import java.beans.IntrospectionException;
 
-class EntityPropertyUtilsBean extends PropertyUtilsBean {
-    static final EntityPropertyUtilsBean instance = new EntityPropertyUtilsBean();
+final class EntityPropertyUtilsBean extends PropertyUtilsBean {
+    static final EntityPropertyUtilsBean INSTANCE = new EntityPropertyUtilsBean();
 
     private EntityPropertyUtilsBean() {
         addBeanIntrospector(new InterfaceBeanIntrospector());
@@ -16,13 +16,13 @@ class EntityPropertyUtilsBean extends PropertyUtilsBean {
 
     private static class InterfaceBeanIntrospector implements BeanIntrospector {
         @Override
-        public void introspect(IntrospectionContext icontext) throws IntrospectionException {
+        public void introspect(final IntrospectionContext icontext) throws IntrospectionException {
             if (icontext.getTargetClass().isInterface()) {
                 introspect(icontext, icontext.getTargetClass(), true);
             }
         }
 
-        private void introspect(IntrospectionContext icontext, Class<?> interfaceClass, boolean root)
+        private void introspect(final IntrospectionContext icontext, final Class<?> interfaceClass, final boolean root)
                 throws IntrospectionException {
             if (!root) {
                 DefaultBeanIntrospector.INSTANCE.introspect(new IntrospectionContextWrapper(icontext, interfaceClass));

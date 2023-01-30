@@ -14,7 +14,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.*;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -29,27 +33,27 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcessor {
-    private static final Logger LOGER = LoggerFactory.getLogger(ServiceBeanInitializer.class);
+public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBeanInitializer.class);
 
     private static final String CLASS_RESOURCE_PATTERN = "*.class";
     private static final String CLASS_RESOURCE_PATTERN_RECURSION = "**/*.class";
 
-    private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-    private static final MetadataReaderFactory metadataFactory = new CachingMetadataReaderFactory(resourceResolver);
-    private static final TypeFilter typeFilter = new AssignableTypeFilter(Service.class);
+    private static final ResourcePatternResolver RESOURCE_RESOLVER = new PathMatchingResourcePatternResolver();
+    private static final MetadataReaderFactory METADATA_FACTORY = new CachingMetadataReaderFactory(RESOURCE_RESOLVER);
+    private static final TypeFilter TYPE_FILTER = new AssignableTypeFilter(Service.class);
 
     private String[] basePackages;
 
     private boolean recursion;
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
         // do nothing
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
         if (basePackages == null || basePackages.length == 0) {
             throw new BeanInitializationException("basePackages not set.");
         }
@@ -58,20 +62,21 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
                 doScan(basePackage, registry);
             } catch (BeansException ex) {
                 throw ex;
-            } catch (Throwable ex) {
+            } catch (Exception ex) {
                 throw new BeanDefinitionStoreException("failure during classpath scanning: " + basePackage, ex);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void doScan(String basePackage, BeanDefinitionRegistry registry) throws IOException, ClassNotFoundException {
+    private void doScan(final String basePackage, final BeanDefinitionRegistry registry)
+            throws IOException, ClassNotFoundException {
         final String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                 + ClassUtils.convertClassNameToResourcePath(basePackage) + '/'
                 + (recursion ? CLASS_RESOURCE_PATTERN_RECURSION : CLASS_RESOURCE_PATTERN);
-        for (Resource resource : resourceResolver.getResources(packageSearchPath)) {
-            final MetadataReader metadataReader = metadataFactory.getMetadataReader(resource);
-            if (typeFilter.match(metadataReader, metadataFactory)) {
+        for (Resource resource : RESOURCE_RESOLVER.getResources(packageSearchPath)) {
+            final MetadataReader metadataReader = METADATA_FACTORY.getMetadataReader(resource);
+            if (TYPE_FILTER.match(metadataReader, METADATA_FACTORY)) {
                 final Class<? extends Service<Entity>> serviceClass = (Class<? extends Service<Entity>>) Class
                         .forName(metadataReader.getClassMetadata().getClassName());
                 registerService(serviceClass, registry);
@@ -79,8 +84,8 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
         }
     }
 
-    private <E extends Entity, S extends Service<E>> void registerService(Class<S> serviceClass,
-                                                                          BeanDefinitionRegistry registry) {
+    private <E extends Entity, S extends Service<E>> void registerService(final Class<S> serviceClass,
+                                                                          final BeanDefinitionRegistry registry) {
         if (ServiceFactory.isServiceClass(serviceClass)) {
             final Class<E> entityClass = getEntityClass(serviceClass);
             if (entityClass != null) {
@@ -88,34 +93,33 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
                 if (registry.containsBeanDefinition(serviceBeanName)) {
                     throw new BeanDefinitionValidationException(
                             "service already exist: [" + serviceBeanName + "]" + serviceClass);
-                } else {
-                    final String collectionBeanName = StringUtils.uncapitalize(entityClass.getSimpleName()) + "Collection";
-                    final BeanDefinition definition = buildService(serviceClass, collectionBeanName);
-                    LOGER.info("register service[{}] of entity: {} with: {}", serviceBeanName, entityClass, serviceClass);
-                    registry.registerBeanDefinition(serviceBeanName, definition);
                 }
+                final String collectionBeanName = StringUtils.uncapitalize(entityClass.getSimpleName()) + "Collection";
+                final BeanDefinition definition = buildService(serviceClass, collectionBeanName);
+                LOGGER.info("register service[{}] of entity: {} with: {}", serviceBeanName, entityClass, serviceClass);
+                registry.registerBeanDefinition(serviceBeanName, definition);
             }
         }
     }
 
-    private <E extends Entity, S extends Service<E>> Class<E> getEntityClass(Class<S> serviceClass) {
-        final Type genericSuperclass;
-        if ((genericSuperclass = serviceClass.getGenericSuperclass()) != null) {
-            final Class<E> entityClass;
-            if ((entityClass = getEntityClassFromGeneric(genericSuperclass)) != null) {
+    private <E extends Entity, S extends Service<E>> Class<E> getEntityClass(final Class<S> serviceClass) {
+        final Type genericSuperclass = serviceClass.getGenericSuperclass();
+        if (genericSuperclass != null) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericSuperclass);
+            if (entityClass != null) {
                 return entityClass;
             }
         }
         for (Type genericInterface : serviceClass.getGenericInterfaces()) {
-            final Class<E> entityClass;
-            if ((entityClass = getEntityClassFromGeneric(genericInterface)) != null) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericInterface);
+            if (entityClass != null) {
                 return entityClass;
             }
         }
         return null;
     }
 
-    private <E extends Entity, S extends Service<E>> Class<E> getEntityClassFromGeneric(Type genericType) {
+    private <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
         if (genericType instanceof ParameterizedType) {
             for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
                 if (Entity.class.isAssignableFrom((Class<?>) type)) {
@@ -133,8 +137,8 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
         return StringUtils.uncapitalize(serviceClass.getSimpleName());
     }
 
-    private <E extends Entity, S extends Service<E>> BeanDefinition buildService(Class<S> serviceClass,
-                                                                                 String collectionFactoryBeanName) {
+    private <E extends Entity, S extends Service<E>> BeanDefinition buildService(
+            final Class<S> serviceClass, final String collectionFactoryBeanName) {
         final GenericBeanDefinition definition = new GenericBeanDefinition();
         definition.setBeanClass(ServiceFactory.class);
         definition.setFactoryMethodName("newInstance");
@@ -152,18 +156,28 @@ public class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcess
      *
      * @param basePackageClasses 基础类
      */
-    public void setBasePackageClasses(Class<?>... basePackageClasses) {
+    public void setBasePackageClasses(final Class<?>... basePackageClasses) {
         this.basePackages = new String[basePackageClasses.length];
         for (int i = 0; i < basePackageClasses.length; i++) {
             this.basePackages[i] = basePackageClasses[i].getPackage().getName();
         }
     }
 
-    public void setBasePackages(String... basePackages) {
+    /**
+     * 设置基础包.
+     *
+     * @param basePackages 基础包
+     */
+    public void setBasePackages(final String... basePackages) {
         this.basePackages = basePackages;
     }
 
-    public void setRecursion(boolean recursion) {
+    /**
+     * 设置是否递归检测基础包下的子包.
+     *
+     * @param recursion 是否递归检测子包
+     */
+    public void setRecursion(final boolean recursion) {
         this.recursion = recursion;
     }
 }

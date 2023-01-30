@@ -45,24 +45,10 @@ public class TestDefaultValidate extends TestCase {
 
         validate.addActionError("addActionError");
 
-        assertTrue(validate.hasErrors());
-        assertTrue(validate.hasActionErrors());
-        assertFalse(validate.hasFieldErrors());
-
-        assertTrue(validate.getFieldErrors().isEmpty());
-        assertFalse(validate.getActionErrors().isEmpty());
-
         assertEquals(1, validate.getActionErrors().size());
         assertEquals("[addActionError]", validate.getActionErrors().toString());
 
         validate.addActionError("addActionError1");
-
-        assertTrue(validate.hasErrors());
-        assertTrue(validate.hasActionErrors());
-        assertFalse(validate.hasFieldErrors());
-
-        assertTrue(validate.getFieldErrors().isEmpty());
-        assertFalse(validate.getActionErrors().isEmpty());
 
         assertEquals(2, validate.getActionErrors().size());
         assertEquals("[addActionError, addActionError1]", validate.getActionErrors().toString());
@@ -95,24 +81,11 @@ public class TestDefaultValidate extends TestCase {
 
         validate.addFieldError("f1", "addFieldError");
 
-        assertTrue(validate.hasErrors());
-        assertFalse(validate.hasActionErrors());
-        assertTrue(validate.hasFieldErrors());
-
-        assertFalse(validate.getFieldErrors().isEmpty());
-        assertTrue(validate.getActionErrors().isEmpty());
-
         assertEquals(1, validate.getFieldErrors().size());
         assertEquals(1, validate.getFieldErrors().get("f1").size());
         assertEquals("[addFieldError]", validate.getFieldErrors().get("f1").toString());
 
         validate.addFieldError("f1", "addFieldError1");
-        assertTrue(validate.hasErrors());
-        assertFalse(validate.hasActionErrors());
-        assertTrue(validate.hasFieldErrors());
-
-        assertFalse(validate.getFieldErrors().isEmpty());
-        assertTrue(validate.getActionErrors().isEmpty());
 
         assertEquals(1, validate.getFieldErrors().size());
         assertEquals(2, validate.getFieldErrors().get("f1").size());

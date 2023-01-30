@@ -27,11 +27,20 @@ public class TestServiceBeanInitializer extends TestCase {
     }
 
     public void testNew() {
-        new ServiceBeanInitializer();
+        try {
+            new ServiceBeanInitializer();
+        } catch (Exception ex) {
+            fail("catch exception");
+        }
     }
 
     public void testPostProcessBeanFactory() {
-        new ServiceBeanInitializer().postProcessBeanFactory(null);
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        try {
+            initializer.postProcessBeanFactory(null);
+        } catch (Exception ex) {
+            fail("catch exception");
+        }
     }
 
     /**
@@ -53,7 +62,7 @@ public class TestServiceBeanInitializer extends TestCase {
      */
     public void testEmptyBasePackages() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
-        initializer.setBasePackages(new String[0]);
+        initializer.setBasePackages();
         try {
             initializer.postProcessBeanDefinitionRegistry(registry);
             fail("throw BeanInitializationException");
@@ -68,7 +77,7 @@ public class TestServiceBeanInitializer extends TestCase {
      */
     public void testNullBasePackage() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
-        initializer.setBasePackages(new String[]{"", "abc", null});
+        initializer.setBasePackages("", "abc", null);
         try {
             initializer.postProcessBeanDefinitionRegistry(registry);
             fail("throw BeanDefinitionStoreException");

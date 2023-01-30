@@ -17,12 +17,18 @@ import static com.mongodb.client.model.Filters.eq;
 
 public final class DefunctAttachImplemental<E extends Entity & Defunctable, S extends Service<E>>
         extends CoreImplementals<E, S> implements DefunctAttach<E> {
-    public DefunctAttachImplemental(S service, Collection<E> collection) {
+    /**
+     * 构造DefunctAttachImplemental.
+     *
+     * @param service    service
+     * @param collection collection
+     */
+    public DefunctAttachImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 
     @Override
-    public Bson filterByDefunct(boolean defunct) {
+    public Bson filterByDefunct(final boolean defunct) {
         return eq(Defunctable.FIELD_NAME_DEFUNCT, defunct);
     }
 
@@ -31,7 +37,7 @@ public final class DefunctAttachImplemental<E extends Entity & Defunctable, S ex
     }
 
     @Override
-    public boolean contains(ObjectId id, Boolean defunct) {
+    public boolean contains(final ObjectId id, final Boolean defunct) {
         if (defunct == null) {
             return getOriginalCollection().contains(id);
         } else if (defunct) {
@@ -42,7 +48,7 @@ public final class DefunctAttachImplemental<E extends Entity & Defunctable, S ex
     }
 
     @Override
-    public FindIterable<E> find(Bson filter, Boolean defunct) {
+    public FindIterable<E> find(final Bson filter, final Boolean defunct) {
         if (defunct == null) {
             return getOriginalCollection().find(filter);
         } else if (defunct) {
@@ -53,7 +59,7 @@ public final class DefunctAttachImplemental<E extends Entity & Defunctable, S ex
     }
 
     @Override
-    public E findById(ObjectId id, Boolean defunct) {
+    public E findById(final ObjectId id, final Boolean defunct) {
         if (defunct == null) {
             return getOriginalCollection().findById(id);
         } else if (defunct) {
@@ -64,11 +70,12 @@ public final class DefunctAttachImplemental<E extends Entity & Defunctable, S ex
     }
 
     @Override
-    public long count(Bson filter, Boolean defunct) {
+    public long count(final Bson filter, final Boolean defunct) {
         if (defunct == null) {
             return getOriginalCollection().count(filter);
         } else if (defunct) {
-            return getOriginalCollection().count(filter == null ? filterByDefunct(true) : and(filter, filterByDefunct(true)));
+            final Bson defunctFilter = filter == null ? filterByDefunct(true) : and(filter, filterByDefunct(true));
+            return getOriginalCollection().count(defunctFilter);
         } else {
             return service.count(filter);
         }
@@ -83,7 +90,7 @@ public final class DefunctAttachImplemental<E extends Entity & Defunctable, S ex
     public Validation<E> defunctValidation() {
         return new AbstractBaseEntityValidation<Defunctable>(Defunctable.class) {
             @Override
-            protected void validate(Defunctable entity, Defunctable original, Validate validate) {
+            protected void validate(final Defunctable entity, final Defunctable original, final Validate validate) {
                 if (original == null ? entity.isDefunct() : entity.isDefunct() != original.isDefunct()) {
                     validate.addFieldError(Defunctable.FIELD_NAME_DEFUNCT, "defunct不允许外部修改");
                 }

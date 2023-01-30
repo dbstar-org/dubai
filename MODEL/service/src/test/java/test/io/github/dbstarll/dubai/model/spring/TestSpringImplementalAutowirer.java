@@ -20,10 +20,7 @@ public class TestSpringImplementalAutowirer extends TestCase {
      */
     public void testNoApplicationContext() {
         try {
-            new SpringImplementalAutowirer().autowire(new Implemental() {
-                @Override
-                public void afterPropertiesSet() throws Exception {
-                }
+            new SpringImplementalAutowirer().autowire(() -> {
             });
             fail("throw AutowireException");
         } catch (Throwable ex) {
@@ -41,13 +38,12 @@ public class TestSpringImplementalAutowirer extends TestCase {
         context.registerPrototype("objectId", ObjectId.class);
         final SpringImplementalAutowirer autowirer = new SpringImplementalAutowirer();
         autowirer.setApplicationContext(context);
-        final AtomicReference<ObjectId> idRef = new AtomicReference<ObjectId>();
+        final AtomicReference<ObjectId> idRef = new AtomicReference<>();
         final Implemental implemental = new Implemental() {
             @Override
-            public void afterPropertiesSet() throws Exception {
+            public void afterPropertiesSet() {
             }
 
-            @SuppressWarnings("unused")
             public void setObjectId(ObjectId id) {
                 idRef.set(id);
             }
@@ -67,10 +63,9 @@ public class TestSpringImplementalAutowirer extends TestCase {
         autowirer.setApplicationContext(context);
         final Implemental implemental = new Implemental() {
             @Override
-            public void afterPropertiesSet() throws Exception {
+            public void afterPropertiesSet() {
             }
 
-            @SuppressWarnings("unused")
             public void setObjectId(ObjectId id) {
                 throw new UnsupportedOperationException("setObjectId");
             }

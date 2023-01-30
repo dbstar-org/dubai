@@ -12,12 +12,12 @@ public class SpringImplementalAutowirer implements ImplementalAutowirer, Applica
     private AutowireCapableBeanFactory factory;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         this.factory = applicationContext.getAutowireCapableBeanFactory();
     }
 
     @Override
-    public <I extends Implemental> void autowire(I implemental) throws AutowireException {
+    public <I extends Implemental> void autowire(final I implemental) throws AutowireException {
         if (factory != null) {
             try {
                 factory.autowireBeanProperties(implemental, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false);

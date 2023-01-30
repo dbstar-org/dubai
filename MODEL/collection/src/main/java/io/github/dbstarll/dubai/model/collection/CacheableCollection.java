@@ -1,7 +1,6 @@
 package io.github.dbstarll.dubai.model.collection;
 
 import io.github.dbstarll.dubai.model.cache.EntityCacheManager;
-import io.github.dbstarll.dubai.model.cache.EntityCacheManager.UpdateCacheHandler;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.notify.NotifyType;
@@ -35,12 +34,7 @@ public class CacheableCollection<E extends Entity> extends NotifiableCollection<
 
     @Override
     public E findOne(final Bson filter) {
-        final E val = entityCacheManager.find(getEntityClass(), filter.toString(), new UpdateCacheHandler<E>() {
-            @Override
-            public E updateCache(final String key) {
-                return collection.findOne(filter);
-            }
-        });
+        final E val = entityCacheManager.find(getEntityClass(), filter.toString(), key -> collection.findOne(filter));
 
         return EntityFactory.clone(val);
     }

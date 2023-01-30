@@ -6,5 +6,5 @@ import io.github.dbstarll.dubai.model.service.test.TestServices;
 
 @EntityService
 public interface TestContentableService
-        extends TestServices<TestContentableEntity>, ContentAttach<TestContentableEntity> {
+        extends TestServices<TestContentableEntity>, ContentAttach {
 }

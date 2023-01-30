@@ -24,14 +24,13 @@ public abstract class AbstractValidation<E extends Entity> implements Validation
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
+        } else if (obj == null) {
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        } else if (getClass() != obj.getClass()) {
             return false;
+        } else {
+            return entityClass == ((AbstractValidation<?>) obj).entityClass;
         }
-        return entityClass == ((AbstractValidation<?>) obj).entityClass;
     }
 
     @Override

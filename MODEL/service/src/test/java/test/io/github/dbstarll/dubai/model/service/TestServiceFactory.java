@@ -5,10 +5,20 @@ import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
-import io.github.dbstarll.dubai.model.service.*;
+import io.github.dbstarll.dubai.model.service.AutowireException;
+import io.github.dbstarll.dubai.model.service.Implemental;
+import io.github.dbstarll.dubai.model.service.ImplementalAutowirer;
+import io.github.dbstarll.dubai.model.service.ImplementalAutowirerAware;
+import io.github.dbstarll.dubai.model.service.ServiceFactory;
 import io.github.dbstarll.dubai.model.service.ServiceFactory.GeneralValidateable;
 import io.github.dbstarll.dubai.model.service.ServiceFactory.PositionValidation;
-import io.github.dbstarll.dubai.model.service.test.*;
+import io.github.dbstarll.dubai.model.service.test.AbstractClassService;
+import io.github.dbstarll.dubai.model.service.test.ClassService;
+import io.github.dbstarll.dubai.model.service.test.InterfaceService;
+import io.github.dbstarll.dubai.model.service.test.NoAnnotationClassService;
+import io.github.dbstarll.dubai.model.service.test.NoAnnotationInterfaceService;
+import io.github.dbstarll.dubai.model.service.test.PrivateClassService;
+import io.github.dbstarll.dubai.model.service.test.ThrowClassService;
 import io.github.dbstarll.dubai.model.service.test4.TestValidEntity;
 import io.github.dbstarll.dubai.model.service.test4.TestValidService;
 import mockit.Expectations;
@@ -18,11 +28,15 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestServiceFactory {
     @Mocked
@@ -128,12 +142,7 @@ public class TestServiceFactory {
     public void testGetServiceClassNoServiceFactory() {
         final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
                 new Class[]{InterfaceService.class, ImplementalAutowirerAware.class, GeneralValidateable.class},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
+                (proxy, method, args) -> null);
         assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
         assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
     }
@@ -222,7 +231,7 @@ public class TestServiceFactory {
 
         final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
 
-        assertEquals(true, service.contains(new ObjectId()));
+        assertTrue(service.contains(new ObjectId()));
 
         new Verifications() {
             {
@@ -396,33 +405,6 @@ public class TestServiceFactory {
         };
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSave() throws Exception {
-        final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
-
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-                collection.save(entity, (ObjectId) any);
-                result = entity;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertEquals(entity, service.save(entity));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 4;
-                collection.save(entity, (ObjectId) any);
-                times = 1;
-            }
-        };
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void testGeneralValidation() {
@@ -433,13 +415,13 @@ public class TestServiceFactory {
             }
         };
         final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertTrue(GeneralValidateable.class.isInstance(service));
+        assertTrue(service instanceof GeneralValidateable);
         final java.util.Collection<PositionValidation<InterfaceEntity>> validation = ((GeneralValidateable) service)
                 .generalValidations();
         assertNotNull(validation);
         final java.util.Collection<PositionValidation<InterfaceEntity>> validation2 = ((GeneralValidateable) service)
                 .generalValidations();
-        assertTrue(validation == validation2);
+        assertSame(validation, validation2);
         new Verifications() {
             {
                 collection.getEntityClass();

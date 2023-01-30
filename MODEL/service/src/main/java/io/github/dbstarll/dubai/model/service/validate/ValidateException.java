@@ -10,21 +10,37 @@ public class ValidateException extends RuntimeException {
 
     private final transient Validate validate;
 
-    public ValidateException(Validate validate) {
+    /**
+     * 构造ValidateException.
+     *
+     * @param validate Validate实例
+     */
+    public ValidateException(final Validate validate) {
         super(message(validate));
         this.validate = validate;
     }
 
-    public ValidateException(String message, Validate validate) {
+    /**
+     * 构造ValidateException.
+     *
+     * @param message  异常消息
+     * @param validate Validate实例
+     */
+    public ValidateException(final String message, final Validate validate) {
         super(message);
         this.validate = validate;
     }
 
+    /**
+     * 获得Validate实例.
+     *
+     * @return Validate实例
+     */
     public Validate getValidate() {
         return validate;
     }
 
-    private static String message(Validate validate) {
+    private static String message(final Validate validate) {
         final Set<String> messages = new TreeSet<>();
         if (validate != null) {
             if (validate.hasActionErrors()) {

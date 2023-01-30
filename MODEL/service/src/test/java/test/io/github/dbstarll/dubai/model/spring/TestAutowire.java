@@ -12,7 +12,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 
-import java.util.Arrays;
+import static org.junit.Assert.assertArrayEquals;
 
 public class TestAutowire extends TestCase {
     private ConfigurableApplicationContext context;
@@ -50,8 +50,8 @@ public class TestAutowire extends TestCase {
         context.refresh();
 
         assertEquals(5, context.getBeanDefinitionCount());
-        assertTrue(Arrays.equals(new String[]{"implementalAutowirer", "mongoDatabase", "collectionFactory",
-                "testEntityCollection", "testService"}, context.getBeanDefinitionNames()));
+        assertArrayEquals(new String[]{"implementalAutowirer", "mongoDatabase", "collectionFactory",
+                "testEntityCollection", "testService"}, context.getBeanDefinitionNames());
 
         assertNotNull(context.getBean(TestService.class));
     }

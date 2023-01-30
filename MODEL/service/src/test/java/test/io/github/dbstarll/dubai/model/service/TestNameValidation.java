@@ -17,8 +17,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestNameValidation {
     @Mocked
@@ -67,72 +72,28 @@ public class TestNameValidation {
     }
 
     @Test
-    public void testInsertSetNameNull() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称未设置"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
+    public void testInsertSetNameError() {
+        new HashMap<String, String>() {{
+            put(null, "名称未设置");
+            put("", "名称未设置");
+            put("\tname", "名称不能以空字符开头");
+            put("name\t", "名称不能以空字符结尾");
+            put("na\t\tme  jone", "名称不能包含连续的空字符");
+            put("n", "名称不能少于 2 字符");
+            put("01234567890123456789", "名称不能超过 16 字符");
+        }}.forEach((k, v) -> {
+            final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
+            entity.setName(k);
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(service.save(entity, validate));
+            assertTrue(validate.hasFieldErrors());
+            assertEquals(1, validate.getFieldErrors().size());
+            assertEquals(Collections.singletonList(v), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
+        });
     }
 
     @Test
-    public void testInsertSetNameEmptyStart() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        entity.setName("\tname");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称不能以空字符开头"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
-    }
-
-    @Test
-    public void testInsertSetNameEmptyEnd() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        entity.setName("name\t");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称不能以空字符结尾"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
-    }
-
-    @Test
-    public void testInsertSetNameEmptyCenter() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        entity.setName("na\t\tme  jone");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称不能包含连续的空字符"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
-    }
-
-    @Test
-    public void testInsertSetNameTooShort() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        entity.setName("n");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称不能少于 2 字符"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
-    }
-
-    @Test
-    public void testInsertSetNameTooLong() {
-        final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
-        entity.setName("01234567890123456789");
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("名称不能超过 16 字符"), validate.getFieldErrors().get(Namable.FIELD_NAME_NAME));
-    }
-
-    @Test
-    public void testUpdateSetName() throws CloneNotSupportedException {
+    public void testUpdateSetName() {
         final ObjectId id = new ObjectId();
         final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
         ((EntityModifier) entity).setId(id);
@@ -164,7 +125,7 @@ public class TestNameValidation {
     }
 
     @Test
-    public void testUpdateSetNameSame() throws CloneNotSupportedException {
+    public void testUpdateSetNameSame() {
         final ObjectId id = new ObjectId();
         final TestNamableEntity entity = EntityFactory.newInstance(TestNamableEntity.class);
         ((EntityModifier) entity).setId(id);

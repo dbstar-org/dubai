@@ -18,7 +18,12 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class TestServiceImplemental {
     @Mocked
@@ -179,21 +184,6 @@ public class TestServiceImplemental {
         };
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSave() {
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        assertNotNull(service.save(entity));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSaveWithId() {
-        final ObjectId newEntityId = new ObjectId();
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        assertNotNull(service.save(entity, newEntityId));
-    }
-
     @Test
     public void testSaveWithValidate() {
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
@@ -204,20 +194,10 @@ public class TestServiceImplemental {
 
     @Test
     public void testDelay() throws InterruptedException {
-        final AtomicReference<Object> lock1 = new AtomicReference<Object>();
-        final AtomicReference<Object> lock2 = new AtomicReference<Object>();
-        final Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                lock1.set(service.delay());
-            }
-        });
-        final Thread t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                lock2.set(service.delay());
-            }
-        });
+        final AtomicReference<Object> lock1 = new AtomicReference<>();
+        final AtomicReference<Object> lock2 = new AtomicReference<>();
+        final Thread t1 = new Thread(() -> lock1.set(service.delay()));
+        final Thread t2 = new Thread(() -> lock2.set(service.delay()));
         t1.start();
         t2.start();
         t1.join();

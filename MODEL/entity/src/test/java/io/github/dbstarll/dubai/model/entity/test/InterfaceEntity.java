@@ -27,9 +27,13 @@ public interface InterfaceEntity extends NoTableEntity, Defunctable {
 
     void setNoParam();
 
+    void setTwoParam(int v1, String v2);
+
     void giveInt(int value);
 
     void setType(Type type);
+
+    void setField(FieldNoSerializable field);
 
     Type getType();
 }

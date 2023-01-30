@@ -7,7 +7,12 @@ import org.bson.codecs.pojo.InstanceCreatorFactory;
 public class EntityInstanceCreatorFactory<E extends Entity> implements InstanceCreatorFactory<E> {
     private final Class<E> entityClass;
 
-    public EntityInstanceCreatorFactory(Class<E> pojoInterface) {
+    /**
+     * 构造一个EntityInstanceCreator的工厂类.
+     *
+     * @param pojoInterface 实体类接口
+     */
+    public EntityInstanceCreatorFactory(final Class<E> pojoInterface) {
         this.entityClass = pojoInterface;
     }
 

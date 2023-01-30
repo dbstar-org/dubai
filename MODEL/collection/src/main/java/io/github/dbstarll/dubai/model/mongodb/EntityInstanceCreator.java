@@ -8,12 +8,12 @@ import org.bson.codecs.pojo.PropertyModel;
 class EntityInstanceCreator<E extends Entity> implements InstanceCreator<E> {
     private final E entity;
 
-    EntityInstanceCreator(Class<E> entityClass) {
+    EntityInstanceCreator(final Class<E> entityClass) {
         this.entity = EntityFactory.newInstance(entityClass);
     }
 
     @Override
-    public <S> void set(S value, PropertyModel<S> propertyModel) {
+    public <S> void set(final S value, final PropertyModel<S> propertyModel) {
         propertyModel.getPropertyAccessor().set(entity, value);
     }
 

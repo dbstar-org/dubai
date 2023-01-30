@@ -1,12 +1,27 @@
 package test.io.github.dbstarll.dubai.model.collection;
 
-import com.mongodb.client.*;
-import com.mongodb.client.model.*;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.DistinctIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.CollectionWrapper;
+import io.github.dbstarll.dubai.model.collection.test.Delay;
+import io.github.dbstarll.dubai.model.collection.test.MockMongoCursor;
 import io.github.dbstarll.dubai.model.collection.test.SimpleNotifiableEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.info.Namable;
@@ -21,16 +36,19 @@ import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestSimpleNotifiableCollection {
     @Injectable
@@ -54,9 +72,6 @@ public class TestSimpleNotifiableCollection {
     @Mocked
     AggregateIterable<SimpleNotifiableEntity> aggregateIterable;
 
-    @Mocked
-    MapReduceIterable<SimpleNotifiableEntity> mapReduceIterable;
-
     private final Class<SimpleNotifiableEntity> entityClass = SimpleNotifiableEntity.class;
 
     private Collection<SimpleNotifiableEntity> collection;
@@ -67,7 +82,7 @@ public class TestSimpleNotifiableCollection {
      * 初始化collection.
      */
     @Before
-    public void initialize() throws NoSuchAlgorithmException {
+    public void initialize() {
         final CollectionFactory collectionFactory = new CollectionFactory(mongoDatabase);
         this.collection = collectionFactory.newInstance(entityClass);
         this.mongoClientFactory = new MongoClientFactory();
@@ -156,11 +171,11 @@ public class TestSimpleNotifiableCollection {
 
         final ObjectId id = new ObjectId();
         final SimpleNotifiableEntity savedEntity = collection.save(entity, id);
-        assertTrue(entity == savedEntity);
+        assertSame(entity, savedEntity);
         assertNotNull(savedEntity.getId());
         assertNotNull(savedEntity.getDateCreated());
         assertNotNull(savedEntity.getLastModified());
-        assertTrue(id == savedEntity.getId());
+        assertSame(id, savedEntity.getId());
         assertEquals(savedEntity.getDateCreated(), id.getDate());
 
         new Verifications() {
@@ -186,7 +201,7 @@ public class TestSimpleNotifiableCollection {
         assertNull(entity.getLastModified());
 
         final SimpleNotifiableEntity savedEntity = collection.save(entity);
-        assertTrue(entity == savedEntity);
+        assertSame(entity, savedEntity);
         assertNotNull(savedEntity.getId());
         assertNotNull(savedEntity.getDateCreated());
         assertNotNull(savedEntity.getLastModified());
@@ -194,12 +209,14 @@ public class TestSimpleNotifiableCollection {
         final ObjectId id = entity.getId();
         final Date dateCreated = entity.getDateCreated();
         final Date lastModified = entity.getLastModified();
-        Thread.sleep(10);
+
+        Delay.delay();
+
         final SimpleNotifiableEntity savedAgainEntity = collection.save(savedEntity);
-        assertTrue(entity == savedAgainEntity);
-        assertTrue(id == savedAgainEntity.getId());
-        assertTrue(dateCreated == savedAgainEntity.getDateCreated());
-        assertTrue(savedAgainEntity.getLastModified().compareTo(lastModified) == 1);
+        assertSame(entity, savedAgainEntity);
+        assertSame(id, savedAgainEntity.getId());
+        assertSame(dateCreated, savedAgainEntity.getDateCreated());
+        assertEquals(1, savedAgainEntity.getLastModified().compareTo(lastModified));
 
         new Verifications() {
             {
@@ -221,15 +238,10 @@ public class TestSimpleNotifiableCollection {
     @Test
     public void testSaveNoEntityModifier() {
         final SimpleNotifiableEntity entity = (SimpleNotifiableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
-                new Class[]{entityClass}, new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
-
+                new Class[]{entityClass}, (proxy, method, args) -> null);
+        final ObjectId id = new ObjectId();
         try {
-            collection.save(entity, new ObjectId());
+            collection.save(entity, id);
             fail("throw IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             assertTrue(ex.getMessage().startsWith("UnModify entity: "));
@@ -249,7 +261,7 @@ public class TestSimpleNotifiableCollection {
         };
 
         assertNull(collection.deleteById(null));
-        assertTrue(entity == collection.deleteById(new ObjectId()));
+        assertSame(entity, collection.deleteById(new ObjectId()));
 
         new Verifications() {
             {
@@ -274,7 +286,7 @@ public class TestSimpleNotifiableCollection {
         };
 
         assertNull(collection.findById(null));
-        assertTrue(entity == collection.findById(new ObjectId()));
+        assertSame(entity, collection.findById(new ObjectId()));
 
         new Verifications() {
             {
@@ -302,7 +314,7 @@ public class TestSimpleNotifiableCollection {
             }
         };
 
-        assertTrue(entity == collection.findOne());
+        assertSame(entity, collection.findOne());
 
         new Verifications() {
             {
@@ -327,7 +339,7 @@ public class TestSimpleNotifiableCollection {
             }
         };
 
-        assertTrue(findIterable == collection.findByIds(Collections.singleton(new ObjectId())));
+        assertSame(findIterable, collection.findByIds(Collections.singleton(new ObjectId())));
 
         new Verifications() {
             {
@@ -348,8 +360,8 @@ public class TestSimpleNotifiableCollection {
             }
         };
 
-        assertTrue(findIterable == collection.find());
-        assertTrue(findIterable == collection.find(entityClass));
+        assertSame(findIterable, collection.find());
+        assertSame(findIterable, collection.find(entityClass));
 
         new Verifications() {
             {
@@ -427,6 +439,8 @@ public class TestSimpleNotifiableCollection {
             {
                 mongoCollection.getCodecRegistry();
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                findIterable.iterator();
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
                 deleteResult.getDeletedCount();
                 result = 10;
             }
@@ -499,6 +513,8 @@ public class TestSimpleNotifiableCollection {
             {
                 mongoCollection.getCodecRegistry();
                 result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                findIterable.iterator();
+                result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
             }
         };
 
@@ -596,18 +612,6 @@ public class TestSimpleNotifiableCollection {
         new Verifications() {
             {
                 mongoCollection.aggregate((List<Bson>) any, (Class<?>) any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void testMapReduce() {
-        assertSame(mapReduceIterable, collection.mapReduce("mapFunction", "reduceFunction"));
-
-        new Verifications() {
-            {
-                mongoCollection.mapReduce(anyString, anyString, (Class<?>) any);
                 times = 1;
             }
         };

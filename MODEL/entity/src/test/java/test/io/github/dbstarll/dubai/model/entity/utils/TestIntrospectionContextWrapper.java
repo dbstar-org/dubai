@@ -2,21 +2,23 @@ package test.io.github.dbstarll.dubai.model.entity.utils;
 
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.utils.IntrospectionContextWrapper;
-import junit.framework.TestCase;
 import org.apache.commons.beanutils.IntrospectionContext;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.beans.PropertyDescriptor;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TestIntrospectionContextWrapper extends TestCase {
+public class TestIntrospectionContextWrapper {
     private AtomicReference<String> result = new AtomicReference<>();
     private IntrospectionContext context;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() {
         context = new IntrospectionContextWrapper(new IntrospectionContext() {
             @Override
             public void removePropertyDescriptor(String name) {
@@ -59,8 +61,8 @@ public class TestIntrospectionContextWrapper extends TestCase {
         }, InterfaceEntity.class);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         this.context = null;
         this.result = null;
     }
@@ -69,44 +71,44 @@ public class TestIntrospectionContextWrapper extends TestCase {
     public void testRemovePropertyDescriptor() {
         final String random = RandomStringUtils.random(10);
         context.removePropertyDescriptor(random);
-        assertEquals("removePropertyDescriptor: " + random, result.get());
+        Assert.assertEquals("removePropertyDescriptor: " + random, result.get());
     }
 
     @Test
     public void testPropertyNames() {
         context.propertyNames();
-        assertEquals("propertyNames", result.get());
+        Assert.assertEquals("propertyNames", result.get());
     }
 
     @Test
     public void testHasProperty() {
         final String random = RandomStringUtils.random(10);
         context.hasProperty(random);
-        assertEquals("hasProperty: " + random, result.get());
+        Assert.assertEquals("hasProperty: " + random, result.get());
     }
 
     @Test
     public void testGetTargetClass() {
-        assertEquals(InterfaceEntity.class, context.getTargetClass());
-        assertNull(result.get());
+        Assert.assertEquals(InterfaceEntity.class, context.getTargetClass());
+        Assert.assertNull(result.get());
     }
 
     @Test
     public void testGetPropertyDescriptor() {
         final String random = RandomStringUtils.random(10);
         context.getPropertyDescriptor(random);
-        assertEquals("getPropertyDescriptor: " + random, result.get());
+        Assert.assertEquals("getPropertyDescriptor: " + random, result.get());
     }
 
     @Test
     public void testAddPropertyDescriptors() {
         context.addPropertyDescriptors(null);
-        assertEquals("addPropertyDescriptors", result.get());
+        Assert.assertEquals("addPropertyDescriptors", result.get());
     }
 
     @Test
     public void testAddPropertyDescriptor() {
         context.addPropertyDescriptor(null);
-        assertEquals("addPropertyDescriptor", result.get());
+        Assert.assertEquals("addPropertyDescriptor", result.get());
     }
 }

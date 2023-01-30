@@ -3,11 +3,15 @@ package test.io.github.dbstarll.dubai.model.notify;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.join.CompanyBase;
-import io.github.dbstarll.dubai.model.notify.*;
+import io.github.dbstarll.dubai.model.notify.EntityNotifyConsumer;
+import io.github.dbstarll.dubai.model.notify.EntityNotifyListener;
+import io.github.dbstarll.dubai.model.notify.NotifyConsumer;
+import io.github.dbstarll.dubai.model.notify.NotifyListener;
+import io.github.dbstarll.dubai.model.notify.NotifyParser;
+import io.github.dbstarll.dubai.model.notify.NotifyType;
 import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,32 +19,29 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TestEntityNotifyConsumer extends TestCase {
     /**
      * 测试缺省的NotifyConsumer.
-     *
-     * @throws IOException IOException
      */
-    public void testDefaultNotifyConsumer() throws IOException {
+    public void testDefaultNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
         consumer.start();
         consumer.close();
     }
 
     /**
      * 测试自定义的NotifyConsumer.
-     *
-     * @throws IOException IOException
      */
-    public void testNotifyConsumer() throws IOException {
+    public void testNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         final AtomicBoolean regist = new AtomicBoolean(false);
         final AtomicBoolean unRegist = new AtomicBoolean(false);
         consumer.setNotifyConsumer(new NotifyConsumer() {
             @Override
-            public void unRegist(NotifyListener listener) {
+            public void unRegister(NotifyListener listener) {
                 unRegist.set(true);
             }
 
             @Override
-            public void regist(NotifyListener listener) {
+            public void register(NotifyListener listener) {
                 regist.set(true);
             }
         });
@@ -58,11 +59,10 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试onNotify方法.
-     *
-     * @throws IOException IOException
      */
-    public void testOnNotify() throws IOException {
+    public void testOnNotify() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
         consumer.onNotify(SimpleEntity.class.getName(), "value1", new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {
@@ -93,7 +93,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
             @Override
             public NotifyType getNotifyType() {
-                return NotifyType.insert;
+                return NotifyType.INSERT;
             }
         });
         consumer.onNotify(SimpleEntity.class.getName(), "value4", new NotifyParser() {
@@ -104,7 +104,7 @@ public class TestEntityNotifyConsumer extends TestCase {
 
             @Override
             public NotifyType getNotifyType() {
-                return NotifyType.insert;
+                return NotifyType.INSERT;
             }
         });
         consumer.close();
@@ -112,10 +112,8 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试设置listener.
-     *
-     * @throws IOException IOException
      */
-    public void testListener() throws IOException {
+    public void testListener() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
 
         final AtomicInteger calls = new AtomicInteger(0);
@@ -134,11 +132,11 @@ public class TestEntityNotifyConsumer extends TestCase {
                 companyIdValue.set(companyId);
             }
         };
-        consumer.regist(listener);
+        consumer.register(listener);
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
-        final NotifyType type = NotifyType.insert;
+        final NotifyType type = NotifyType.INSERT;
         final NotifyParser notifyParser = new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {
@@ -159,7 +157,7 @@ public class TestEntityNotifyConsumer extends TestCase {
         consumer.onNotify(SimpleEntity.class.getName(), "value4", notifyParser);
         consumer.onNotify(String.class.getName(), "value", notifyParser);
         consumer.onNotify("io.github.dbstarll.dubai.notify.UnknownClass", "value", notifyParser);
-        consumer.unRegist(listener);
+        consumer.unRegister(listener);
         consumer.close();
 
         assertEquals(1, calls.get());
@@ -171,11 +169,10 @@ public class TestEntityNotifyConsumer extends TestCase {
 
     /**
      * 测试设置listener抛出异常.
-     *
-     * @throws IOException IOException
      */
-    public void testListenerException() throws IOException {
+    public void testListenerException() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
+        assertNotNull(consumer);
 
         final EntityNotifyListener listener = new EntityNotifyListener() {
             @Override
@@ -184,11 +181,11 @@ public class TestEntityNotifyConsumer extends TestCase {
                 throw new RuntimeException("test");
             }
         };
-        consumer.regist(listener);
+        consumer.register(listener);
 
         final ObjectId id = new ObjectId();
         final ObjectId companyId = new ObjectId();
-        final NotifyType type = NotifyType.insert;
+        final NotifyType type = NotifyType.INSERT;
         final NotifyParser notifyParser = new NotifyParser() {
             @Override
             public ObjectId getObjectId(String key) {
@@ -207,7 +204,7 @@ public class TestEntityNotifyConsumer extends TestCase {
             }
         };
         consumer.onNotify(SimpleEntity.class.getName(), "value4", notifyParser);
-        consumer.unRegist(listener);
+        consumer.unRegister(listener);
         consumer.close();
     }
 }

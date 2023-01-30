@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestDefunctAttach {
     @Mocked
@@ -51,7 +53,7 @@ public class TestDefunctAttach {
             }
         };
 
-        assertEquals(true, service.contains(new ObjectId(), null));
+        assertTrue(service.contains(new ObjectId(), null));
 
         new Verifications() {
             {
@@ -74,7 +76,7 @@ public class TestDefunctAttach {
             }
         };
 
-        assertEquals(true, service.contains(new ObjectId(), true));
+        assertTrue(service.contains(new ObjectId(), true));
 
         new Verifications() {
             {
@@ -97,7 +99,7 @@ public class TestDefunctAttach {
             }
         };
 
-        assertEquals(false, service.contains(new ObjectId(), true));
+        assertFalse(service.contains(new ObjectId(), true));
 
         new Verifications() {
             {
@@ -120,7 +122,7 @@ public class TestDefunctAttach {
             }
         };
 
-        assertEquals(true, service.contains(new ObjectId(), false));
+        assertTrue(service.contains(new ObjectId(), false));
 
         new Verifications() {
             {

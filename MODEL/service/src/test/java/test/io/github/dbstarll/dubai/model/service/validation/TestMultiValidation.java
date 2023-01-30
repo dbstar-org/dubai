@@ -86,9 +86,9 @@ public class TestMultiValidation extends TestCase {
      */
     public void testEquals() {
         final MultiValidation<InterfaceEntity> mv1 = new MultiValidation<>(InterfaceEntity.class);
-        assertFalse(mv1.equals(null));
-        assertFalse(mv1.equals(new Object()));
-        assertTrue(mv1.equals(mv1));
+        assertNotEquals(mv1, null);
+        assertNotEquals(mv1, new Object());
+        assertEquals(mv1, mv1);
     }
 
     /**

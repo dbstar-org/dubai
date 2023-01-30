@@ -17,7 +17,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 public class TestSourceValidation {
     @Mocked
@@ -81,7 +83,7 @@ public class TestSourceValidation {
     @Test
     public void testInsertWithEmptyValue() {
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        entity.setSources(Collections.singletonMap("key", (ObjectId) null));
+        entity.setSources(Collections.singletonMap("key", null));
         final DefaultValidate validate = new DefaultValidate();
         assertNull(service.save(entity, validate));
         assertEquals(Collections.singletonList("来源不能包含空的key或者value"),

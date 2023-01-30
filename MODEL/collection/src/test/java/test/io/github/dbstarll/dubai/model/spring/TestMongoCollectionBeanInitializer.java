@@ -15,7 +15,9 @@ import org.springframework.beans.factory.support.BeanDefinitionValidationExcepti
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestMongoCollectionBeanInitializer {
     private static final String COLLECTION_FACTORY_BEAN_NAME = "collectionFactory";
@@ -41,7 +43,11 @@ public class TestMongoCollectionBeanInitializer {
 
     @Test
     public void testPostProcessBeanFactory() {
-        initializer.postProcessBeanFactory(configurableListableBeanFactory);
+        try {
+            initializer.postProcessBeanFactory(configurableListableBeanFactory);
+        } catch (Exception ex) {
+            fail("catch Exception");
+        }
     }
 
     @Test

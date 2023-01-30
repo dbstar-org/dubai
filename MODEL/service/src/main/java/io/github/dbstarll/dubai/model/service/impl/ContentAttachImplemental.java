@@ -12,8 +12,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class ContentAttachImplemental<E extends Entity & Contentable, S extends Service<E>>
-        extends CoreImplementals<E, S> implements ContentAttach<E> {
-    public ContentAttachImplemental(S service, Collection<E> collection) {
+        extends CoreImplementals<E, S> implements ContentAttach {
+    /**
+     * 构建ContentAttachImplemental.
+     *
+     * @param service    service
+     * @param collection collection
+     */
+    public ContentAttachImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
     }
 
@@ -26,26 +32,34 @@ public final class ContentAttachImplemental<E extends Entity & Contentable, S ex
     public Validation<E> contentValidation() {
         return new AbstractBaseEntityValidation<Contentable>(Contentable.class) {
             @Override
-            protected void validate(Contentable entity, Contentable original, Validate validate) {
+            protected void validate(final Contentable entity, final Contentable original, final Validate validate) {
                 if (ArrayUtils.isEmpty(entity.getContent())) {
                     validate.addFieldError(Contentable.FIELD_NAME_CONTENT, "内容未设置");
                 }
-                final String contentType = entity.getContentType();
+                validateContentType(entity.getContentType(), original, validate);
+            }
+
+            private void validateContentType(final String contentType, final Contentable original,
+                                             final Validate validate) {
                 if (original == null || !StringUtils.equals(contentType, original.getContentType())) {
                     if (StringUtils.isBlank(contentType)) {
                         validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "内容类型未设置");
                     } else {
-                        final int index = contentType.indexOf('/');
-                        if (index < 0) {
-                            validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "不符合格式：主类型/子类型");
-                        } else if (index == 0) {
-                            validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "缺少主类型");
-                        } else if (index == contentType.length() - 1) {
-                            validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "缺少子类型");
-                        } else if (contentType.indexOf('/', index + 1) > 0) {
-                            validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "只能有一个子类型");
-                        }
+                        validateFormat(contentType, validate);
                     }
+                }
+            }
+
+            private void validateFormat(final String contentType, final Validate validate) {
+                final int index = contentType.indexOf('/');
+                if (index < 0) {
+                    validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "不符合格式：主类型/子类型");
+                } else if (index == 0) {
+                    validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "缺少主类型");
+                } else if (index == contentType.length() - 1) {
+                    validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "缺少子类型");
+                } else if (contentType.indexOf('/', index + 1) > 0) {
+                    validate.addFieldError(Contentable.FIELD_NAME_CONTENT_TYPE, "只能有一个子类型");
                 }
             }
         };

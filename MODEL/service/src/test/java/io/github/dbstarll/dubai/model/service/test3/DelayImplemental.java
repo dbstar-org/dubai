@@ -6,9 +6,8 @@ import io.github.dbstarll.dubai.model.service.test.TestImplementals;
 public final class DelayImplemental extends TestImplementals<TestEntity, TestService> implements DelayAttach {
     private final Object lock = new Object();
 
-    public DelayImplemental(TestService service, Collection<TestEntity> collection) throws InterruptedException {
+    public DelayImplemental(TestService service, Collection<TestEntity> collection) {
         super(service, collection);
-        Thread.sleep(100);
     }
 
     @Override

@@ -23,7 +23,7 @@ public class TestSourceAttach {
     @Mocked
     Collection<TestEntity> collection;
 
-    SourceAttach<TestEntity> service;
+    SourceAttach service;
 
     /**
      * 测试初始化.
@@ -92,7 +92,7 @@ public class TestSourceAttach {
     @Test
     public void testUpdateSourceNull() {
         try {
-            service.updateSource(new ObjectId(), Collections.singletonMap("source", (ObjectId) null));
+            service.updateSource(new ObjectId(), Collections.singletonMap("source", null));
         } catch (Throwable ex) {
             assertEquals(IllegalArgumentException.class, ex.getClass());
             assertEquals("来源不能包含空的key或者value", ex.getMessage());
@@ -125,7 +125,7 @@ public class TestSourceAttach {
     @Test
     public void testRemoveSourceNull() {
         try {
-            service.removeSource(new ObjectId(), Collections.singletonMap("source", (ObjectId) null));
+            service.removeSource(new ObjectId(), Collections.singletonMap("source", null));
         } catch (Throwable ex) {
             assertEquals(IllegalArgumentException.class, ex.getClass());
             assertEquals("来源不能包含空的key或者value", ex.getMessage());

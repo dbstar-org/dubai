@@ -21,7 +21,7 @@ public final class ServiceImplemental<E extends Entity, S extends Service<E>> ex
      * @param service    service
      * @param collection collection
      */
-    public ServiceImplemental(S service, Collection<E> collection) {
+    public ServiceImplemental(final S service, final Collection<E> collection) {
         super(service, collection);
         this.serviceSaver = service instanceof ServiceSaver;
         this.serviceDeleter = service instanceof ServiceDeleter;
@@ -33,37 +33,37 @@ public final class ServiceImplemental<E extends Entity, S extends Service<E>> ex
     }
 
     @Override
-    public long count(Bson filter) {
+    public long count(final Bson filter) {
         return getCollection().count(filter);
     }
 
     @Override
-    public boolean contains(ObjectId id) {
+    public boolean contains(final ObjectId id) {
         return getCollection().contains(id);
     }
 
     @Override
-    public FindIterable<E> find(Bson filter) {
+    public FindIterable<E> find(final Bson filter) {
         return getCollection().find(filter);
     }
 
     @Override
-    public E findOne(Bson filter) {
+    public E findOne(final Bson filter) {
         return getCollection().findOne(filter);
     }
 
     @Override
-    public E findById(ObjectId id) {
+    public E findById(final ObjectId id) {
         return getCollection().findById(id);
     }
 
     @Override
-    public E deleteById(ObjectId id) {
+    public E deleteById(final ObjectId id) {
         return deleteById(id, null);
     }
 
     @SuppressWarnings("unchecked")
-    private E deleteById(ObjectId id, Validate validate) {
+    private E deleteById(final ObjectId id, final Validate validate) {
         if (serviceDeleter) {
             return ((ServiceDeleter<E>) service).deleteById(id, validate);
         } else {
@@ -72,22 +72,12 @@ public final class ServiceImplemental<E extends Entity, S extends Service<E>> ex
     }
 
     @Override
-    public E save(E entity) {
-        return save(entity, null, null);
-    }
-
-    @Override
-    public E save(E entity, ObjectId newEntityId) {
-        return save(entity, newEntityId, null);
-    }
-
-    @Override
-    public E save(E entity, Validate validate) {
+    public E save(final E entity, final Validate validate) {
         return save(entity, null, validate);
     }
 
     @SuppressWarnings("unchecked")
-    private E save(E entity, ObjectId newEntityId, Validate validate) {
+    private E save(final E entity, final ObjectId newEntityId, final Validate validate) {
         if (serviceSaver) {
             return ((ServiceSaver<E>) service).save(entity, newEntityId, validate);
         } else {

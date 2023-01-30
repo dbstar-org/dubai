@@ -23,15 +23,15 @@ public class CollectionAutoConfiguration {
     @ConditionalOnMissingBean(MongoCollectionBeanInitializer.class)
     static BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {
         MongoCollectionBeanInitializer initializer = new MongoCollectionBeanInitializer();
-        initializer
-                .setBasePackageClasses(loadBasePackages(Entity.class, CollectionAutoConfiguration.class.getClassLoader()));
+        initializer.setBasePackageClasses(
+                loadBasePackages(Entity.class, CollectionAutoConfiguration.class.getClassLoader()));
         initializer.setMongoDatabaseBeanName("mongoDatabase");
         return initializer;
     }
 
     @Bean
     @ConditionalOnMissingBean(CollectionNameGenerator.class)
-    CollectionNameGenerator collectionNameGenerator() {
+    static CollectionNameGenerator collectionNameGenerator() {
         return new AnnotationCollectionNameGenerator();
     }
 
@@ -42,7 +42,7 @@ public class CollectionAutoConfiguration {
      * @param classLoader classLoader
      * @return BasePackage列表
      */
-    public static Class<?>[] loadBasePackages(Class<?> baseClass, ClassLoader classLoader) {
+    public static Class<?>[] loadBasePackages(final Class<?> baseClass, final ClassLoader classLoader) {
         final List<Class<?>> packages = new ArrayList<>();
         for (String packageClassName : SpringFactoriesLoader.loadFactoryNames(baseClass, classLoader)) {
             final Class<?> packageClass;
@@ -59,6 +59,6 @@ public class CollectionAutoConfiguration {
                 packages.add(packageClass);
             }
         }
-        return packages.toArray(new Class<?>[packages.size()]);
+        return packages.toArray(new Class<?>[0]);
     }
 }

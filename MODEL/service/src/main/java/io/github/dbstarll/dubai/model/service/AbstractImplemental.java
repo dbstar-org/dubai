@@ -19,12 +19,16 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Posit
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.commons.lang3.Validate.*;
+import static org.apache.commons.lang3.Validate.isAssignableFrom;
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.noNullElements;
+import static org.apache.commons.lang3.Validate.notNull;
 
 public abstract class AbstractImplemental<E extends Entity, S extends Service<E>> implements Implemental {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractImplemental.class);
@@ -43,14 +47,14 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
      * @param service    service
      * @param collection collection
      */
-    public AbstractImplemental(final S service, final Collection<E> collection) {
+    protected AbstractImplemental(final S service, final Collection<E> collection) {
         this.service = notNull(service, "service is null");
         this.collection = notNull(collection, "collection is null");
         this.entityClass = collection.getEntityClass();
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         // do nothing
     }
 
@@ -81,7 +85,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 LOGGER.debug("validateAndDelete with ActionErrors: {}, FieldErrors: {}", v.hasActionErrors(),
                         v.hasFieldErrors());
             }
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             v.addActionError(ex.getMessage());
             LOGGER.error("validateAndDelete failed!", ex);
         }
@@ -120,7 +124,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             if (!v.hasErrors()) {
                 LOGGER.debug("validateAndSave with change: {}", save);
                 if (save) {
-                    final NotifyType notifyType = entity.getId() == null ? NotifyType.insert : NotifyType.update;
+                    final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
                     final E saved = collection.save(entity, newEntityId);
                     onEntitySaved(saved, validate, notifyType);
                     return saved;
@@ -132,7 +136,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                         v.hasActionErrors(),
                         v.hasFieldErrors());
             }
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             v.addActionError(ex.getMessage());
             LOGGER.error("validateAndSave failed!", ex);
         }
@@ -189,10 +193,6 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         }
     }
 
-    @Deprecated
-    protected void onEntitySaved(final E entity, final Validate validate) {
-    }
-
     protected void onEntitySaved(final E entity, final Validate validate, final NotifyType notifyType) {
     }
 
@@ -233,14 +233,14 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected abstract class AbstractEntityValidation extends AbstractValidation<E> {
-        public AbstractEntityValidation() {
+        protected AbstractEntityValidation() {
             super(AbstractImplemental.this.entityClass);
         }
     }
 
     protected abstract class AbstractBaseEntityValidation<B extends Base>
             extends AbstractEntityValidation {
-        public AbstractBaseEntityValidation(final Class<B> baseClass) {
+        protected AbstractBaseEntityValidation(final Class<B> baseClass) {
             isAssignableFrom(baseClass, entityClass);
         }
 
@@ -271,29 +271,55 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 if (StringUtils.isBlank(name)) {
                     validate.addFieldError(Namable.FIELD_NAME_NAME, "名称未设置");
                 } else {
-                    boolean lastWhitespace = false;
-                    for (int i = 0, size = name.length(); i < size; i++) {
-                        if (Character.isWhitespace(name.charAt(i))) {
-                            if (i == 0) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符开头");
-                            } else if (i == size - 1) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符结尾");
-                            } else if (lastWhitespace) {
-                                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能包含连续的空字符");
-                            } else {
-                                lastWhitespace = true;
-                            }
-                        } else {
-                            lastWhitespace = false;
-                        }
-                    }
-                    if (minLength >= 0 && name.length() < minLength) {
-                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能少于 " + minLength + " 字符");
-                    } else if (maxLength >= 0 && name.length() > maxLength) {
-                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能超过 " + maxLength + " 字符");
-                    }
+                    checkWhitespace(name, validate);
+                    checkLength(name, validate);
                 }
             }
+        }
+
+        private void checkWhitespace(final String name, final Validate validate) {
+            boolean lastWhitespace = false;
+            for (int i = 0, size = name.length(); i < size; i++) {
+                if (Character.isWhitespace(name.charAt(i))) {
+                    if (i == 0) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符开头");
+                    } else if (i == size - 1) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能以空字符结尾");
+                    } else if (lastWhitespace) {
+                        validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能包含连续的空字符");
+                    } else {
+                        lastWhitespace = true;
+                    }
+                } else {
+                    lastWhitespace = false;
+                }
+            }
+        }
+
+        private void checkLength(final String name, final Validate validate) {
+            if (minLength >= 0 && name.length() < minLength) {
+                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能少于 " + minLength + " 字符");
+            } else if (maxLength >= 0 && name.length() > maxLength) {
+                validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能超过 " + maxLength + " 字符");
+            }
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (!super.equals(o)) {
+                return false;
+            }
+            final NameValidation that = (NameValidation) o;
+            return this.minLength == that.minLength && this.maxLength == that.maxLength;
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(minLength)
+                    .append(maxLength)
+                    .toHashCode();
         }
     }
 
@@ -315,6 +341,23 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                     validate.addFieldError(Describable.FIELD_NAME_DESCRIPTION, "备注不能超过 " + maxLength + " 字符");
                 }
             }
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (!super.equals(o)) {
+                return false;
+            }
+            final DescriptionValidation that = (DescriptionValidation) o;
+            return this.maxLength == that.maxLength;
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(maxLength)
+                    .toHashCode();
         }
     }
 }

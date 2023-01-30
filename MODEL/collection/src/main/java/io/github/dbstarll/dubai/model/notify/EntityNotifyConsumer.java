@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,21 +20,29 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
     private final List<EntityNotifyListener> listeners = new LinkedList<>();
     private final ConcurrentMap<String, Class<? extends Entity>> entityClasses = new ConcurrentHashMap<>();
 
-    public void setNotifyConsumer(NotifyConsumer notifyConsumer) {
+    /**
+     * 设置通知消费者.
+     *
+     * @param notifyConsumer 通知消费者
+     */
+    public void setNotifyConsumer(final NotifyConsumer notifyConsumer) {
         this.notifyConsumer = notifyConsumer;
     }
 
+    /**
+     * 启动.
+     */
     public void start() {
-        notifyConsumer.regist(this);
+        notifyConsumer.register(this);
     }
 
     @Override
-    public void close() throws IOException {
-        notifyConsumer.unRegist(this);
+    public void close() {
+        notifyConsumer.unRegister(this);
     }
 
     @Override
-    public void onNotify(String key, String value, NotifyParser parser) {
+    public void onNotify(final String key, final String value, final NotifyParser parser) {
         final Class<? extends Entity> entityClass = getEntityClass(key);
         if (NullEntity.class != entityClass) {
             final ObjectId id = parser.getObjectId(Entity.FIELD_NAME_ID);
@@ -47,14 +54,14 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
         }
     }
 
-    private void onNotify(Class<? extends Entity> entityClass, ObjectId id, NotifyType notifyType, ObjectId companyId,
-                          String clientId) {
+    private void onNotify(final Class<? extends Entity> entityClass, final ObjectId id, final NotifyType notifyType,
+                          final ObjectId companyId, final String clientId) {
         LOGGER.debug("{} - {}@{}, companyId: {}", notifyType, entityClass.getName(), id, companyId);
         synchronized (listeners) {
             for (EntityNotifyListener listener : listeners) {
                 try {
                     listener.onNotify(entityClass, id, notifyType, companyId, clientId);
-                } catch (Throwable ex) {
+                } catch (Exception ex) {
                     LOGGER.error("entity notify failed: " + listener, ex);
                 }
             }
@@ -66,9 +73,9 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
      *
      * @param listener 注册的监听器
      */
-    public void regist(EntityNotifyListener listener) {
+    public void register(final EntityNotifyListener listener) {
         synchronized (listeners) {
-            LOGGER.info("regist: {}: {}", listener, listeners.add(listener));
+            LOGGER.info("register: {}: {}", listener, listeners.add(listener));
         }
     }
 
@@ -77,14 +84,14 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
      *
      * @param listener 注销的监听器
      */
-    public void unRegist(EntityNotifyListener listener) {
+    public void unRegister(final EntityNotifyListener listener) {
         synchronized (listeners) {
-            LOGGER.info("unRegist: {}: {}", listener, listeners.remove(listener));
+            LOGGER.info("unRegister: {}: {}", listener, listeners.remove(listener));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Class<? extends Entity> getEntityClass(String className) {
+    private Class<? extends Entity> getEntityClass(final String className) {
         if (!entityClasses.containsKey(className)) {
             try {
                 final Class<?> entityClass = getClass().getClassLoader().loadClass(className);
@@ -108,11 +115,13 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
 
     private static class DefaultNotifyConsumer implements NotifyConsumer {
         @Override
-        public void regist(NotifyListener listener) {
+        public void register(final NotifyListener listener) {
+            // do nothing
         }
 
         @Override
-        public void unRegist(NotifyListener listener) {
+        public void unRegister(final NotifyListener listener) {
+            // do nothing
         }
     }
 }

@@ -13,6 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @AutoConfigureAfter(CollectionAutoConfiguration.class)
 public class ServiceAutoConfiguration {
+    private ServiceAutoConfiguration() {
+        // 工具类禁止实例化
+    }
+
     @Bean
     @ConditionalOnMissingBean(ServiceBeanInitializer.class)
     static BeanDefinitionRegistryPostProcessor serviceBeanInitializer() {
@@ -25,7 +29,7 @@ public class ServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ImplementalAutowirer.class)
-    ImplementalAutowirer implementalAutowirer() {
+    static ImplementalAutowirer implementalAutowirer() {
         return new SpringImplementalAutowirer();
     }
 }
