@@ -39,7 +39,6 @@ public class TestMongoAutoConfiguration implements ApplicationContextAware {
 
     @BeforeClass
     public static void setup() {
-        System.out.println("setup");
         state = Mongod.builder()
                 .net(Start.to(Net.class).initializedWith(Net.of("localhost", 27017, false)))
                 .processOutput(Derive.given(Name.class).state(ProcessOutput.class).deriveBy(name -> ProcessOutput.silent()))
@@ -49,7 +48,6 @@ public class TestMongoAutoConfiguration implements ApplicationContextAware {
 
     @AfterClass
     public static void clean() {
-        System.out.println("clean");
         if (state != null) {
             state.close();
             state = null;
