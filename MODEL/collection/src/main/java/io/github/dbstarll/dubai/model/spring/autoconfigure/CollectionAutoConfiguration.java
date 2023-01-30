@@ -19,10 +19,6 @@ import java.util.List;
 public class CollectionAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectionAutoConfiguration.class);
 
-    private CollectionAutoConfiguration() {
-        // 工具类禁止实例化
-    }
-
     @Bean
     @ConditionalOnMissingBean(MongoCollectionBeanInitializer.class)
     static BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {

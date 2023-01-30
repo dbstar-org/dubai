@@ -21,10 +21,6 @@ import java.security.NoSuchAlgorithmException;
 public class MongoAutoConfiguration {
     private static final int SHA_STRENGTH = 256;
 
-    private MongoAutoConfiguration() {
-        // 工具类禁止实例化
-    }
-
     @Bean
     @ConditionalOnMissingBean(MongoClientFactory.class)
     static MongoClientFactory mongoClientFactory(@Value("${dubai.mongodb.encryptedKey:}") final String encryptedKey)
@@ -54,12 +50,18 @@ public class MongoAutoConfiguration {
                     new Object[]{authDB, mongoProperties.getUsername(), new String(mongoProperties.getPassword())},
                     ':');
         }
-        return mongoClientFactory.createWithPojoCodecSplit(mongoProperties.getHost(), authDB, credential, options);
+        return mongoClientFactory.createWithPojoCodecSplit(
+                getOrDefault(mongoProperties.getHost(), "localhost"), authDB, credential, options);
     }
 
     @Bean
     @ConditionalOnMissingBean(MongoDatabase.class)
     static MongoDatabase mongoDatabase(final MongoClient client, final MongoProperties properties) {
         return client.getDatabase(properties.getMongoClientDatabase());
+    }
+
+
+    private static <V> V getOrDefault(final V value, final V defaultValue) {
+        return (value != null) ? value : defaultValue;
     }
 }

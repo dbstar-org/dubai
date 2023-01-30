@@ -100,11 +100,9 @@ public class TestMockCollection {
 
             @Override
             public <T> T execute(WriteOperation<T> writeOperation, ReadConcern readConcern, ClientSession clientSession) {
-                System.out.println(writeOperation);
                 final MixedBulkWriteOperation op = (MixedBulkWriteOperation) writeOperation;
                 op.getWriteRequests().forEach(a -> {
                     final InsertRequest r = (InsertRequest) a;
-                    System.out.println(r.getDocument());
                 });
                 return (T) bulkWriteResult;
             }
