@@ -270,7 +270,7 @@ public class TestServiceFactory {
     }
 
     @Test
-    public void testThrowExceptionMethod() throws Exception {
+    public void testThrowExceptionMethod() {
         new Expectations() {
             {
                 collection.getEntityClass();

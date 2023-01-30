@@ -17,12 +17,12 @@ public class TestServiceBeanInitializer extends TestCase {
     private BeanDefinitionRegistry registry;
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() {
         this.registry = new StaticApplicationContext();
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         this.registry = null;
     }
 

@@ -1,6 +1,7 @@
 package test.io.github.dbstarll.dubai.model.spring;
 
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.config.Net;
@@ -12,6 +13,7 @@ import de.flapdoodle.embed.process.types.Name;
 import de.flapdoodle.reverse.TransitionWalker.ReachedState;
 import de.flapdoodle.reverse.transitions.Derive;
 import de.flapdoodle.reverse.transitions.Start;
+import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.spring.autoconfigure.MongoAutoConfiguration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -24,17 +26,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = {MongoAutoConfiguration.class}, webEnvironment = WebEnvironment.NONE)
 public class TestMongoAutoConfiguration implements ApplicationContextAware {
     private static ReachedState<RunningMongodProcess> state;
-    private ApplicationContext applicationContext;
+    private ApplicationContext ctx;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    public void setApplicationContext(final ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
     }
 
     @BeforeClass
@@ -55,12 +60,17 @@ public class TestMongoAutoConfiguration implements ApplicationContextAware {
     }
 
     @Test
-    public void testGetMongoDatabase() {
-        assertNotNull(applicationContext.getBean("mongoDatabase", MongoDatabase.class));
-    }
-
-    @Test
-    public void testGetMongoClient() {
-        assertNotNull(applicationContext.getBean("mongoClient", MongoClient.class));
+    public void testGetBean() {
+        new HashMap<String, Class<?>>() {{
+            put("mongoAutoConfiguration", MongoAutoConfiguration.class);
+            put("mongoClientFactory", MongoClientFactory.class);
+            put("mongoClientSettingsBuilder", MongoClientSettings.Builder.class);
+            put("mongoClient", MongoClient.class);
+            put("mongoDatabase", MongoDatabase.class);
+        }}.forEach((k, c) -> {
+            final Object bean = ctx.getBean(k);
+            assertNotNull(String.format("%s is null", k), bean);
+            assertTrue(String.format("%s[%s] not instanceOf [%s]", k, bean.getClass().getName(), c), c.isInstance(bean));
+        });
     }
 }

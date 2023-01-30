@@ -105,7 +105,7 @@ public class TestDescriptionValidation {
     }
 
     @Test
-    public void testUpdateSetDescription() throws CloneNotSupportedException {
+    public void testUpdateSetDescription() {
         final ObjectId id = new ObjectId();
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
         ((EntityModifier) entity).setId(id);
@@ -136,7 +136,7 @@ public class TestDescriptionValidation {
     }
 
     @Test
-    public void testUpdateSetDescriptionSame() throws CloneNotSupportedException {
+    public void testUpdateSetDescriptionSame() {
         final ObjectId id = new ObjectId();
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
         ((EntityModifier) entity).setId(id);

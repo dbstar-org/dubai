@@ -21,24 +21,45 @@ import java.security.NoSuchAlgorithmException;
 public class MongoAutoConfiguration {
     private static final int SHA_STRENGTH = 256;
 
+    /**
+     * 自动装配MongoClientFactory实例，用于配置并生成MongoClient.
+     *
+     * @param encryptedKey 加密用的key
+     * @return MongoClientFactory实例
+     * @throws NoSuchAlgorithmException 加密key用的摘要算法不存在时抛出
+     */
     @Bean
     @ConditionalOnMissingBean(MongoClientFactory.class)
-    static MongoClientFactory mongoClientFactory(@Value("${dubai.mongodb.encryptedKey:}") final String encryptedKey)
+    MongoClientFactory mongoClientFactory(@Value("${dubai.mongodb.encryptedKey:}") final String encryptedKey)
             throws NoSuchAlgorithmException {
         return new MongoClientFactory(
                 StringUtils.isBlank(encryptedKey) ? null : new Bytes(EncryptUtils.sha(encryptedKey, SHA_STRENGTH)));
     }
 
+    /**
+     * 自动装配MongoClientSettings.Builder实例，用于配置MongoClient的各种参数.
+     *
+     * @param mongoClientFactory mongoClientFactory实例
+     * @return MongoClientSettings.Builder实例
+     */
     @Bean
     @ConditionalOnMissingBean(MongoClientSettings.Builder.class)
-    static MongoClientSettings.Builder clientOptions(final MongoClientFactory mongoClientFactory) {
-        return mongoClientFactory.getMongoClientSettingsbuilder();
+    MongoClientSettings.Builder mongoClientSettingsBuilder(final MongoClientFactory mongoClientFactory) {
+        return mongoClientFactory.getMongoClientSettingsBuilder();
     }
 
+    /**
+     * 自动装配MongoClient实例.
+     *
+     * @param mongoClientFactory mongoClientFactory实例
+     * @param mongoProperties    通过配置文件加载的配置参数
+     * @param options            通过内部API加载的配置参数
+     * @return MongoClient实例
+     */
     @Bean
     @ConditionalOnMissingBean(MongoClient.class)
-    static MongoClient mongoClient(final MongoClientFactory mongoClientFactory, final MongoProperties mongoProperties,
-                                   final MongoClientSettings.Builder options) {
+    MongoClient mongoClient(final MongoClientFactory mongoClientFactory, final MongoProperties mongoProperties,
+                            final MongoClientSettings.Builder options) {
         final String authDB = StringUtils.isNotBlank(mongoProperties.getAuthenticationDatabase())
                 ? mongoProperties.getAuthenticationDatabase()
                 : mongoProperties.getMongoClientDatabase();
@@ -54,14 +75,20 @@ public class MongoAutoConfiguration {
                 getOrDefault(mongoProperties.getHost(), "localhost"), authDB, credential, options);
     }
 
+    /**
+     * 自动装配MongoDatabase实例.
+     *
+     * @param client     MongoClient
+     * @param properties 通过配置文件加载的配置参数
+     * @return MongoDatabase实例
+     */
     @Bean
     @ConditionalOnMissingBean(MongoDatabase.class)
-    static MongoDatabase mongoDatabase(final MongoClient client, final MongoProperties properties) {
+    MongoDatabase mongoDatabase(final MongoClient client, final MongoProperties properties) {
         return client.getDatabase(properties.getMongoClientDatabase());
     }
 
-
     private static <V> V getOrDefault(final V value, final V defaultValue) {
-        return (value != null) ? value : defaultValue;
+        return value != null ? value : defaultValue;
     }
 }

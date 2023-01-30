@@ -27,12 +27,9 @@ public class DebugCodecRegistry implements CodecRegistry {
     public <T> Codec<T> get(final Class<T> clazz) {
         final Codec<T> codec = registry.get(clazz);
         MAP.computeIfAbsent(clazz, c -> {
-            if (codec == null) {
-                return null;
-            } else {
-                LOGGER.debug("{} -> {}", c, codec);
-                return codec.toString();
-            }
+            final String val = String.format("%s -> %s", c, codec);
+            LOGGER.debug(val);
+            return val;
         });
         return codec;
     }

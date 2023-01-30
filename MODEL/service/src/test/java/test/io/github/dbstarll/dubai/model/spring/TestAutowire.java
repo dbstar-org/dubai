@@ -18,7 +18,7 @@ public class TestAutowire extends TestCase {
     private ConfigurableApplicationContext context;
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() {
         final StaticApplicationContext applicationContext = new StaticApplicationContext();
         applicationContext.registerSingleton("implementalAutowirer", SpringImplementalAutowirer.class);
         applicationContext.registerBeanDefinition("mongoDatabase", BeanDefinitionBuilder
@@ -30,12 +30,12 @@ public class TestAutowire extends TestCase {
         this.context = applicationContext;
     }
 
-    static MongoDatabase getDatabase() throws Exception {
+    static MongoDatabase getDatabase() {
         return new MongoClientFactory().createWithPojoCodec("mongodb://localhost:12345/pumpkin").getDatabase("test");
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         this.context.close();
         this.context = null;
     }

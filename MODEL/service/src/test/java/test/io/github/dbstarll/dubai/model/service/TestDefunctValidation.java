@@ -60,7 +60,7 @@ public class TestDefunctValidation {
     }
 
     @Test
-    public void testUpdateSetDefunct() throws CloneNotSupportedException {
+    public void testUpdateSetDefunct() {
         final ObjectId id = new ObjectId();
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
         ((EntityModifier) entity).setId(id);

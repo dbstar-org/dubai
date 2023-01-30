@@ -113,7 +113,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.countDocuments((Bson) any, (CountOptions) any);
                 result = 10;
             }
@@ -138,7 +138,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.countDocuments((Bson) any, (CountOptions) any);
                 result = 0;
             }
@@ -185,7 +185,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -248,7 +248,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);
@@ -277,7 +277,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
             }
@@ -306,7 +306,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
             }
@@ -333,7 +333,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -354,7 +354,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -376,7 +376,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -412,7 +412,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 updateResult.getModifiedCount();
@@ -441,7 +441,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 updateResult.getModifiedCount();
                 result = 10;
                 findIterable.iterator();
@@ -469,7 +469,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);
@@ -500,7 +500,7 @@ public class TestComplexCollection {
                 findIterable.first();
                 result = entity;
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -524,7 +524,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.iterator();
                 result = new MockMongoCursor<>(Collections.singletonList(EntityFactory.newInstance(entityClass)).iterator());
             }
@@ -551,7 +551,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);
@@ -579,7 +579,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 mongoCollection.findOneAndReplace((Bson) any, (CacheableEntity) any, (FindOneAndReplaceOptions) any);
@@ -607,7 +607,7 @@ public class TestComplexCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);

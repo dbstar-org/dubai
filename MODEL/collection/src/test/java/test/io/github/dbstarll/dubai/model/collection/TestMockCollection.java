@@ -52,7 +52,7 @@ public class TestMockCollection {
     @Before
     public void initialize() {
         mongoDriverInformation = MongoDriverInformation.builder().driverName("sync").build();
-        settings = new MongoClientFactory().getMongoClientSettingsbuilder().applyToClusterSettings(
+        settings = new MongoClientFactory().getMongoClientSettingsBuilder().applyToClusterSettings(
                 s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)
         ).build();
         cluster = createCluster(settings, mongoDriverInformation);

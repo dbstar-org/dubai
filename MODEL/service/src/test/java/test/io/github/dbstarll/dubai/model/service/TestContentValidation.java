@@ -107,7 +107,7 @@ public class TestContentValidation {
     }
 
     @Test
-    public void testUpdateSetSameContentType() throws CloneNotSupportedException {
+    public void testUpdateSetSameContentType() {
         final ObjectId id = new ObjectId();
         final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
         ((EntityModifier) entity).setId(id);
@@ -140,7 +140,7 @@ public class TestContentValidation {
     }
 
     @Test
-    public void testUpdateSetDiffContentType() throws CloneNotSupportedException {
+    public void testUpdateSetDiffContentType() {
         final ObjectId id = new ObjectId();
         final TestContentableEntity entity = EntityFactory.newInstance(TestContentableEntity.class);
         ((EntityModifier) entity).setId(id);

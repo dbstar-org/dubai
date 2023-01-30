@@ -60,7 +60,7 @@ public class TestCacheableCollectionCloneNotSupported {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
             }
@@ -95,7 +95,7 @@ public class TestCacheableCollectionCloneNotSupported {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = null;
             }

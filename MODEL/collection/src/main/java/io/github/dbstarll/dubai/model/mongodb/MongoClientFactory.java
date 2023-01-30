@@ -59,7 +59,7 @@ public final class MongoClientFactory {
      * @return 返回创建的MongoClient对象
      */
     public MongoClient createWithPojoCodec(final String mongoUri) {
-        return MongoClients.create(getMongoClientSettingsbuilder()
+        return MongoClients.create(getMongoClientSettingsBuilder()
                 .applyConnectionString(new ConnectionString(mongoUri))
                 .build());
     }
@@ -74,7 +74,7 @@ public final class MongoClientFactory {
      */
     public MongoClient createWithPojoCodecSplit(final String servers, final String defaultAuthDatabase,
                                                 final String credential) {
-        return createWithPojoCodecSplit(servers, defaultAuthDatabase, credential, getMongoClientSettingsbuilder());
+        return createWithPojoCodecSplit(servers, defaultAuthDatabase, credential, getMongoClientSettingsBuilder());
     }
 
     /**
@@ -100,7 +100,7 @@ public final class MongoClientFactory {
      *
      * @return MongoClientSettings.Builder
      */
-    public MongoClientSettings.Builder getMongoClientSettingsbuilder() {
+    public MongoClientSettings.Builder getMongoClientSettingsBuilder() {
         final List<Convention> conventions = new LinkedList<>();
         conventions.add(new EntityConvention());
         conventions.addAll(Conventions.DEFAULT_CONVENTIONS);

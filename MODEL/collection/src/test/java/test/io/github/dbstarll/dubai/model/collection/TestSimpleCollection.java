@@ -117,7 +117,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.countDocuments((Bson) any, (CountOptions) any);
                 result = 10;
             }
@@ -142,7 +142,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.countDocuments((Bson) any, (CountOptions) any);
                 result = 0;
             }
@@ -189,7 +189,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -252,7 +252,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.findOneAndDelete((Bson) any, (FindOneAndDeleteOptions) any);
                 result = entity;
             }
@@ -277,7 +277,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
             }
@@ -306,7 +306,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 findIterable.first();
                 result = entity;
             }
@@ -333,7 +333,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -354,7 +354,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -376,7 +376,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -398,7 +398,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -476,7 +476,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);
                 result = entity;
             }
@@ -500,7 +500,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -522,7 +522,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
             }
         };
 
@@ -545,7 +545,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.findOneAndDelete((Bson) any, (FindOneAndDeleteOptions) any);
                 result = entity;
             }
@@ -569,7 +569,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.findOneAndReplace((Bson) any, (SimpleEntity) any, (FindOneAndReplaceOptions) any);
                 result = entity;
             }
@@ -593,7 +593,7 @@ public class TestSimpleCollection {
         new Expectations() {
             {
                 mongoCollection.getCodecRegistry();
-                result = mongoClientFactory.getMongoClientSettingsbuilder().build().getCodecRegistry();
+                result = mongoClientFactory.getMongoClientSettingsBuilder().build().getCodecRegistry();
                 mongoCollection.findOneAndUpdate((Bson) any, (Bson) any, (FindOneAndUpdateOptions) any);
                 result = entity;
             }

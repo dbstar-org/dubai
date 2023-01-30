@@ -60,7 +60,7 @@ public class TestCodecProvider extends TestCase {
     @Override
     protected void setUp() throws Exception {
         this.client = MongoClients.create(
-                new MongoClientFactory(new Bytes(EncryptUtils.sha("y1cloud.com", 256))).getMongoClientSettingsbuilder()
+                new MongoClientFactory(new Bytes(EncryptUtils.sha("y1cloud.com", 256))).getMongoClientSettingsBuilder()
                         .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
                         .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
         );
@@ -208,7 +208,7 @@ public class TestCodecProvider extends TestCase {
      */
     public void testImageCodecNotEncode() throws IOException {
         this.client = MongoClients.create(
-                new MongoClientFactory().getMongoClientSettingsbuilder()
+                new MongoClientFactory().getMongoClientSettingsBuilder()
                         .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
                         .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
         );
