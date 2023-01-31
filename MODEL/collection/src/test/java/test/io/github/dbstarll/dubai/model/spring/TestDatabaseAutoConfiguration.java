@@ -1,8 +1,6 @@
 package test.io.github.dbstarll.dubai.model.spring;
 
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version.Main;
@@ -13,34 +11,37 @@ import de.flapdoodle.embed.process.types.Name;
 import de.flapdoodle.reverse.TransitionWalker.ReachedState;
 import de.flapdoodle.reverse.transitions.Derive;
 import de.flapdoodle.reverse.transitions.Start;
-import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
-import io.github.dbstarll.dubai.model.spring.autoconfigure.MongoAutoConfiguration;
+import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
+import io.github.dbstarll.dubai.model.spring.autoconfigure.DatabaseAutoConfiguration;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.HashMap;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {MongoAutoConfiguration.class}, webEnvironment = WebEnvironment.NONE)
-public class TestMongoAutoConfiguration implements ApplicationContextAware {
+@SpringBootTest(webEnvironment = WebEnvironment.NONE,
+        classes = {
+                MongoAutoConfiguration.class,
+                DatabaseAutoConfiguration.class,
+        },
+        properties = {
+                "dubai.mongodb.encryptedKey=test",
+                "spring.data.mongodb.host=127.0.0.1",
+                "spring.data.mongodb.username=username",
+                "spring.data.mongodb.password=password",
+                "spring.data.mongodb.authenticationDatabase=pumpkin"
+        })
+public class TestDatabaseAutoConfiguration {
     private static ReachedState<RunningMongodProcess> state;
-    private ApplicationContext ctx;
-
-    @Override
-    public void setApplicationContext(final ApplicationContext ctx) throws BeansException {
-        this.ctx = ctx;
-    }
 
     @BeforeClass
     public static void setup() {
@@ -59,18 +60,18 @@ public class TestMongoAutoConfiguration implements ApplicationContextAware {
         }
     }
 
+    @Autowired
+    private MongoDatabase db;
+
     @Test
-    public void testGetBean() {
-        new HashMap<String, Class<?>>() {{
-            put("mongoAutoConfiguration", MongoAutoConfiguration.class);
-            put("mongoClientFactory", MongoClientFactory.class);
-            put("mongoClientSettingsBuilder", MongoClientSettings.Builder.class);
-            put("mongoClient", MongoClient.class);
-            put("mongoDatabase", MongoDatabase.class);
-        }}.forEach((k, c) -> {
-            final Object bean = ctx.getBean(k);
-            assertNotNull(String.format("%s is null", k), bean);
-            assertTrue(String.format("%s[%s] not instanceOf [%s]", k, bean.getClass().getName(), c), c.isInstance(bean));
-        });
+    public void testMongoDatabase() {
+        assertEquals("test", db.getName());
+    }
+
+    @Test
+    public void testCodecRegistry() {
+        final CodecRegistry registry = db.getCodecRegistry();
+        assertSame(EncryptedByteArrayCodec.class, registry.get(byte[].class).getClass());
+        System.out.println(registry.get(Enum.class).getClass());
     }
 }
