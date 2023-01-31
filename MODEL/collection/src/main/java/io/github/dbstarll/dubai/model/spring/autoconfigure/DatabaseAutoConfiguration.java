@@ -39,8 +39,7 @@ public class DatabaseAutoConfiguration {
         final Bytes encryptedBytes = StringUtils.isBlank(encryptedKey) ? null : new Bytes(
                 new Sha256Digestor().digest(encryptedKey.getBytes(StandardCharsets.UTF_8)));
         return clientSettingsBuilder -> {
-            System.out.println(settings.getCodecRegistry());
-            new MongoClientFactory(encryptedBytes).customize(clientSettingsBuilder);
+            new MongoClientFactory(encryptedBytes).customize(clientSettingsBuilder, settings.getCodecRegistry());
         };
     }
 

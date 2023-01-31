@@ -7,13 +7,10 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import io.github.dbstarll.dubai.model.entity.Entity;
-import io.github.dbstarll.dubai.model.entity.EntityFactory.PojoFields;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodec;
+import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodecProvider;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -22,7 +19,6 @@ import org.bson.codecs.pojo.Conventions;
 import org.bson.codecs.pojo.EntityConvention;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
-import java.lang.reflect.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,27 +92,29 @@ public final class MongoClientFactory {
      * @return MongoClientSettings.Builder
      */
     public Builder getMongoClientSettingsBuilder() {
-        return customize(MongoClientSettings.builder());
+        return customize(MongoClientSettings.builder(), MongoClientSettings.getDefaultCodecRegistry());
     }
 
     /**
      * 定制clientSettingsBuilder.
      *
      * @param clientSettingsBuilder clientSettingsBuilder
+     * @param originalCodecRegistry 起初的CodecRegistry
      * @return 定制后的clientSettingsBuilder
      */
-    public Builder customize(final Builder clientSettingsBuilder) {
+    public Builder customize(final Builder clientSettingsBuilder, final CodecRegistry originalCodecRegistry) {
         final List<Convention> conventions = new LinkedList<>();
         conventions.add(new EntityConvention());
         conventions.addAll(Conventions.DEFAULT_CONVENTIONS);
         final CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .conventions(conventions).automatic(true).build();
-        final CodecRegistry defaultCodecRegistry = MongoClientSettings.getDefaultCodecRegistry();
-        final CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
-                CodecRegistries.fromProviders(new DefaultCodecProvider()), defaultCodecRegistry,
-                CodecRegistries.fromProviders(new EntityCodecProvider(), pojoCodecProvider));
-        clientSettingsBuilder.codecRegistry(new DebugCodecRegistry(pojoCodecRegistry));
-        return clientSettingsBuilder;
+        return clientSettingsBuilder.codecRegistry(new DebugCodecRegistry(
+                CodecRegistries.fromRegistries(
+                        CodecRegistries.fromCodecs(new EncryptedByteArrayCodec(encryptedKey)),
+                        CodecRegistries.fromProviders(new EntityCodecProvider()),
+                        originalCodecRegistry,
+                        CodecRegistries.fromProviders(pojoCodecProvider)
+                )));
     }
 
     private static List<ServerAddress> parseServers(final String servers) {
@@ -143,30 +141,5 @@ public final class MongoClientFactory {
         return null;
     }
 
-    class DefaultCodecProvider implements CodecProvider {
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        @Override
-        public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-            if (byte[].class.isAssignableFrom(clazz)) {
-                return (Codec<T>) new EncryptedByteArrayCodec(encryptedKey);
-            }
-            return null;
-        }
-    }
-
-    static class EntityCodecProvider implements CodecProvider {
-        @SuppressWarnings("unchecked")
-        @Override
-        public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-            if (Entity.class.isAssignableFrom(clazz) && isProxy(clazz)) {
-                return (Codec<T>) new EntityCodec<>((Class<? extends Entity>) clazz, registry);
-            }
-            return null;
-        }
-
-        private <T> boolean isProxy(final Class<T> clazz) {
-            return Proxy.isProxyClass(clazz) && PojoFields.class.isAssignableFrom(clazz);
-        }
-    }
 
 }
