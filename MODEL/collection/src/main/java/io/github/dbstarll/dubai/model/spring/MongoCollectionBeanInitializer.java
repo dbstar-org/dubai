@@ -100,11 +100,11 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
         if (registry.containsBeanDefinition(beanName)) {
             final BeanDefinition definition = registry.getBeanDefinition(beanName);
-            if (definition.getBeanClassName().equals(entityClass.getName())) {
+            if (entityClass.getName().equals(definition.getBeanClassName())) {
                 throw new BeanDefinitionValidationException(
-                        "collection already exist: [" + beanName + "]" + entityClass);
+                        "collection already exist: [" + beanName + "] of entity: " + entityClass);
             }
-            LOGER.warn("collection already exist: [{}] with entity: {}", beanName, definition.getBeanClassName());
+            LOGER.warn("bean already exist: [{}] with definition: {}", beanName, definition);
             registerBeanDefinition(registry, entityClass, baseBeanName, index + 1);
         } else {
             final BeanDefinition definition = buildCollection(entityClass);
