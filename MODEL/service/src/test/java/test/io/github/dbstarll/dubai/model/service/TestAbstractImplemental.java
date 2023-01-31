@@ -59,7 +59,7 @@ public class TestAbstractImplemental {
         final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
         entity.setDefunct(true);
         try {
-            service.save(entity, (Validate) null);
+            service.save(entity, null);
             fail("throw ValidateException");
         } catch (Throwable ex) {
             assertEquals(ValidateException.class, ex.getClass());

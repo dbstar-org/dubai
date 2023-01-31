@@ -72,6 +72,5 @@ public class TestDatabaseAutoConfiguration {
     public void testCodecRegistry() {
         final CodecRegistry registry = db.getCodecRegistry();
         assertSame(EncryptedByteArrayCodec.class, registry.get(byte[].class).getClass());
-//        System.out.println(registry.get(Enum.class).getClass());
     }
 }

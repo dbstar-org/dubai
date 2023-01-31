@@ -39,9 +39,6 @@ public class TestCollectionAutoConfiguration implements ApplicationContextAware 
 
     @Test
     public void testGetSimpleEntityCollection() {
-        for (String name : ctx.getBeanDefinitionNames()) {
-            System.out.println(name);
-        }
         assertNotNull(ctx.getBean("simpleEntityCollection", Collection.class));
     }
 }

@@ -26,7 +26,7 @@ public class DatabaseAutoConfiguration {
     /**
      * 注入一个MongoClientSettingsBuilderCustomizer实例，用于定制化加入所需要的CodecRegistry.
      *
-     * @param settings
+     * @param settings     初始的MongoClientSettings
      * @param encryptedKey 加密用的key
      * @return MongoClientSettingsBuilderCustomizer
      * @throws NoSuchAlgorithmException 加密key用的摘要算法不存在时抛出
@@ -38,9 +38,7 @@ public class DatabaseAutoConfiguration {
             throws NoSuchAlgorithmException {
         final Bytes encryptedBytes = StringUtils.isBlank(encryptedKey) ? null : new Bytes(
                 new Sha256Digestor().digest(encryptedKey.getBytes(StandardCharsets.UTF_8)));
-        return clientSettingsBuilder -> {
-            new MongoClientFactory(encryptedBytes).customize(clientSettingsBuilder, settings.getCodecRegistry());
-        };
+        return builder -> new MongoClientFactory(encryptedBytes).customize(builder, settings.getCodecRegistry());
     }
 
     /**
