@@ -24,6 +24,7 @@ import io.github.dbstarll.dubai.model.collection.test.SimpleGenericEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
+import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.utils.lang.EncryptUtils;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import junit.framework.TestCase;
@@ -194,8 +195,8 @@ public class TestCodecProvider extends TestCase {
     public void testImageCodecEncode() throws IOException {
         final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
         final Codec<byte[]> codec = registry.get(byte[].class);
-        assertEquals(codec.getClass().getName(), "io.github.dbstarll.dubai.model.mongodb.MongoClientFactory$ImageCodec");
-        assertEquals(byte[].class, codec.getEncoderClass());
+        assertSame(EncryptedByteArrayCodec.class, codec.getClass());
+        assertSame(byte[].class, codec.getEncoderClass());
 
         testImageCodec(codec, "png.png", true, true);
         testImageCodec(codec, "jpg.jpg", true, true);
@@ -214,8 +215,8 @@ public class TestCodecProvider extends TestCase {
         );
         final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
         final Codec<byte[]> codec = registry.get(byte[].class);
-        assertEquals(codec.getClass().getName(), "io.github.dbstarll.dubai.model.mongodb.MongoClientFactory$ImageCodec");
-        assertEquals(byte[].class, codec.getEncoderClass());
+        assertSame(EncryptedByteArrayCodec.class, codec.getClass());
+        assertSame(byte[].class, codec.getEncoderClass());
 
         testImageCodec(codec, "png.png", true, false);
         testImageCodec(codec, "jpg.jpg", true, false);
