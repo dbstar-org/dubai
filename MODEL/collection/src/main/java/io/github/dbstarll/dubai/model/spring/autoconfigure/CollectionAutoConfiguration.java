@@ -1,5 +1,6 @@
 package io.github.dbstarll.dubai.model.spring.autoconfigure;
 
+import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.collection.AnnotationCollectionNameGenerator;
 import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.entity.Entity;
@@ -7,31 +8,45 @@ import io.github.dbstarll.dubai.model.spring.MongoCollectionBeanInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Configuration
+@AutoConfiguration
+@AutoConfigureAfter(DatabaseAutoConfiguration.class)
 public class CollectionAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectionAutoConfiguration.class);
 
+    /**
+     * 遍历所有Entity并为其装配CollectionBean，然后注入到Spring Context中.
+     *
+     * @return MongoCollectionBeanInitializer实例.
+     */
     @Bean
+    @ConditionalOnBean(name = "mongoDatabase", value = MongoDatabase.class)
     @ConditionalOnMissingBean(MongoCollectionBeanInitializer.class)
-    static BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {
-        MongoCollectionBeanInitializer initializer = new MongoCollectionBeanInitializer();
+    BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {
+        final MongoCollectionBeanInitializer initializer = new MongoCollectionBeanInitializer();
         initializer.setBasePackageClasses(
                 loadBasePackages(Entity.class, CollectionAutoConfiguration.class.getClassLoader()));
         initializer.setMongoDatabaseBeanName("mongoDatabase");
         return initializer;
     }
 
+    /**
+     * 注入CollectionNameGenerator实例，用于为Collection生成Bean的名字.
+     *
+     * @return CollectionNameGenerator实例
+     */
     @Bean
     @ConditionalOnMissingBean(CollectionNameGenerator.class)
-    static CollectionNameGenerator collectionNameGenerator() {
+    CollectionNameGenerator collectionNameGenerator() {
         return new AnnotationCollectionNameGenerator();
     }
 

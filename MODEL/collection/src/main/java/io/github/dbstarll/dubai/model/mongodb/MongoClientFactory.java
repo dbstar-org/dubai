@@ -2,19 +2,18 @@ package io.github.dbstarll.dubai.model.mongodb;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoClientSettings.Builder;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory.PojoFields;
-import io.github.dbstarll.utils.lang.EncryptUtils;
+import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
-import io.github.dbstarll.utils.lang.bytes.BytesUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
-import org.bson.codecs.ByteArrayCodec;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -100,7 +99,17 @@ public final class MongoClientFactory {
      *
      * @return MongoClientSettings.Builder
      */
-    public MongoClientSettings.Builder getMongoClientSettingsBuilder() {
+    public Builder getMongoClientSettingsBuilder() {
+        return customize(MongoClientSettings.builder());
+    }
+
+    /**
+     * 定制clientSettingsBuilder.
+     *
+     * @param clientSettingsBuilder clientSettingsBuilder
+     * @return 定制后的clientSettingsBuilder
+     */
+    public Builder customize(final Builder clientSettingsBuilder) {
         final List<Convention> conventions = new LinkedList<>();
         conventions.add(new EntityConvention());
         conventions.addAll(Conventions.DEFAULT_CONVENTIONS);
@@ -110,7 +119,8 @@ public final class MongoClientFactory {
         final CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
                 CodecRegistries.fromProviders(new DefaultCodecProvider()), defaultCodecRegistry,
                 CodecRegistries.fromProviders(new EntityCodecProvider(), pojoCodecProvider));
-        return MongoClientSettings.builder().codecRegistry(new DebugCodecRegistry(pojoCodecRegistry));
+        clientSettingsBuilder.codecRegistry(new DebugCodecRegistry(pojoCodecRegistry));
+        return clientSettingsBuilder;
     }
 
     private static List<ServerAddress> parseServers(final String servers) {
@@ -144,7 +154,7 @@ public final class MongoClientFactory {
             if (Enum.class.isAssignableFrom(clazz)) {
                 return new EnumCodec(clazz);
             } else if (byte[].class.isAssignableFrom(clazz)) {
-                return (Codec<T>) new ImageCodec();
+                return (Codec<T>) new EncryptedByteArrayCodec(encryptedKey);
             }
             return null;
         }
@@ -214,36 +224,6 @@ public final class MongoClientFactory {
             } catch (IllegalArgumentException ex) {
                 return null;
             }
-        }
-    }
-
-    class ImageCodec extends ByteArrayCodec {
-        private final Bytes jpegHeader = new Bytes(BytesUtils.decodeHexString("ffd8"));
-        private final Bytes pngHeader = new Bytes(BytesUtils.decodeHexString("89504e470d0a1a0a"));
-
-        @Override
-        public void encode(final BsonWriter writer, final byte[] value, final EncoderContext encoderContext) {
-            super.encode(writer, encodeImage(value), encoderContext);
-        }
-
-        @Override
-        public byte[] decode(final BsonReader reader, final DecoderContext decoderContext) {
-            return decodeImage(super.decode(reader, decoderContext));
-        }
-
-        private byte[] encodeImage(final byte[] value) {
-            return encryptedKey == null ? value : EncryptUtils.encryptCopy(value, encryptedKey);
-        }
-
-        private byte[] decodeImage(final byte[] value) {
-            if (encryptedKey != null && !isImage(value, jpegHeader) && !isImage(value, pngHeader)) {
-                return EncryptUtils.encryptCopy(value, encryptedKey);
-            }
-            return value;
-        }
-
-        private boolean isImage(final byte[] value, final Bytes header) {
-            return value.length > header.length() && header.compareTo(new Bytes(value, 0, header.length())) == 0;
         }
     }
 }

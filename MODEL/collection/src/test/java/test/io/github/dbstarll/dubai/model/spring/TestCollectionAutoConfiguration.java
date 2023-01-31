@@ -4,10 +4,11 @@ package test.io.github.dbstarll.dubai.model.spring;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.spring.autoconfigure.CollectionAutoConfiguration;
-import io.github.dbstarll.dubai.model.spring.autoconfigure.MongoAutoConfiguration;
+import io.github.dbstarll.dubai.model.spring.autoconfigure.DatabaseAutoConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
@@ -17,22 +18,30 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {MongoAutoConfiguration.class, CollectionAutoConfiguration.class}, webEnvironment = WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE,
+        classes = {
+                MongoAutoConfiguration.class,
+                DatabaseAutoConfiguration.class,
+                CollectionAutoConfiguration.class
+        })
 public class TestCollectionAutoConfiguration implements ApplicationContextAware {
-    private ApplicationContext applicationContext;
+    private ApplicationContext ctx;
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
     }
 
     @Test
     public void testGetCollectionNameGenerator() {
-        assertNotNull(applicationContext.getBean("collectionNameGenerator", CollectionNameGenerator.class));
+        assertNotNull(ctx.getBean("collectionNameGenerator", CollectionNameGenerator.class));
     }
 
     @Test
     public void testGetSimpleEntityCollection() {
-        assertNotNull(applicationContext.getBean("simpleEntityCollection", Collection.class));
+        for (String name : ctx.getBeanDefinitionNames()) {
+            System.out.println(name);
+        }
+        assertNotNull(ctx.getBean("simpleEntityCollection", Collection.class));
     }
 }
