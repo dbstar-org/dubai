@@ -2,18 +2,17 @@ package test.io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import io.github.dbstarll.dubai.model.spring.MongoCollectionBeanInitializer;
-import mockit.Expectations;
-import mockit.Mocked;
-import mockit.Verifications;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -23,75 +22,72 @@ public class TestMongoCollectionBeanInitializer {
     private static final String COLLECTION_FACTORY_BEAN_NAME = "collectionFactory";
     private static final String MONGO_DATABASE_BEAN_NAME = "mongoDatabase";
 
-    @Mocked
-    ConfigurableListableBeanFactory configurableListableBeanFactory;
+    private MongoCollectionBeanInitializer initializer;
 
-    @Mocked
-    BeanDefinitionRegistry beanDefinitionRegistry;
-
-    MongoCollectionBeanInitializer initializer;
+    private BeanDefinitionRegistry beanDefinitionRegistry;
 
     /**
      * 初始化MongoCollectionBeanInitializer.
      */
     @Before
-    public void initialize() {
+    public void setup() {
         this.initializer = new MongoCollectionBeanInitializer();
         initializer.setCollectionFactoryBeanName(COLLECTION_FACTORY_BEAN_NAME);
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
+        this.beanDefinitionRegistry = new SimpleBeanDefinitionRegistry();
+    }
+
+    @After
+    public void clean() {
+        this.initializer = null;
+        this.beanDefinitionRegistry = null;
     }
 
     @Test
     public void testPostProcessBeanFactory() {
         try {
-            initializer.postProcessBeanFactory(configurableListableBeanFactory);
-        } catch (Exception ex) {
-            fail("catch Exception");
+            initializer.postProcessBeanFactory(null);
+        } catch (BeansException ex) {
+            fail("throws BeansException");
         }
     }
 
     @Test
-    public void testMissCollectionFactory() {
-        new Expectations() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                result = false;
+    public void testCollectionFactory() {
+        final AtomicInteger containsCounter = new AtomicInteger();
+        final AtomicInteger registerCounter = new AtomicInteger();
+
+        final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry() {
+            @Override
+            public boolean containsBeanDefinition(String beanName) {
+                if (COLLECTION_FACTORY_BEAN_NAME.equals(beanName)) {
+                    containsCounter.incrementAndGet();
+                }
+                return super.containsBeanDefinition(beanName);
+            }
+
+            @Override
+            public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+                super.registerBeanDefinition(beanName, beanDefinition);
+                if (COLLECTION_FACTORY_BEAN_NAME.equals(beanName)) {
+                    registerCounter.incrementAndGet();
+                }
             }
         };
+
+        assertEquals(0, containsCounter.get());
+        assertEquals(0, registerCounter.get());
 
         initializer.setBasePackages();
-        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(1, containsCounter.get());
+        assertEquals(1, registerCounter.get());
+        assertEquals(1, registry.getBeanDefinitionCount());
 
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void testContainsCollectionFactory() {
-        new Expectations() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                result = true;
-            }
-        };
-
-        initializer.setBasePackages();
-        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
-
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 0;
-            }
-        };
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(2, containsCounter.get());
+        assertEquals(1, registerCounter.get());
+        assertEquals(1, registry.getBeanDefinitionCount());
     }
 
     @Test
@@ -99,18 +95,9 @@ public class TestMongoCollectionBeanInitializer {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 1;
-                beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection");
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition("simpleEntityCollection", (BeanDefinition) any);
-                times = 1;
-            }
-        };
+        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME));
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
     }
 
     @Test
@@ -119,81 +106,47 @@ public class TestMongoCollectionBeanInitializer {
         initializer.setRecursion(true);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 1;
-                beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection");
-                times = 2;
-                beanDefinitionRegistry.registerBeanDefinition("simpleEntityCollection", (BeanDefinition) any);
-                times = 2;
-            }
-        };
+        assertEquals(16, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection2"));
     }
 
     @Test
     public void testExistCollection() {
-        new Expectations() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection");
-                result = true;
-            }
-        };
-
         initializer.setBasePackageClasses(SimpleEntity.class);
+        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+
+        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
+
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
             fail("throw BeanDefinitionValidationException");
         } catch (BeanDefinitionValidationException ex) {
             assertTrue(ex.getMessage().startsWith("collection already exist: "));
         }
-
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 1;
-                beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection");
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition("simpleEntityCollection", (BeanDefinition) any);
-                times = 0;
-            }
-        };
     }
 
     @Test
     public void testException() {
-        new Expectations() {
-            {
-                beanDefinitionRegistry.registerBeanDefinition("simpleEntityCollection", (BeanDefinition) any);
-                result = new IOException("TestIOException");
+        final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry() {
+            @Override
+            public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+                if ("simpleEntityCollection".equals(beanName)) {
+                    throw new IllegalArgumentException("TestIOException");
+                }
+                super.registerBeanDefinition(beanName, beanDefinition);
             }
         };
+
 
         initializer.setBasePackageClasses(SimpleEntity.class);
         try {
-            initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+            initializer.postProcessBeanDefinitionRegistry(registry);
             fail("throw BeanDefinitionStoreException");
         } catch (BeanDefinitionStoreException ex) {
             assertTrue(ex.getMessage().startsWith("I/O failure during classpath scanning"));
-            assertEquals(IOException.class, ex.getCause().getClass());
+            assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
             assertEquals("TestIOException", ex.getCause().getMessage());
         }
-
-        new Verifications() {
-            {
-                beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME);
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, (BeanDefinition) any);
-                times = 1;
-                beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection");
-                times = 1;
-                beanDefinitionRegistry.registerBeanDefinition("simpleEntityCollection", (BeanDefinition) any);
-                times = 1;
-            }
-        };
     }
 }

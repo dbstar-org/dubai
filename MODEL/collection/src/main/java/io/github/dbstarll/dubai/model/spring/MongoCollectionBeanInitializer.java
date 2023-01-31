@@ -10,13 +10,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -66,13 +64,12 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
 
     private void createIfMissCollectionFactory(final BeanDefinitionRegistry registry) throws BeansException {
         if (!registry.containsBeanDefinition(collectionFactoryBeanName)) {
-            final GenericBeanDefinition definition = new GenericBeanDefinition();
-            definition.setBeanClass(CollectionFactory.class);
-            definition.setScope(BeanDefinition.SCOPE_SINGLETON);
-            final ConstructorArgumentValues argumentValues = new ConstructorArgumentValues();
-            argumentValues.addIndexedArgumentValue(0, new RuntimeBeanReference(mongoDatabaseBeanName));
-            definition.setConstructorArgumentValues(argumentValues);
-            definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
+            final BeanDefinition definition = BeanDefinitionBuilder
+                    .genericBeanDefinition(CollectionFactory.class)
+                    .setScope(BeanDefinition.SCOPE_SINGLETON)
+                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                    .addConstructorArgReference(mongoDatabaseBeanName)
+                    .getBeanDefinition();
             LOGER.info("registerBeanDefinition: [{}] with: {}", collectionFactoryBeanName, definition);
             registry.registerBeanDefinition(collectionFactoryBeanName, definition);
         }
@@ -91,29 +88,39 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
                         .forName(metadataReader.getClassMetadata().getClassName());
                 if (EntityFactory.isEntityClass(entityClass)) {
                     final String beanName = StringUtils.uncapitalize(entityClass.getSimpleName()) + "Collection";
-                    if (registry.containsBeanDefinition(beanName)) {
-                        throw new BeanDefinitionValidationException(
-                                "collection already exist: [" + beanName + "]" + entityClass);
-                    } else {
-                        final BeanDefinition definition = buildCollection(entityClass);
-                        LOGER.info("register collection[{}] of entity: {}", beanName, entityClass);
-                        registry.registerBeanDefinition(beanName, definition);
-                    }
+                    registerBeanDefinition(registry, entityClass, beanName, 0);
                 }
             }
         }
     }
 
-    private BeanDefinition buildCollection(final Class<? extends Entity> entityClass) {
-        final GenericBeanDefinition definition = new GenericBeanDefinition();
-        definition.setFactoryBeanName(collectionFactoryBeanName);
-        definition.setFactoryMethodName("newInstance");
-        definition.setScope(BeanDefinition.SCOPE_SINGLETON);
-        final ConstructorArgumentValues argumentValues = new ConstructorArgumentValues();
-        argumentValues.addIndexedArgumentValue(0, entityClass);
-        definition.setConstructorArgumentValues(argumentValues);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
-        return definition;
+    private <E extends Entity> void registerBeanDefinition(
+            final BeanDefinitionRegistry registry, final Class<E> entityClass,
+            final String baseBeanName, final int index) {
+        final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
+        if (registry.containsBeanDefinition(beanName)) {
+            final BeanDefinition definition = registry.getBeanDefinition(beanName);
+            if (definition.getBeanClassName().equals(entityClass.getName())) {
+                throw new BeanDefinitionValidationException(
+                        "collection already exist: [" + beanName + "]" + entityClass);
+            }
+            LOGER.warn("collection already exist: [{}] with entity: {}", beanName, definition.getBeanClassName());
+            registerBeanDefinition(registry, entityClass, baseBeanName, index + 1);
+        } else {
+            final BeanDefinition definition = buildCollection(entityClass);
+            LOGER.info("register collection[{}] of entity: {}", beanName, entityClass);
+            registry.registerBeanDefinition(beanName, definition);
+        }
+    }
+
+    private <E extends Entity> BeanDefinition buildCollection(final Class<E> entityClass) {
+        return BeanDefinitionBuilder
+                .genericBeanDefinition(entityClass)
+                .setFactoryMethodOnBean("newInstance", collectionFactoryBeanName)
+                .setScope(BeanDefinition.SCOPE_SINGLETON)
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                .addConstructorArgValue(entityClass)
+                .getBeanDefinition();
     }
 
     /**
