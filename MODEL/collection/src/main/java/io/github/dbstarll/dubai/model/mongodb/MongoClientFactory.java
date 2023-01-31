@@ -10,6 +10,7 @@ import com.mongodb.client.MongoClients;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory.PojoFields;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
+import io.github.dbstarll.dubai.model.mongodb.codecs.NullableEnumCodec;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonReader;
@@ -152,7 +153,7 @@ public final class MongoClientFactory {
         @Override
         public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
             if (Enum.class.isAssignableFrom(clazz)) {
-                return new EnumCodec(clazz);
+                return new NullableEnumCodec(clazz);
             } else if (byte[].class.isAssignableFrom(clazz)) {
                 return (Codec<T>) new EncryptedByteArrayCodec(encryptedKey);
             }
@@ -197,33 +198,6 @@ public final class MongoClientFactory {
         @Override
         public Class<E> getEncoderClass() {
             return entityClass;
-        }
-    }
-
-    static class EnumCodec<T extends Enum<T>> implements Codec<T> {
-        private final Class<T> clazz;
-
-        EnumCodec(final Class<T> clazz) {
-            this.clazz = clazz;
-        }
-
-        @Override
-        public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
-            writer.writeString(value.name());
-        }
-
-        @Override
-        public Class<T> getEncoderClass() {
-            return clazz;
-        }
-
-        @Override
-        public T decode(final BsonReader reader, final DecoderContext decoderContext) {
-            try {
-                return Enum.valueOf(clazz, reader.readString());
-            } catch (IllegalArgumentException ex) {
-                return null;
-            }
         }
     }
 }

@@ -25,6 +25,7 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
+import io.github.dbstarll.dubai.model.mongodb.codecs.NullableEnumCodec;
 import io.github.dbstarll.utils.lang.EncryptUtils;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import junit.framework.TestCase;
@@ -170,8 +171,8 @@ public class TestCodecProvider extends TestCase {
     public void testEnumCodec() {
         final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
         final Codec<SimpleEntity.Type> codec = registry.get(SimpleEntity.Type.class);
-        assertEquals(codec.getClass().getName(), "io.github.dbstarll.dubai.model.mongodb.MongoClientFactory$EnumCodec");
-        assertEquals(SimpleEntity.Type.class, codec.getEncoderClass());
+        assertSame(NullableEnumCodec.class, codec.getClass());
+        assertSame(SimpleEntity.Type.class, codec.getEncoderClass());
 
         final BsonDocument document = new BsonDocument();
         final BsonWriter writer = new BsonDocumentWriter(document);
