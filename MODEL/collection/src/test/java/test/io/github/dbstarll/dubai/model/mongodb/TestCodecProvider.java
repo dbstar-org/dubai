@@ -25,7 +25,7 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.dubai.model.mongodb.codecs.NullableEnumCodec;
+import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodec;
 import io.github.dbstarll.utils.lang.EncryptUtils;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import junit.framework.TestCase;
@@ -35,7 +35,6 @@ import org.bson.BsonDocument;
 import org.bson.BsonDocumentReader;
 import org.bson.BsonDocumentWriter;
 import org.bson.BsonReader;
-import org.bson.BsonString;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
@@ -148,9 +147,9 @@ public class TestCodecProvider extends TestCase {
         final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
         @SuppressWarnings("unchecked") final Codec<SimpleEntity> codec = (Codec<SimpleEntity>) registry
                 .get(entity.getClass());
-        assertEquals(codec.getClass().getName(), "io.github.dbstarll.dubai.model.mongodb.MongoClientFactory$EntityCodec");
+        assertSame(EntityCodec.class, codec.getClass());
         assertNotEquals(SimpleEntity.class, codec.getEncoderClass());
-        assertEquals(entity.getClass(), codec.getEncoderClass());
+        assertSame(entity.getClass(), codec.getEncoderClass());
 
         entity.setType(Type.t1);
         final BsonDocument document = new BsonDocument();
@@ -163,31 +162,6 @@ public class TestCodecProvider extends TestCase {
         } catch (Throwable ex) {
             assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
-    }
-
-    /**
-     * 测试EnumCodec.
-     */
-    public void testEnumCodec() {
-        final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
-        final Codec<SimpleEntity.Type> codec = registry.get(SimpleEntity.Type.class);
-        assertSame(NullableEnumCodec.class, codec.getClass());
-        assertSame(SimpleEntity.Type.class, codec.getEncoderClass());
-
-        final BsonDocument document = new BsonDocument();
-        final BsonWriter writer = new BsonDocumentWriter(document);
-        writer.writeStartDocument();
-        writer.writeName("type");
-        codec.encode(writer, SimpleEntity.Type.t1, EncoderContext.builder().build());
-        assertEquals("t1", document.getString("type").getValue());
-
-        document.append("type2", new BsonString("ttt"));
-        final BsonReader reader = new BsonDocumentReader(document);
-        reader.readStartDocument();
-        reader.readName();
-        assertEquals(SimpleEntity.Type.t1, codec.decode(reader, DecoderContext.builder().build()));
-        reader.readName();
-        assertNull(codec.decode(reader, DecoderContext.builder().build()));
     }
 
     /**

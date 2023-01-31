@@ -12,7 +12,6 @@ import de.flapdoodle.reverse.TransitionWalker.ReachedState;
 import de.flapdoodle.reverse.transitions.Derive;
 import de.flapdoodle.reverse.transitions.Start;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.dubai.model.mongodb.codecs.NullableEnumCodec;
 import io.github.dbstarll.dubai.model.spring.autoconfigure.DatabaseAutoConfiguration;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.junit.AfterClass;
@@ -73,7 +72,6 @@ public class TestDatabaseAutoConfiguration {
     public void testCodecRegistry() {
         final CodecRegistry registry = db.getCodecRegistry();
         assertSame(EncryptedByteArrayCodec.class, registry.get(byte[].class).getClass());
-        assertSame(NullableEnumCodec.class, registry.get(Enum.class).getClass());
 //        System.out.println(registry.get(Enum.class).getClass());
     }
 }
