@@ -6,6 +6,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.commands.ServerAddress;
 import de.flapdoodle.embed.mongo.distribution.Version.Main;
+import de.flapdoodle.embed.mongo.transitions.ImmutableMongod.Builder;
 import de.flapdoodle.embed.mongo.transitions.Mongod;
 import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
 import de.flapdoodle.embed.process.io.ProcessOutput;
@@ -24,10 +25,12 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 public abstract class MongodTestCase {
-    protected Mongod mongod() {
-        return Mongod.builder()
-                .processOutput(Start.to(ProcessOutput.class).initializedWith(ProcessOutput.silent()))
-                .build();
+    protected static Builder mongodBuilder() {
+        return Mongod.builder().processOutput(Start.to(ProcessOutput.class).initializedWith(ProcessOutput.silent()));
+    }
+
+    protected static Mongod mongod() {
+        return mongodBuilder().build();
     }
 
     protected Bytes encryptedKey() {
