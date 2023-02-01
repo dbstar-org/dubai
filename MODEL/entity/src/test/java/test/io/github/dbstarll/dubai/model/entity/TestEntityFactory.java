@@ -384,4 +384,11 @@ public class TestEntityFactory {
                 new Class[]{EntityModifier.class, PojoFields.class}, (proxy, method, args) -> null);
         assertFalse(EntityFactory.isEntityProxy(entityNoEntity.getClass()));
     }
+
+    @Test
+    public void testIsEntityInterface() {
+        assertTrue(EntityFactory.isEntityInterface(InterfaceEntity.class));
+        assertFalse(EntityFactory.isEntityInterface(ClassEntity.class));
+        assertFalse(EntityFactory.isEntityInterface(NoTableEntity.class));
+    }
 }
