@@ -23,6 +23,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -44,12 +45,14 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
     private boolean recursion;
 
     @Override
-    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@NonNull final ConfigurableListableBeanFactory beanFactory)
+            throws BeansException {
         // do nothing
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(@NonNull final BeanDefinitionRegistry registry)
+            throws BeansException {
         createIfMissCollectionFactory(registry);
         for (String basePackage : basePackages) {
             try {
@@ -75,7 +78,6 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void doScan(final String basePackage, final BeanDefinitionRegistry registry)
             throws IOException, ClassNotFoundException {
         final String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
@@ -84,8 +86,7 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         for (Resource resource : RESOURCE_RESOLVER.getResources(packageSearchPath)) {
             final MetadataReader metadataReader = METADATA_FACTORY.getMetadataReader(resource);
             if (TYPE_FILTER.match(metadataReader, METADATA_FACTORY)) {
-                final Class<? extends Entity> entityClass = (Class<? extends Entity>) Class
-                        .forName(metadataReader.getClassMetadata().getClassName());
+                final Class<?> entityClass = Class.forName(metadataReader.getClassMetadata().getClassName());
                 if (EntityFactory.isEntityClass(entityClass)) {
                     final String beanName = StringUtils.uncapitalize(entityClass.getSimpleName()) + "Collection";
                     registerBeanDefinition(registry, entityClass, beanName, 0);
@@ -94,9 +95,8 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         }
     }
 
-    private <E extends Entity> void registerBeanDefinition(
-            final BeanDefinitionRegistry registry, final Class<E> entityClass,
-            final String baseBeanName, final int index) {
+    private void registerBeanDefinition(final BeanDefinitionRegistry registry, final Class<?> entityClass,
+                                        final String baseBeanName, final int index) {
         final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
         if (registry.containsBeanDefinition(beanName)) {
             final BeanDefinition definition = registry.getBeanDefinition(beanName);
@@ -113,7 +113,7 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         }
     }
 
-    private <E extends Entity> BeanDefinition buildCollection(final Class<E> entityClass) {
+    private BeanDefinition buildCollection(final Class<?> entityClass) {
         return BeanDefinitionBuilder
                 .genericBeanDefinition(entityClass)
                 .setFactoryMethodOnBean("newInstance", collectionFactoryBeanName)

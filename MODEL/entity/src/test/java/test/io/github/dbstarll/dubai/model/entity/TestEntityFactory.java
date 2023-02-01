@@ -25,7 +25,9 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestEntityFactory {
     /**
@@ -362,7 +364,24 @@ public class TestEntityFactory {
             Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
             Assert.assertNotNull(ex.getCause());
             Assert.assertEquals(CloneNotSupportedException.class, ex.getCause().getClass());
-            Assert.assertEquals("Exception cloning Cloneable type " + NoModifierCloneEntity.class.getName(), ex.getMessage());
+            Assert.assertEquals("Exception cloning Cloneable type " + NoModifierCloneEntity.class.getName(),
+                    ex.getMessage());
         }
+    }
+
+    @Test
+    public void testIsEntityProxy() {
+        assertFalse(EntityFactory.isEntityProxy(InterfaceEntity.class));
+        assertTrue(EntityFactory.isEntityProxy(EntityFactory.newInstance(InterfaceEntity.class).getClass()));
+
+        final InterfaceEntity entityNoPojoFields = (InterfaceEntity) Proxy.newProxyInstance(
+                InterfaceEntity.class.getClassLoader(),
+                new Class[]{EntityModifier.class, InterfaceEntity.class}, (proxy, method, args) -> null);
+        assertFalse(EntityFactory.isEntityProxy(entityNoPojoFields.getClass()));
+
+        final EntityModifier entityNoEntity = (EntityModifier) Proxy.newProxyInstance(
+                InterfaceEntity.class.getClassLoader(),
+                new Class[]{EntityModifier.class, PojoFields.class}, (proxy, method, args) -> null);
+        assertFalse(EntityFactory.isEntityProxy(entityNoEntity.getClass()));
     }
 }

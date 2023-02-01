@@ -27,6 +27,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
@@ -48,12 +49,14 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     private boolean recursion;
 
     @Override
-    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(@NonNull final ConfigurableListableBeanFactory beanFactory)
+            throws BeansException {
         // do nothing
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
+    public void postProcessBeanDefinitionRegistry(@NonNull final BeanDefinitionRegistry registry)
+            throws BeansException {
         if (basePackages == null || basePackages.length == 0) {
             throw new BeanInitializationException("basePackages not set.");
         }
@@ -119,14 +122,12 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
         if (genericType instanceof ParameterizedType) {
             for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
-                if (Entity.class.isAssignableFrom((Class<?>) type)) {
-                    @SuppressWarnings("unchecked") final Class<E> entityClass = (Class<E>) type;
-                    if (EntityFactory.isEntityClass(entityClass)) {
-                        return entityClass;
-                    }
+                if (EntityFactory.isEntityClass((Class<?>) type)) {
+                    return (Class<E>) type;
                 }
             }
         }

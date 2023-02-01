@@ -304,6 +304,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(final Object o) {
             if (!super.equals(o)) {
@@ -348,7 +349,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             if (!super.equals(o)) {
                 return false;
             }
-            final DescriptionValidation that = (DescriptionValidation) o;
+            @SuppressWarnings("unchecked") final DescriptionValidation that = (DescriptionValidation) o;
             return this.maxLength == that.maxLength;
         }
 

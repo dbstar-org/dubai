@@ -1,6 +1,7 @@
 package io.github.dbstarll.dubai.model.notify;
 
 import io.github.dbstarll.dubai.model.entity.Entity;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.join.CompanyBase;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ public final class EntityNotifyConsumer implements NotifyListener, Closeable {
         if (!entityClasses.containsKey(className)) {
             try {
                 final Class<?> entityClass = getClass().getClassLoader().loadClass(className);
-                if (Entity.class.isAssignableFrom(entityClass)) {
+                if (EntityFactory.isEntityClass(entityClass)) {
                     entityClasses.putIfAbsent(className, (Class<? extends Entity>) entityClass);
                 } else {
                     LOGGER.warn("Unknown Entity Class: {}", entityClass);

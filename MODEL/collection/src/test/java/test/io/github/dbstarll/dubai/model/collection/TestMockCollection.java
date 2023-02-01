@@ -98,6 +98,7 @@ public class TestMockCollection {
                 return null;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public <T> T execute(WriteOperation<T> writeOperation, ReadConcern readConcern, ClientSession clientSession) {
                 final MixedBulkWriteOperation op = (MixedBulkWriteOperation) writeOperation;

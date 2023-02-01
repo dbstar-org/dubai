@@ -11,6 +11,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.lang.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,7 +60,7 @@ public class TestMongoCollectionBeanInitializer {
 
         final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry() {
             @Override
-            public boolean containsBeanDefinition(String beanName) {
+            public boolean containsBeanDefinition(@NonNull String beanName) {
                 if (COLLECTION_FACTORY_BEAN_NAME.equals(beanName)) {
                     containsCounter.incrementAndGet();
                 }
@@ -67,7 +68,7 @@ public class TestMongoCollectionBeanInitializer {
             }
 
             @Override
-            public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+            public void registerBeanDefinition(@NonNull String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
                 super.registerBeanDefinition(beanName, beanDefinition);
                 if (COLLECTION_FACTORY_BEAN_NAME.equals(beanName)) {
                     registerCounter.incrementAndGet();
@@ -130,7 +131,8 @@ public class TestMongoCollectionBeanInitializer {
     public void testException() {
         final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry() {
             @Override
-            public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
+            public void registerBeanDefinition(@NonNull String beanName, BeanDefinition beanDefinition)
+                    throws BeanDefinitionStoreException {
                 if ("simpleEntityCollection".equals(beanName)) {
                     throw new IllegalArgumentException("TestIOException");
                 }

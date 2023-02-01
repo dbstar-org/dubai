@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +29,7 @@ public class TestCollectionAutoConfiguration implements ApplicationContextAware 
     private ApplicationContext ctx;
 
     @Override
-    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext ctx) throws BeansException {
         this.ctx = ctx;
     }
 

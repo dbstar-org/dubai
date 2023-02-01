@@ -1,6 +1,7 @@
 package org.bson.codecs.pojo;
 
 import io.github.dbstarll.dubai.model.entity.Entity;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.EntityInstanceCreatorFactory;
 import org.bson.codecs.configuration.CodecConfigurationException;
@@ -31,7 +32,7 @@ public final class EntityConvention implements Convention {
     @SuppressWarnings("unchecked")
     private <T> void process(final ClassModelBuilder<T> classModelBuilder) {
         final Class<T> entityClass = classModelBuilder.getType();
-        if (Entity.class.isAssignableFrom(entityClass) && entityClass.isInterface()) {
+        if (EntityFactory.isEntityInterface(entityClass)) {
             processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder);
         }
     }
