@@ -96,7 +96,7 @@ public final class EntityConvention implements Convention {
             // potentially less specific methods from super classes
             final PropertyMetadata<?> existPropertyMetadata = context.propertyNameMap.get(propertyName);
             if (existPropertyMetadata != null && existPropertyMetadata.getGetter() != null) {
-                return propertyName;
+                return existPropertyMetadata.getName();
             }
         }
 
@@ -116,7 +116,7 @@ public final class EntityConvention implements Convention {
             }
         }
 
-        return propertyName;
+        return propertyMetadata.getName();
     }
 
     private static <T> PropertyMetadata<T> getOrCreateMethodPropertyMetadata(
