@@ -15,6 +15,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -155,7 +156,8 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
             return false;
         }
         final EntityFactory<?> other = (EntityFactory<?>) handler;
-        return entityClass.equals(other.entityClass) && fields.equals(other.fields);
+        return entityClass.equals(other.entityClass) && fields.size() == other.fields.size() && fields.entrySet()
+                .stream().allMatch(e -> Objects.deepEquals(e.getValue(), other.fields.get(e.getKey())));
     }
 
     @Override
