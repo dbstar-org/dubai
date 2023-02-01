@@ -251,10 +251,12 @@ public final class EntityConvention implements Convention {
                     classModelBuilder.addProperty(createPropertyModelBuilder(propertyMetadata));
                 } else {
                     throw new CodecConfigurationException(
-                            String.format("Property '%s' in %s with data types: %s, need both getter[%s] and setter[%s]",
-                                    propertyName,
-                                    propertyMetadata.getDeclaringClassName(), propertyMetadata.getTypeData(),
-                                    propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()));
+                            String.format("Property '%s'[%s] in %s, need both getter[%s] and setter[%s]",
+                                    propertyName, propertyMetadata.getTypeData(),
+                                    propertyMetadata.getDeclaringClassName(),
+                                    propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()
+                            )
+                    );
                 }
             }
             classModelBuilder.annotations(annotations);
