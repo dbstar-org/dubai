@@ -46,47 +46,22 @@ public final class EntityConvention implements Convention {
         } else {
             entityClass = classModelBuilder.getType();
         }
-
-        final Set<String> propertyNames = new TreeSet<>();
-        final Map<String, PropertyMetadata<?>> propertyMetadatas = new HashMap<>();
-        final ArrayList<Annotation> annotations = new ArrayList<>();
-        final Map<String, TypeParameterMap> typeParameters = new HashMap<>();
-
-        collectMethods(EntityModifier.class, propertyNames, propertyMetadatas, annotations, typeParameters, null);
-        collectMethods(entityClass, propertyNames, propertyMetadatas, annotations, typeParameters, null);
-
-        for (final String propertyName : propertyNames) {
-            final PropertyMetadata<?> propertyMetadata = propertyMetadatas.get(propertyName);
-            if (propertyMetadata.isSerializable() && propertyMetadata.isDeserializable()) {
-                classModelBuilder.removeProperty(propertyMetadata.getName());
-                classModelBuilder.addProperty(createPropertyModelBuilder(propertyMetadata));
-            } else {
-                throw new CodecConfigurationException(
-                        String.format("Property '%s' in %s with data types: %s, need both getter[%s] and setter[%s]",
-                                propertyName,
-                                propertyMetadata.getDeclaringClassName(), propertyMetadata.getTypeData(),
-                                propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()));
-            }
-        }
-
-        classModelBuilder.annotations(annotations);
-        classModelBuilder.propertyNameToTypeParameterMap(typeParameters);
-
         classModelBuilder.instanceCreatorFactory(new EntityInstanceCreatorFactory<>(entityClass));
+
+        final Context context = new Context();
+        collectMethods(EntityModifier.class, context, null);
+        collectMethods(entityClass, context, null);
+        context.process(classModelBuilder);
     }
 
-    private static <T, S> void collectMethods(final Class<T> entityInterface, final Set<String> propertyNames,
-                                              final Map<String, PropertyMetadata<?>> propertyMetadatas,
-                                              final ArrayList<Annotation> annotations,
-                                              final Map<String, TypeParameterMap> typeParameterMaps,
+    private static <T, S> void collectMethods(final Class<T> entityInterface, final Context context,
                                               final TypeData<S> parentClassTypeData) {
         for (Type t : entityInterface.getGenericInterfaces()) {
             final TypeData<T> classTypeData = TypeData.newInstance(t, entityInterface);
             if (t instanceof ParameterizedType) {
                 t = ((ParameterizedType) t).getRawType();
             }
-            collectMethods((Class<?>) t, propertyNames, propertyMetadatas, annotations, typeParameterMaps,
-                    classTypeData);
+            collectMethods((Class<?>) t, context, classTypeData);
         }
 
         final String declaringClassName = entityInterface.toString();
@@ -94,31 +69,23 @@ public final class EntityConvention implements Convention {
                 .map(TypeVariable::getName).collect(Collectors.toList());
 
         final PropertyMethods propertyMethods = PropertyReflectionUtils.getPropertyMethods(entityInterface);
-        propertyMethods.getSetterMethods().stream()
-                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                        parentClassTypeData, genericTypeNames, method, false))
-                .forEach(propertyNames::add);
-        propertyMethods.getGetterMethods().stream()
-                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                        parentClassTypeData, genericTypeNames, method, true))
-                .forEach(propertyNames::add);
+        propertyMethods.getSetterMethods().stream().map(method -> collectMethod(declaringClassName, context,
+                parentClassTypeData, genericTypeNames, method, false)).forEach(context.propertyNames::add);
+        propertyMethods.getGetterMethods().stream().map(method -> collectMethod(declaringClassName, context,
+                parentClassTypeData, genericTypeNames, method, true)).forEach(context.propertyNames::add);
 
-        annotations.addAll(Arrays.asList(entityInterface.getDeclaredAnnotations()));
+        context.annotations.addAll(Arrays.asList(entityInterface.getDeclaredAnnotations()));
     }
 
-    private static <S> String collectMethod(final String declaringClassName,
-                                            final Map<String, PropertyMetadata<?>> propertyNameMap,
-                                            final Map<String, TypeParameterMap> propertyTypeParameterMap,
-                                            final TypeData<S> parentClassTypeData,
-                                            final List<String> genericTypeNames,
-                                            final Method method,
-                                            final boolean getter) {
+    private static <S> String collectMethod(final String declaringClassName, final Context context,
+                                            final TypeData<S> parentClassTypeData, final List<String> genericTypeNames,
+                                            final Method method, final boolean getter) {
         final String propertyName = PropertyReflectionUtils.toPropertyName(method);
 
         final Type genericType = getter ? method.getGenericReturnType() : method.getGenericParameterTypes()[0];
         final PropertyMetadata<?> propertyMetadata = getOrCreateMethodPropertyMetadata(
-                propertyName, declaringClassName, propertyNameMap, TypeData.newInstance(method));
-        cachePropertyTypeData(propertyMetadata, propertyTypeParameterMap, parentClassTypeData, genericTypeNames,
+                propertyName, declaringClassName, context, TypeData.newInstance(method));
+        cachePropertyTypeData(propertyMetadata, context, parentClassTypeData, genericTypeNames,
                 genericType);
         if (!getter && propertyMetadata.getSetter() == null) {
             propertyMetadata.setSetter(method);
@@ -137,9 +104,9 @@ public final class EntityConvention implements Convention {
 
     private static <T> PropertyMetadata<T> getOrCreateMethodPropertyMetadata(
             final String propertyName, final String declaringClassName,
-            final Map<String, PropertyMetadata<?>> propertyNameMap, final TypeData<T> typeData) {
+            final Context context, final TypeData<T> typeData) {
         final PropertyMetadata<T> propertyMetadata = getOrCreatePropertyMetadata(propertyName, declaringClassName,
-                propertyNameMap, typeData);
+                context, typeData);
         if (!propertyMetadata.getTypeData().getType().isAssignableFrom(typeData.getType())) {
             throw new CodecConfigurationException(
                     String.format("Property '%s' in %s, has differing data types: %s and %s",
@@ -151,19 +118,18 @@ public final class EntityConvention implements Convention {
     @SuppressWarnings("unchecked")
     private static <T> PropertyMetadata<T> getOrCreatePropertyMetadata(
             final String propertyName, final String declaringClassName,
-            final Map<String, PropertyMetadata<?>> propertyNameMap, final TypeData<T> typeData) {
-        return (PropertyMetadata<T>) propertyNameMap.computeIfAbsent(propertyName,
+            final Context context, final TypeData<T> typeData) {
+        return (PropertyMetadata<T>) context.propertyMetadatas.computeIfAbsent(propertyName,
                 k -> new PropertyMetadata<>(k, declaringClassName, typeData));
     }
 
-    private static <T, S> void cachePropertyTypeData(final PropertyMetadata<T> propertyMetadata,
-                                                     final Map<String, TypeParameterMap> propertyTypeParameterMap,
+    private static <T, S> void cachePropertyTypeData(final PropertyMetadata<T> propertyMetadata, final Context context,
                                                      final TypeData<S> parentClassTypeData,
                                                      final List<String> genericTypeNames, final Type genericType) {
         if (parentClassTypeData != null && !parentClassTypeData.getTypeParameters().isEmpty()) {
             final TypeParameterMap typeParameter = getTypeParameterMap(propertyMetadata, genericTypeNames, genericType);
             if (typeParameter.hasTypeParameters()) {
-                propertyTypeParameterMap.put(propertyMetadata.getName(), typeParameter);
+                context.typeParameters.put(propertyMetadata.getName(), typeParameter);
                 propertyMetadata.typeParameterInfo(typeParameter, parentClassTypeData);
             }
         } else if (genericType instanceof TypeVariable) {
@@ -269,5 +235,30 @@ public final class EntityConvention implements Convention {
                     specializeFieldType(fieldToClassParamIndexMap, parentClassTypeParameters, typeParameter, index));
         }
         return builder.build();
+    }
+
+    private static class Context {
+        private final Set<String> propertyNames = new TreeSet<>();
+        private final Map<String, PropertyMetadata<?>> propertyMetadatas = new HashMap<>();
+        private final ArrayList<Annotation> annotations = new ArrayList<>();
+        private final Map<String, TypeParameterMap> typeParameters = new HashMap<>();
+
+        private <T> void process(final ClassModelBuilder<T> classModelBuilder) {
+            for (final String propertyName : propertyNames) {
+                final PropertyMetadata<?> propertyMetadata = propertyMetadatas.get(propertyName);
+                if (propertyMetadata.isSerializable() && propertyMetadata.isDeserializable()) {
+                    classModelBuilder.removeProperty(propertyMetadata.getName());
+                    classModelBuilder.addProperty(createPropertyModelBuilder(propertyMetadata));
+                } else {
+                    throw new CodecConfigurationException(
+                            String.format("Property '%s' in %s with data types: %s, need both getter[%s] and setter[%s]",
+                                    propertyName,
+                                    propertyMetadata.getDeclaringClassName(), propertyMetadata.getTypeData(),
+                                    propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()));
+                }
+            }
+            classModelBuilder.annotations(annotations);
+            classModelBuilder.propertyNameToTypeParameterMap(typeParameters);
+        }
     }
 }
