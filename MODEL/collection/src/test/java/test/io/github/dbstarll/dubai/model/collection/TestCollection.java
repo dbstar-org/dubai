@@ -8,6 +8,8 @@ import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 
 public class TestCollection extends MongodTestCase {
     @Test
@@ -18,8 +20,14 @@ public class TestCollection extends MongodTestCase {
 
             final SimpleEntity saved = collection.save(entity);
             assertNotNull(saved);
+            assertSame(entity, saved);
 
             assertEquals(1, collection.count());
+
+            final SimpleEntity loaded = collection.findById(entity.getId());
+            assertNotNull(loaded);
+            assertEquals(saved, loaded);
+            assertNotSame(saved, loaded);
         });
     }
 }
