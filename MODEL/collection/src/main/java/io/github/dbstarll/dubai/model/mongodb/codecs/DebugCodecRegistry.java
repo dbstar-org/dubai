@@ -1,4 +1,4 @@
-package io.github.dbstarll.dubai.model.mongodb;
+package io.github.dbstarll.dubai.model.mongodb.codecs;
 
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;

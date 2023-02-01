@@ -7,6 +7,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import io.github.dbstarll.dubai.model.mongodb.codecs.DebugCodecRegistry;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodecProvider;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
