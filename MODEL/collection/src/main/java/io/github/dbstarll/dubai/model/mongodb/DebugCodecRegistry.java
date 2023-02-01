@@ -5,12 +5,8 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 public class DebugCodecRegistry implements CodecRegistry {
     private static final Logger LOGGER = LoggerFactory.getLogger(DebugCodecRegistry.class);
-    private static final ConcurrentMap<Class<?>, String> MAP = new ConcurrentHashMap<>();
 
     private final CodecRegistry registry;
 
@@ -25,17 +21,16 @@ public class DebugCodecRegistry implements CodecRegistry {
 
     @Override
     public <T> Codec<T> get(final Class<T> clazz) {
-        final Codec<T> codec = registry.get(clazz);
-        MAP.computeIfAbsent(clazz, c -> {
-            final String val = String.format("%s -> %s", c, codec);
-            LOGGER.debug(val);
-            return val;
-        });
-        return codec;
+        return debug(clazz, registry.get(clazz));
     }
 
     @Override
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry dependentRegistry) {
-        return this.registry.get(clazz, dependentRegistry);
+        return debug(clazz, registry.get(clazz, dependentRegistry));
+    }
+
+    private <T> Codec<T> debug(final Class<T> clazz, final Codec<T> codec) {
+        LOGGER.debug("{} -> {}", clazz, codec);
+        return codec;
     }
 }
