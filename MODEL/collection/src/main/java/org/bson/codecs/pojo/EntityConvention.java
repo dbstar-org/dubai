@@ -33,12 +33,19 @@ public final class EntityConvention implements Convention {
     private <T> void process(final ClassModelBuilder<T> classModelBuilder) {
         final Class<T> entityClass = classModelBuilder.getType();
         if (EntityFactory.isEntityInterface(entityClass)) {
-            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder);
+            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder, false);
+        } else if (EntityFactory.isEntityProxy(entityClass)) {
+            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder, true);
         }
     }
 
-    private <T extends Entity> void processEntity(final ClassModelBuilder<T> classModelBuilder) {
-        final Class<T> entityClass = classModelBuilder.getType();
+    private <T extends Entity> void processEntity(final ClassModelBuilder<T> classModelBuilder, final boolean proxy) {
+        final Class<T> entityClass;
+        if (proxy) {
+            entityClass = EntityFactory.getEntityClass(classModelBuilder.getType());
+        } else {
+            entityClass = classModelBuilder.getType();
+        }
 
         final Set<String> propertyNames = new TreeSet<>();
         final Map<String, PropertyMetadata<?>> propertyMetadatas = new HashMap<>();
@@ -51,6 +58,7 @@ public final class EntityConvention implements Convention {
         for (final String propertyName : propertyNames) {
             final PropertyMetadata<?> propertyMetadata = propertyMetadatas.get(propertyName);
             if (propertyMetadata.isSerializable() && propertyMetadata.isDeserializable()) {
+                classModelBuilder.removeProperty(propertyMetadata.getName());
                 classModelBuilder.addProperty(createPropertyModelBuilder(propertyMetadata));
             } else {
                 throw new CodecConfigurationException(

@@ -9,7 +9,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import io.github.dbstarll.dubai.model.mongodb.codecs.DebugCodecRegistry;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodecProvider;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.codecs.configuration.CodecProvider;
@@ -112,7 +111,6 @@ public final class MongoClientFactory {
         return clientSettingsBuilder.codecRegistry(new DebugCodecRegistry(
                 CodecRegistries.fromRegistries(
                         CodecRegistries.fromCodecs(new EncryptedByteArrayCodec(encryptedKey)),
-                        CodecRegistries.fromProviders(new EntityCodecProvider()),
                         originalCodecRegistry,
                         CodecRegistries.fromProviders(pojoCodecProvider)
                 )));

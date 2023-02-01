@@ -25,7 +25,6 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.dubai.model.mongodb.codecs.EntityCodec;
 import io.github.dbstarll.utils.lang.EncryptUtils;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import junit.framework.TestCase;
@@ -51,7 +50,6 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class TestCodecProvider extends TestCase {
     private MongoClient client;
@@ -136,31 +134,6 @@ public class TestCodecProvider extends TestCase {
             fail("throw CodecConfigurationException");
         } catch (Throwable ex) {
             assertCodecNotFound(ex);
-        }
-    }
-
-    /**
-     * 测试EntityCodec.
-     */
-    public void testEntityCodec() {
-        final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
-        final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
-        @SuppressWarnings("unchecked") final Codec<SimpleEntity> codec = (Codec<SimpleEntity>) registry
-                .get(entity.getClass());
-        assertSame(EntityCodec.class, codec.getClass());
-        assertNotEquals(SimpleEntity.class, codec.getEncoderClass());
-        assertSame(entity.getClass(), codec.getEncoderClass());
-
-        entity.setType(Type.t1);
-        final BsonDocument document = new BsonDocument();
-        codec.encode(new BsonDocumentWriter(document), entity, EncoderContext.builder().build());
-        assertEquals("t1", document.getString("type").getValue());
-
-        try {
-            codec.decode(new BsonDocumentReader(document), DecoderContext.builder().build());
-            fail("throw UnsupportedOperationException");
-        } catch (Throwable ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
     }
 
