@@ -429,6 +429,7 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
             final List<Bson> pipelines = new ArrayList<>();
             pipelines.add(Aggregates.group("$type", Accumulators.sum("num", 1)));
             pipelines.add(Aggregates.sort(Sorts.ascending("_id")));
+            assertNull(c.aggregate(pipelines).first());
             assertNull(c.aggregate(pipelines, Document.class).first());
 
             final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
