@@ -1,12 +1,11 @@
 package test.io.github.dbstarll.dubai.model.collection;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.cache.EntityCacheManager;
 import io.github.dbstarll.dubai.model.collection.AnnotationCollectionNameGenerator;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.CollectionInitializeException;
+import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.collection.test.CacheableEntity;
 import io.github.dbstarll.dubai.model.collection.test.DefunctableEntity;
 import io.github.dbstarll.dubai.model.collection.test.NotifiableEntity;
@@ -15,87 +14,95 @@ import io.github.dbstarll.dubai.model.entity.test.ClassNoTableEntity;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.NoTableEntity;
 import io.github.dbstarll.dubai.model.notify.NotifyProvider;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
-import mockit.Verifications;
+import io.github.dbstarll.dubai.model.notify.NotifyType;
+import org.bson.types.ObjectId;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-public class TestCollectionFactory {
-    @Tested
-    CollectionFactory collectionFactory;
+public class TestCollectionFactory extends MongodTestCase {
+    @BeforeClass
+    public static void beforeClass() {
+        globalCollectionFactory();
+    }
 
-    @Injectable
-    MongoDatabase mongoDatabase;
-
-    @Mocked
-    MongoCollection<?> mongoCollection;
-
-    private <E extends Entity> void testGetCollection(final Class<E> entityClass) {
-        new Expectations() {
-            {
-                mongoDatabase.getCollection(anyString, entityClass);
-                result = mongoCollection;
-                mongoCollection.getDocumentClass();
-                result = entityClass;
-            }
-        };
-
-        final Collection<E> collection = collectionFactory.newInstance(entityClass);
+    private <E extends Entity> void testGetCollection(final CollectionFactory cf, final Class<E> entityClass) {
+        final Collection<E> collection = cf.newInstance(entityClass);
+        assertNotNull(collection);
         assertEquals(entityClass, collection.getEntityClass());
-
-        new Verifications() {
-            {
-                mongoDatabase.getCollection(anyString, entityClass);
-                times = 1;
-                mongoCollection.getDocumentClass();
-                times = 1;
-            }
-        };
     }
 
     @Test
     public void testGetCollection() {
-        testGetCollection(InterfaceEntity.class);
-        testGetCollection(DefunctableEntity.class);
-        testGetCollection(NotifiableEntity.class);
-        testGetCollection(CacheableEntity.class);
+        useCollectionFactory(cf -> {
+            testGetCollection(cf, InterfaceEntity.class);
+            testGetCollection(cf, DefunctableEntity.class);
+            testGetCollection(cf, NotifiableEntity.class);
+            testGetCollection(cf, CacheableEntity.class);
+        });
     }
 
     @Test
-    public void testGetCollectionInject(@Mocked NotifyProvider notifyProvider,
-                                        @Mocked EntityCacheManager entityCacheManager) {
-        collectionFactory.setEntityCacheManager(entityCacheManager);
-        collectionFactory.setNotifyProvider(notifyProvider);
-        collectionFactory.setCollectionNameGenerator(new AnnotationCollectionNameGenerator());
+    public void testGetCollectionInject() {
+        final NotifyProvider notifyProvider = new NotifyProvider() {
+            @Override
+            public <E extends Entity> void doNotify(E e, NotifyType notifyType) {
+                //do nothing
+            }
+        };
+        final EntityCacheManager entityCacheManager = new EntityCacheManager() {
+            @Override
+            public <E extends Entity> E find(Class<E> entityClass, String key, UpdateCacheHandler<E> updateCacheHandler) {
+                return null;
+            }
 
-        testGetCollection(InterfaceEntity.class);
-        testGetCollection(DefunctableEntity.class);
-        testGetCollection(NotifiableEntity.class);
-        testGetCollection(CacheableEntity.class);
+            @Override
+            public <E extends Entity> void update(Class<E> entityClass, ObjectId entityId, NotifyType notifyType) {
+                //do nothing
+            }
+
+            @Override
+            public <E extends Entity> void set(String key, E entity) {
+                //do nothing
+            }
+        };
+        final CollectionNameGenerator nameGenerator = new AnnotationCollectionNameGenerator();
+        useCollectionFactory(cf -> {
+            cf.setEntityCacheManager(entityCacheManager);
+            cf.setNotifyProvider(notifyProvider);
+            cf.setCollectionNameGenerator(nameGenerator);
+            testGetCollection(cf, InterfaceEntity.class);
+            testGetCollection(cf, DefunctableEntity.class);
+            testGetCollection(cf, NotifiableEntity.class);
+            testGetCollection(cf, CacheableEntity.class);
+        });
     }
 
     @Test
     public void testGetCollectionNotEntity() {
-        try {
-            collectionFactory.newInstance(NoTableEntity.class);
-            fail("throw CollectionInitializeException");
-        } catch (CollectionInitializeException ex) {
-            assertEquals(ex.getMessage(), "Invalid EntityClass: " + NoTableEntity.class);
-        }
+        useCollectionFactory(cf -> {
+            try {
+                cf.newInstance(NoTableEntity.class);
+                fail("throw CollectionInitializeException");
+            } catch (CollectionInitializeException ex) {
+                assertEquals(ex.getMessage(), "Invalid EntityClass: " + NoTableEntity.class);
+            }
+        });
     }
 
     @Test
     public void testGetCollectionClassEntity() {
-        try {
-            collectionFactory.newInstance(ClassNoTableEntity.class);
-            fail("throw RuntimeException");
-        } catch (RuntimeException ex) {
-            assertEquals(ex.getMessage(), "Invalid EntityClass: " + ClassNoTableEntity.class);
-        }
+        useCollectionFactory(cf -> {
+            try {
+                cf.newInstance(ClassNoTableEntity.class);
+                fail("throw RuntimeException");
+            } catch (RuntimeException ex) {
+                assertEquals(ex.getMessage(), "Invalid EntityClass: " + ClassNoTableEntity.class);
+            }
+        });
     }
 }
