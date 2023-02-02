@@ -72,7 +72,7 @@ public class TestCodecProvider extends MongodTestCase {
             final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
             entity.setType(Type.t1);
             entity.setBytes(new ObjectId().toByteArray());
-            c.save(entity);
+            assertSame(entity, c.save(entity));
         });
     }
 
@@ -81,7 +81,10 @@ public class TestCodecProvider extends MongodTestCase {
      */
     @Test
     public void testClassEntity() {
-        useCollection(SimpleClassEntity.class, c -> c.save(EntityFactory.newInstance(SimpleClassEntity.class)));
+        useCollection(SimpleClassEntity.class, c -> {
+            final SimpleClassEntity entity = EntityFactory.newInstance(SimpleClassEntity.class);
+            assertSame(entity, c.save(entity));
+        });
     }
 
     /**
@@ -228,7 +231,7 @@ public class TestCodecProvider extends MongodTestCase {
             final SimpleGenericEntity entity = EntityFactory.newInstance(SimpleGenericEntity.class);
             entity.setKey("key");
             entity.setValue(100);
-            c.save(entity);
+            assertSame(entity, c.save(entity));
         });
     }
 
@@ -355,8 +358,10 @@ public class TestCodecProvider extends MongodTestCase {
 
     @Test
     public void testOverrideSetWithSubClassEntity() {
-        useCollection(OverrideSetWithSubClassEntity.class,
-                c -> c.save(EntityFactory.newInstance(OverrideSetWithSubClassEntity.class)));
+        useCollection(OverrideSetWithSubClassEntity.class, c -> {
+            final OverrideSetWithSubClassEntity entity = EntityFactory.newInstance(OverrideSetWithSubClassEntity.class);
+            assertEquals(entity, c.save(entity));
+        });
     }
 
     @Test
@@ -389,8 +394,10 @@ public class TestCodecProvider extends MongodTestCase {
 
     @Test
     public void testOverrideGetWithSubClassEntity() {
-        useCollection(OverrideGetWithSubClassEntity.class,
-                c -> c.save(EntityFactory.newInstance(OverrideGetWithSubClassEntity.class)));
+        useCollection(OverrideGetWithSubClassEntity.class, c -> {
+            final OverrideGetWithSubClassEntity entity = EntityFactory.newInstance(OverrideGetWithSubClassEntity.class);
+            assertEquals(entity, c.save(entity));
+        });
     }
 
     private void assertCodecNotFound(Throwable ex) {
