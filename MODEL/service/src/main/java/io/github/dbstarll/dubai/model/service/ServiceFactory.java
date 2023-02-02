@@ -2,6 +2,7 @@ package io.github.dbstarll.dubai.model.service;
 
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
@@ -317,6 +318,43 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             }
         }
         return (Class<S>) proxy.getClass();
+    }
+
+    /**
+     * 获得一个服务类对应的实体类.
+     *
+     * @param serviceClass 服务类
+     * @param <E>          实体类
+     * @param <S>          服务类
+     * @return 实体类
+     */
+    public static <E extends Entity, S extends Service<E>> Class<E> getEntityClass(final Class<S> serviceClass) {
+        final Type genericSuperclass = serviceClass.getGenericSuperclass();
+        if (genericSuperclass != null) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericSuperclass);
+            if (entityClass != null) {
+                return entityClass;
+            }
+        }
+        for (Type genericInterface : serviceClass.getGenericInterfaces()) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericInterface);
+            if (entityClass != null) {
+                return entityClass;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
+        if (genericType instanceof ParameterizedType) {
+            for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
+                if (EntityFactory.isEntityClass((Class<?>) type)) {
+                    return (Class<E>) type;
+                }
+            }
+        }
+        return null;
     }
 
     public interface GeneralValidateable<E extends Entity> {

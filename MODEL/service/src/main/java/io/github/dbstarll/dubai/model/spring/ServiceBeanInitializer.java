@@ -1,7 +1,6 @@
 package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.entity.Entity;
-import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.service.Service;
 import io.github.dbstarll.dubai.model.service.ServiceFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -31,8 +30,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBeanInitializer.class);
@@ -90,7 +87,7 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     private <E extends Entity, S extends Service<E>> void registerService(final Class<S> serviceClass,
                                                                           final BeanDefinitionRegistry registry) {
         if (ServiceFactory.isServiceClass(serviceClass)) {
-            final Class<E> entityClass = getEntityClass(serviceClass);
+            final Class<E> entityClass = ServiceFactory.getEntityClass(serviceClass);
             if (entityClass != null) {
                 final String serviceBeanName = getServiceBeanName(serviceClass);
                 if (registry.containsBeanDefinition(serviceBeanName)) {
@@ -103,35 +100,6 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
                 registry.registerBeanDefinition(serviceBeanName, definition);
             }
         }
-    }
-
-    private <E extends Entity, S extends Service<E>> Class<E> getEntityClass(final Class<S> serviceClass) {
-        final Type genericSuperclass = serviceClass.getGenericSuperclass();
-        if (genericSuperclass != null) {
-            final Class<E> entityClass = getEntityClassFromGeneric(genericSuperclass);
-            if (entityClass != null) {
-                return entityClass;
-            }
-        }
-        for (Type genericInterface : serviceClass.getGenericInterfaces()) {
-            final Class<E> entityClass = getEntityClassFromGeneric(genericInterface);
-            if (entityClass != null) {
-                return entityClass;
-            }
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
-        if (genericType instanceof ParameterizedType) {
-            for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
-                if (EntityFactory.isEntityClass((Class<?>) type)) {
-                    return (Class<E>) type;
-                }
-            }
-        }
-        return null;
     }
 
     private <E extends Entity, S extends Service<E>> String getServiceBeanName(final Class<S> serviceClass) {
