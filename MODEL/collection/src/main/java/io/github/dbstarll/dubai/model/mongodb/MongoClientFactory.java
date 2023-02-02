@@ -7,7 +7,6 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import io.github.dbstarll.dubai.model.mongodb.codecs.DebugCodecRegistry;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import org.apache.commons.lang3.StringUtils;
@@ -108,12 +107,10 @@ public final class MongoClientFactory {
         conventions.addAll(Conventions.DEFAULT_CONVENTIONS);
         final CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .conventions(conventions).automatic(true).build();
-        return clientSettingsBuilder.codecRegistry(new DebugCodecRegistry(
-                CodecRegistries.fromRegistries(
-                        CodecRegistries.fromCodecs(new EncryptedByteArrayCodec(encryptedKey)),
-                        originalCodecRegistry,
-                        CodecRegistries.fromProviders(pojoCodecProvider)
-                )));
+        return clientSettingsBuilder.codecRegistry(CodecRegistries.fromRegistries(
+                CodecRegistries.fromCodecs(new EncryptedByteArrayCodec(encryptedKey)),
+                originalCodecRegistry, CodecRegistries.fromProviders(pojoCodecProvider)
+        ));
     }
 
     private static List<ServerAddress> parseServers(final String servers) {
