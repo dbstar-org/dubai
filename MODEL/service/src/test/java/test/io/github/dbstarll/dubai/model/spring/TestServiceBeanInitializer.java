@@ -9,6 +9,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.StaticApplicationContext;
 
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class TestServiceBeanInitializer extends TestCase {
     public void testPostProcessBeanFactory() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         try {
-            initializer.postProcessBeanFactory(null);
+            initializer.postProcessBeanFactory(new DefaultListableBeanFactory());
         } catch (Exception ex) {
             fail("catch exception");
         }

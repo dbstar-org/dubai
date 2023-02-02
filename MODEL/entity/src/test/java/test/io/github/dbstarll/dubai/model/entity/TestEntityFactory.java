@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class TestEntityFactory {
@@ -322,6 +323,7 @@ public class TestEntityFactory {
         entity1.setStringFromInterfaceEntity(stringValue);
 
         final InterfaceEntity entity2 = EntityFactory.clone(entity1);
+        assertNotNull(entity2);
 
         Assert.assertNotSame(entity1, entity2);
         Assert.assertEquals(entity1.hashCode(), entity2.hashCode());

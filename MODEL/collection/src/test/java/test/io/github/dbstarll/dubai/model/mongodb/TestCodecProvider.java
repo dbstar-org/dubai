@@ -21,6 +21,10 @@ import io.github.dbstarll.dubai.model.collection.test.SimpleClassEntity;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity.Type;
 import io.github.dbstarll.dubai.model.collection.test.SimpleGenericEntity;
+import io.github.dbstarll.dubai.model.collection.test.o2.OverrideGetWithSubClassEntity;
+import io.github.dbstarll.dubai.model.collection.test.o2.OverrideSetWithOtherClassEntity;
+import io.github.dbstarll.dubai.model.collection.test.o2.OverrideSetWithSubClassEntity;
+import io.github.dbstarll.dubai.model.collection.test.o2.OverrideSetWithSuperClassEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
@@ -206,6 +210,7 @@ public class TestCodecProvider extends TestCase {
 
     private byte[] read(String resource) throws IOException {
         try (InputStream in = ClassLoader.getSystemResourceAsStream(resource)) {
+            assertNotNull(in);
             try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 try {
                     IOUtils.copy(in, out);
@@ -341,6 +346,58 @@ public class TestCodecProvider extends TestCase {
             fail("throw CodecConfigurationException");
         } catch (Throwable ex) {
             assertCodecNotFound(ex);
+        }
+    }
+
+    public void testOverrideSetWithSubClassEntity() {
+        final Collection<OverrideSetWithSubClassEntity> collection = collectionFactory
+                .newInstance(OverrideSetWithSubClassEntity.class);
+        final OverrideSetWithSubClassEntity entity = EntityFactory.newInstance(OverrideSetWithSubClassEntity.class);
+
+        try {
+            collection.save(entity);
+            fail("throw MongoTimeoutException");
+        } catch (Throwable ex) {
+            assertEquals(MongoTimeoutException.class, ex.getClass());
+        }
+    }
+
+    public void testOverrideSetWithSuperClassEntity() {
+        final Collection<OverrideSetWithSuperClassEntity> collection = collectionFactory
+                .newInstance(OverrideSetWithSuperClassEntity.class);
+        final OverrideSetWithSuperClassEntity entity = EntityFactory.newInstance(OverrideSetWithSuperClassEntity.class);
+
+        try {
+            collection.save(entity);
+            fail("throw CodecConfigurationException");
+        } catch (Throwable ex) {
+            assertCodecNotFound(ex);
+        }
+    }
+
+    public void testOverrideSetWithOtherClassEntity() {
+        final Collection<OverrideSetWithOtherClassEntity> collection = collectionFactory
+                .newInstance(OverrideSetWithOtherClassEntity.class);
+        final OverrideSetWithOtherClassEntity entity = EntityFactory.newInstance(OverrideSetWithOtherClassEntity.class);
+
+        try {
+            collection.save(entity);
+            fail("throw CodecConfigurationException");
+        } catch (Throwable ex) {
+            assertCodecNotFound(ex);
+        }
+    }
+
+    public void testOverrideGetWithSubClassEntity() {
+        final Collection<OverrideGetWithSubClassEntity> collection = collectionFactory
+                .newInstance(OverrideGetWithSubClassEntity.class);
+        final OverrideGetWithSubClassEntity entity = EntityFactory.newInstance(OverrideGetWithSubClassEntity.class);
+
+        try {
+            collection.save(entity);
+            fail("throw MongoTimeoutException");
+        } catch (Throwable ex) {
+            assertEquals(MongoTimeoutException.class, ex.getClass());
         }
     }
 

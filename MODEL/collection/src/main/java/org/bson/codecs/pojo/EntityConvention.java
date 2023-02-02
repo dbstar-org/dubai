@@ -91,15 +91,6 @@ public final class EntityConvention implements Convention {
                                         final Method method, final boolean getter) {
         final String propertyName = toPropertyName(method);
 
-        if (getter) {
-            // If the getter is overridden in a subclass, we only want to process that property, and ignore
-            // potentially less specific methods from super classes
-            final PropertyMetadata<?> existPropertyMetadata = context.propertyNameMap.get(propertyName);
-            if (existPropertyMetadata != null && existPropertyMetadata.getGetter() != null) {
-                return existPropertyMetadata.getName();
-            }
-        }
-
         final PropertyMetadata<?> propertyMetadata = getOrCreateMethodPropertyMetadata(propertyName, declaringClassName,
                 context, TypeData.newInstance(method));
         cachePropertyTypeData(propertyMetadata, context, parentClassTypeData, genericTypeNames, getGenericType(method));
@@ -125,8 +116,9 @@ public final class EntityConvention implements Convention {
         final PropertyMetadata<T> propertyMetadata = getOrCreatePropertyMetadata(propertyName, declaringClassName,
                 context, typeData);
         if (!isAssignableClass(propertyMetadata.getTypeData().getType(), typeData.getType())) {
-            propertyMetadata.setError(format("Property '%s' in %s, has differing data types: %s and %s.", propertyName,
-                    declaringClassName, propertyMetadata.getTypeData(), typeData));
+            throw new CodecConfigurationException(
+                    format("Property '%s' in %s, has differing data types: %s and %s.", propertyName,
+                            declaringClassName, propertyMetadata.getTypeData(), typeData));
         }
         return propertyMetadata;
     }
@@ -134,7 +126,7 @@ public final class EntityConvention implements Convention {
     private static boolean isAssignableClass(final Class<?> propertyTypeClass, final Class<?> typeDataClass) {
         notNull("propertyTypeClass", propertyTypeClass);
         notNull("typeDataClass", typeDataClass);
-        return propertyTypeClass.isAssignableFrom(typeDataClass) || typeDataClass.isAssignableFrom(propertyTypeClass);
+        return typeDataClass.isAssignableFrom(propertyTypeClass);
     }
 
     @SuppressWarnings("unchecked")

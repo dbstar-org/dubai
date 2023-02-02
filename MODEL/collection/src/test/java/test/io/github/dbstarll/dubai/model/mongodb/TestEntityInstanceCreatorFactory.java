@@ -10,7 +10,7 @@ import org.bson.codecs.pojo.PropertyModel;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -50,10 +50,11 @@ public class TestEntityInstanceCreatorFactory {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         final Integer value = 100;
 
-        final PropertyModel propertyModel = ClassModel.builder(SimpleGenericEntity.class)
-                .conventions(Arrays.asList(new EntityConvention()))
-                .build()
-                .getPropertyModel("value");
+        final ClassModel<SimpleGenericEntity> classModel = ClassModel.builder(SimpleGenericEntity.class)
+                .conventions(Collections.singletonList(new EntityConvention()))
+                .build();
+        //noinspection unchecked
+        final PropertyModel<Integer> propertyModel = (PropertyModel<Integer>) classModel.getPropertyModel("value");
 
         instanceCreator.set(value, propertyModel);
         final SimpleGenericEntity entity = instanceCreator.getInstance();

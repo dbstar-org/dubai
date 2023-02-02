@@ -10,12 +10,14 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.lang.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -47,7 +49,7 @@ public class TestMongoCollectionBeanInitializer {
     @Test
     public void testPostProcessBeanFactory() {
         try {
-            initializer.postProcessBeanFactory(null);
+            initializer.postProcessBeanFactory(new DefaultListableBeanFactory());
         } catch (BeansException ex) {
             fail("throws BeansException");
         }
@@ -96,7 +98,7 @@ public class TestMongoCollectionBeanInitializer {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME));
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
     }
@@ -107,7 +109,7 @@ public class TestMongoCollectionBeanInitializer {
         initializer.setRecursion(true);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(16, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(20, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection2"));
     }
@@ -117,12 +119,13 @@ public class TestMongoCollectionBeanInitializer {
         initializer.setBasePackageClasses(SimpleEntity.class);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
 
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
             fail("throw BeanDefinitionValidationException");
         } catch (BeanDefinitionValidationException ex) {
+            assertNotNull(ex.getMessage());
             assertTrue(ex.getMessage().startsWith("collection already exist: "));
         }
     }
@@ -146,6 +149,7 @@ public class TestMongoCollectionBeanInitializer {
             initializer.postProcessBeanDefinitionRegistry(registry);
             fail("throw BeanDefinitionStoreException");
         } catch (BeanDefinitionStoreException ex) {
+            assertNotNull(ex.getMessage());
             assertTrue(ex.getMessage().startsWith("I/O failure during classpath scanning"));
             assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
             assertEquals("TestIOException", ex.getCause().getMessage());
