@@ -130,22 +130,25 @@ public abstract class MongodTestCase {
         return global != null ? global : supplier.get();
     }
 
-    protected final void useClient(final Consumer<MongoClient> consumer) {
-        final Consumer<ReachedState<RunningMongodProcess>> mongodConsumer = running -> {
-            if (globalClient == null) {
-                try (MongoClient client = mongoClient(running.current().getServerAddress())) {
-                    consumer.accept(client);
-                }
-            } else {
-                consumer.accept(globalClient);
-            }
-        };
+    protected final void useMongod(final Consumer<ReachedState<RunningMongodProcess>> consumer) {
         if (globalRunning == null) {
             try (ReachedState<RunningMongodProcess> running = mongod().start(Main.V4_4)) {
-                mongodConsumer.accept(running);
+                consumer.accept(running);
             }
         } else {
-            mongodConsumer.accept(globalRunning);
+            consumer.accept(globalRunning);
+        }
+    }
+
+    protected final void useClient(final Consumer<MongoClient> consumer) {
+        if (globalClient == null) {
+            useMongod(d -> {
+                try (MongoClient client = mongoClient(d.current().getServerAddress())) {
+                    consumer.accept(client);
+                }
+            });
+        } else {
+            consumer.accept(globalClient);
         }
     }
 

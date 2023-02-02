@@ -1,14 +1,10 @@
 package test.io.github.dbstarll.dubai.model.mongodb;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoTimeoutException;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.internal.MongoClientImpl;
-import io.github.dbstarll.dubai.model.collection.Collection;
-import io.github.dbstarll.dubai.model.collection.CollectionFactory;
+import de.flapdoodle.embed.mongo.commands.ServerAddress;
 import io.github.dbstarll.dubai.model.collection.test.DiffGetterSetterEntity;
 import io.github.dbstarll.dubai.model.collection.test.DirectMethodGenericEntity;
 import io.github.dbstarll.dubai.model.collection.test.InheritMethodGenericEntity;
@@ -27,11 +23,7 @@ import io.github.dbstarll.dubai.model.collection.test.o2.OverrideSetWithSubClass
 import io.github.dbstarll.dubai.model.collection.test.o2.OverrideSetWithSuperClassEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
-import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
-import io.github.dbstarll.utils.lang.EncryptUtils;
-import io.github.dbstarll.utils.lang.bytes.Bytes;
-import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import org.bson.BsonBinary;
 import org.bson.BsonDocument;
@@ -45,142 +37,147 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.types.ObjectId;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
+import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class TestCodecProvider extends TestCase {
-    private MongoClient client;
-    private MongoDatabase database;
-    private CollectionFactory collectionFactory;
-
-    @Override
-    protected void setUp() throws Exception {
-        this.client = MongoClients.create(
-                new MongoClientFactory(new Bytes(EncryptUtils.sha("y1cloud.com", 256))).getMongoClientSettingsBuilder()
-                        .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
-                        .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
-        );
-        this.database = client.getDatabase("test");
-        this.collectionFactory = new CollectionFactory(database);
-    }
-
-    @Override
-    protected void tearDown() {
-        this.collectionFactory = null;
-        this.database = null;
-        this.client.close();
-        this.client = null;
+public class TestCodecProvider extends MongodTestCase {
+    @BeforeClass
+    public static void beforeClass() {
+        globalCollectionFactory();
     }
 
     /**
      * 测试基于接口的Entity.
      */
+    @Test
     public void testInterfaceEntity() {
-        final Collection<SimpleEntity> collection = collectionFactory.newInstance(SimpleEntity.class);
-        final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
-        entity.setType(Type.t1);
-        entity.setBytes(new ObjectId().toByteArray());
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(SimpleEntity.class, c -> {
+            final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
+            entity.setType(Type.t1);
+            entity.setBytes(new ObjectId().toByteArray());
+            c.save(entity);
+        });
     }
 
     /**
      * 测试基于Class的Entity.
      */
+    @Test
     public void testClassEntity() {
-        final Collection<SimpleClassEntity> collection = collectionFactory.newInstance(SimpleClassEntity.class);
-        final SimpleClassEntity entity = EntityFactory.newInstance(SimpleClassEntity.class);
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(SimpleClassEntity.class, c -> c.save(EntityFactory.newInstance(SimpleClassEntity.class)));
     }
 
     /**
      * 测试未实现PojoFields的Proxy.
      */
+    @Test
     public void testProxyNoPojoFields() {
-        final Collection<SimpleEntity> collection = collectionFactory.newInstance(SimpleEntity.class);
-        final SimpleEntity entity = (SimpleEntity) Proxy.newProxyInstance(SimpleEntity.class.getClassLoader(),
-                new Class[]{SimpleEntity.class, EntityModifier.class}, (proxy, method, args) -> null);
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(SimpleEntity.class, c -> {
+            final SimpleEntity entity = (SimpleEntity) Proxy.newProxyInstance(SimpleEntity.class.getClassLoader(),
+                    new Class[]{SimpleEntity.class, EntityModifier.class}, (proxy, method, args) -> null);
+            try {
+                c.save(entity);
+            } catch (Exception ex) {
+                assertEquals(CodecConfigurationException.class, ex.getClass());
+                assertNotNull(ex.getCause());
+                assertEquals(CodecConfigurationException.class, ex.getCause().getClass());
+            }
+        });
     }
 
     /**
      * 测试保存一个非Entity的对象.
      */
+    @Test
     public void testNoEntity() {
-        final MongoCollection<NotEntity> collection = database.getCollection("oid", NotEntity.class);
+        useDatabase(db -> {
+            final MongoCollection<NotEntity> collection = db.getCollection("oid", NotEntity.class);
 
-        try {
-            collection.insertOne(new NotEntity());
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                collection.insertOne(new NotEntity());
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试ImageCodec.
      */
-    public void testImageCodecEncode() throws IOException {
-        final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
-        final Codec<byte[]> codec = registry.get(byte[].class);
-        assertSame(EncryptedByteArrayCodec.class, codec.getClass());
-        assertSame(byte[].class, codec.getEncoderClass());
+    @Test
+    public void testImageCodecEncode() {
+        useClient(c -> {
+            final CodecRegistry registry = ((MongoClientImpl) c).getCodecRegistry();
+            final Codec<byte[]> codec = registry.get(byte[].class);
+            assertSame(EncryptedByteArrayCodec.class, codec.getClass());
+            assertSame(byte[].class, codec.getEncoderClass());
 
-        testImageCodec(codec, "png.png", true, true);
-        testImageCodec(codec, "jpg.jpg", true, true);
-        testImageCodec(codec, "ico.ico", false, true);
-        testImageCodec(codec, "txt.txt", false, true);
+            testImageCodec(codec, "png.png", true, true);
+            testImageCodec(codec, "jpg.jpg", true, true);
+            testImageCodec(codec, "ico.ico", false, true);
+            testImageCodec(codec, "txt.txt", false, true);
+        });
     }
 
     /**
      * 测试ImageCodec.
      */
-    public void testImageCodecNotEncode() throws IOException {
-        this.client = MongoClients.create(
-                new MongoClientFactory().getMongoClientSettingsBuilder()
-                        .applyConnectionString(new ConnectionString("mongodb://localhost:12345/pumpkin"))
-                        .applyToClusterSettings(s -> s.serverSelectionTimeout(100, TimeUnit.MILLISECONDS)).build()
-        );
-        final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
-        final Codec<byte[]> codec = registry.get(byte[].class);
-        assertSame(EncryptedByteArrayCodec.class, codec.getClass());
-        assertSame(byte[].class, codec.getEncoderClass());
+    @Test
+    public void testImageCodecNotEncode() {
+        useMongod(d -> {
+            final ServerAddress serverAddress = d.current().getServerAddress();
+            final MongoClientSettings settings = mongoClientSettings();
+            final MongoClientSettingsBuilderCustomizer serverCustomizer = b -> b.applyToClusterSettings(
+                    c -> c.hosts(Collections.singletonList(
+                            new com.mongodb.ServerAddress(serverAddress.getHost(), serverAddress.getPort())
+                    ))
+            );
+            try (final MongoClient client = new org.springframework.boot.autoconfigure.mongo.MongoClientFactory(
+                    Arrays.asList(
+                            b -> new io.github.dbstarll.dubai.model.mongodb.MongoClientFactory()
+                                    .customize(b, settings.getCodecRegistry()),
+                            serverCustomizer
+                    )).createMongoClient(settings)) {
+                final CodecRegistry registry = ((MongoClientImpl) client).getCodecRegistry();
+                final Codec<byte[]> codec = registry.get(byte[].class);
+                assertSame(EncryptedByteArrayCodec.class, codec.getClass());
+                assertSame(byte[].class, codec.getEncoderClass());
 
-        testImageCodec(codec, "png.png", true, false);
-        testImageCodec(codec, "jpg.jpg", true, false);
-        testImageCodec(codec, "ico.ico", false, false);
-        testImageCodec(codec, "txt.txt", false, false);
+                testImageCodec(codec, "png.png", true, false);
+                testImageCodec(codec, "jpg.jpg", true, false);
+                testImageCodec(codec, "ico.ico", false, false);
+                testImageCodec(codec, "txt.txt", false, false);
+            }
+        });
     }
 
-    private void testImageCodec(final Codec<byte[]> codec, String resource, boolean image, boolean encode)
-            throws IOException {
+    private void testImageCodec(final Codec<byte[]> codec, String resource, boolean image, boolean encode) {
         final BsonDocument document = new BsonDocument();
         final BsonWriter writer = new BsonDocumentWriter(document);
-        final byte[] data = read(resource);
+        final byte[] data;
+        try {
+            data = read(resource);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
         writer.writeStartDocument();
         writer.writeName("data");
         codec.encode(writer, data, EncoderContext.builder().build());
@@ -225,180 +222,175 @@ public class TestCodecProvider extends TestCase {
     /**
      * 测试基于范型接口的Entity.
      */
+    @Test
     public void testGenericEntity() {
-        final Collection<SimpleGenericEntity> collection = collectionFactory.newInstance(SimpleGenericEntity.class);
-        final SimpleGenericEntity entity = EntityFactory.newInstance(SimpleGenericEntity.class);
-        entity.setKey("key");
-        entity.setValue(100);
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(SimpleGenericEntity.class, c -> {
+            final SimpleGenericEntity entity = EntityFactory.newInstance(SimpleGenericEntity.class);
+            entity.setKey("key");
+            entity.setValue(100);
+            c.save(entity);
+        });
     }
 
     /**
      * 测试基于多个同名属性的Entity.
      */
+    @Test
     public void testMultiSetterEntity() {
-        final Collection<MultiSetterEntity> collection = collectionFactory.newInstance(MultiSetterEntity.class);
-        final MultiSetterEntity entity = EntityFactory.newInstance(MultiSetterEntity.class);
-        entity.setData(true);
-        entity.setData(100);
+        useCollection(MultiSetterEntity.class, c -> {
+            final MultiSetterEntity entity = EntityFactory.newInstance(MultiSetterEntity.class);
+            entity.setData(true);
+            entity.setData(100);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试属性的getter和setter类型不一致的Entity.
      */
+    @Test
     public void testDiffGetterSetterEntity() {
-        final Collection<DiffGetterSetterEntity> collection = collectionFactory.newInstance(DiffGetterSetterEntity.class);
-        final DiffGetterSetterEntity entity = EntityFactory.newInstance(DiffGetterSetterEntity.class);
+        useCollection(DiffGetterSetterEntity.class, c -> {
+            final DiffGetterSetterEntity entity = EntityFactory.newInstance(DiffGetterSetterEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试只有setter的Entity.
      */
+    @Test
     public void testOnlySetterEntity() {
-        final Collection<OnlySetterEntity> collection = collectionFactory.newInstance(OnlySetterEntity.class);
-        final OnlySetterEntity entity = EntityFactory.newInstance(OnlySetterEntity.class);
+        useCollection(OnlySetterEntity.class, c -> {
+            final OnlySetterEntity entity = EntityFactory.newInstance(OnlySetterEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试只有getter的Entity.
      */
+    @Test
     public void testOnlyGetterEntity() {
-        final Collection<OnlyGetterEntity> collection = collectionFactory.newInstance(OnlyGetterEntity.class);
-        final OnlyGetterEntity entity = EntityFactory.newInstance(OnlyGetterEntity.class);
+        useCollection(OnlyGetterEntity.class, c -> {
+            final OnlyGetterEntity entity = EntityFactory.newInstance(OnlyGetterEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试直接实现的方法级范型的Entity.
      */
+    @Test
     public void testDirectMethodGenericEntity() {
-        final Collection<DirectMethodGenericEntity> collection = collectionFactory
-                .newInstance(DirectMethodGenericEntity.class);
-        final DirectMethodGenericEntity entity = EntityFactory.newInstance(DirectMethodGenericEntity.class);
+        useCollection(DirectMethodGenericEntity.class, c -> {
+            final DirectMethodGenericEntity entity = EntityFactory.newInstance(DirectMethodGenericEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试继承实现的方法级范型的Entity.
      */
+    @Test
     public void testInheritMethodGenericEntity() {
-        final Collection<InheritMethodGenericEntity> collection = collectionFactory
-                .newInstance(InheritMethodGenericEntity.class);
-        final InheritMethodGenericEntity entity = EntityFactory.newInstance(InheritMethodGenericEntity.class);
+        useCollection(InheritMethodGenericEntity.class, c -> {
+            final InheritMethodGenericEntity entity = EntityFactory.newInstance(InheritMethodGenericEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
     /**
      * 测试继承实现的方法级范型的Entity.
      */
+    @Test
     public void testInheritMethodGenericHidingEntity() {
-        final Collection<InheritMethodGenericHidingEntity> collection = collectionFactory
-                .newInstance(InheritMethodGenericHidingEntity.class);
-        final InheritMethodGenericHidingEntity entity = EntityFactory.newInstance(InheritMethodGenericHidingEntity.class);
+        useCollection(InheritMethodGenericHidingEntity.class, c -> {
+            final InheritMethodGenericHidingEntity entity = EntityFactory.newInstance(InheritMethodGenericHidingEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
+    @Test
     public void testOverrideSetWithSubClassEntity() {
-        final Collection<OverrideSetWithSubClassEntity> collection = collectionFactory
-                .newInstance(OverrideSetWithSubClassEntity.class);
-        final OverrideSetWithSubClassEntity entity = EntityFactory.newInstance(OverrideSetWithSubClassEntity.class);
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(OverrideSetWithSubClassEntity.class,
+                c -> c.save(EntityFactory.newInstance(OverrideSetWithSubClassEntity.class)));
     }
 
+    @Test
     public void testOverrideSetWithSuperClassEntity() {
-        final Collection<OverrideSetWithSuperClassEntity> collection = collectionFactory
-                .newInstance(OverrideSetWithSuperClassEntity.class);
-        final OverrideSetWithSuperClassEntity entity = EntityFactory.newInstance(OverrideSetWithSuperClassEntity.class);
+        useCollection(OverrideSetWithSuperClassEntity.class, c -> {
+            final OverrideSetWithSuperClassEntity entity = EntityFactory.newInstance(OverrideSetWithSuperClassEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
+    @Test
     public void testOverrideSetWithOtherClassEntity() {
-        final Collection<OverrideSetWithOtherClassEntity> collection = collectionFactory
-                .newInstance(OverrideSetWithOtherClassEntity.class);
-        final OverrideSetWithOtherClassEntity entity = EntityFactory.newInstance(OverrideSetWithOtherClassEntity.class);
+        useCollection(OverrideSetWithOtherClassEntity.class, c -> {
+            final OverrideSetWithOtherClassEntity entity = EntityFactory.newInstance(OverrideSetWithOtherClassEntity.class);
 
-        try {
-            collection.save(entity);
-            fail("throw CodecConfigurationException");
-        } catch (Throwable ex) {
-            assertCodecNotFound(ex);
-        }
+            try {
+                c.save(entity);
+                fail("throw CodecConfigurationException");
+            } catch (Throwable ex) {
+                assertCodecNotFound(ex);
+            }
+        });
     }
 
+    @Test
     public void testOverrideGetWithSubClassEntity() {
-        final Collection<OverrideGetWithSubClassEntity> collection = collectionFactory
-                .newInstance(OverrideGetWithSubClassEntity.class);
-        final OverrideGetWithSubClassEntity entity = EntityFactory.newInstance(OverrideGetWithSubClassEntity.class);
-
-        try {
-            collection.save(entity);
-            fail("throw MongoTimeoutException");
-        } catch (Throwable ex) {
-            assertEquals(MongoTimeoutException.class, ex.getClass());
-        }
+        useCollection(OverrideGetWithSubClassEntity.class,
+                c -> c.save(EntityFactory.newInstance(OverrideGetWithSubClassEntity.class)));
     }
 
     private void assertCodecNotFound(Throwable ex) {
