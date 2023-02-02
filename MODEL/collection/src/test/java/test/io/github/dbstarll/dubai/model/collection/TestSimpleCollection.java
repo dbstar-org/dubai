@@ -131,9 +131,7 @@ public class TestSimpleCollection extends MongodTestCase {
 
     @Test
     public void testSaveNull() {
-        useCollection(entityClass, c -> {
-            assertNull(c.save(null));
-        });
+        useCollection(entityClass, c -> assertNull(c.save(null)));
     }
 
     @Test
@@ -446,8 +444,6 @@ public class TestSimpleCollection extends MongodTestCase {
 
     @Test
     public void testOriginal() {
-        useCollection(entityClass, c -> {
-            assertSame(c, c.original());
-        });
+        useCollection(entityClass, c -> assertSame(c, c.original()));
     }
 }

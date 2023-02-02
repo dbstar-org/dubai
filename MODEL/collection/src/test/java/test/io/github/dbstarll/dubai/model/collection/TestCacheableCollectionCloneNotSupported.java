@@ -42,8 +42,6 @@ public class TestCacheableCollectionCloneNotSupported extends MongodTestCase {
 
     @Test
     public void testFindByIdNull() {
-        useCollection(entityClass, c -> {
-            assertNull(c.findById(new ObjectId()));
-        });
+        useCollection(entityClass, c -> assertNull(c.findById(new ObjectId())));
     }
 }
