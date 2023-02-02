@@ -9,6 +9,7 @@ import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
+import io.github.dbstarll.dubai.model.collection.BaseCollection;
 import io.github.dbstarll.dubai.model.collection.test.Delay;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity.Type;
@@ -444,6 +445,9 @@ public class TestSimpleCollection extends MongodTestCase {
 
     @Test
     public void testOriginal() {
-        useCollection(entityClass, c -> assertSame(c, c.original()));
+        useCollection(entityClass, c -> {
+            assertEquals(BaseCollection.class, c.getClass());
+            assertEquals(BaseCollection.class, c.original().getClass());
+        });
     }
 }

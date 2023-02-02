@@ -5,5 +5,4 @@ import io.github.dbstarll.dubai.model.entity.func.Cacheable;
 
 @Table
 public interface CacheableEntity extends NotifiableEntity, Cacheable {
-
 }
