@@ -1,7 +1,7 @@
 package io.github.dbstarll.dubai.model.service;
 
 import com.mongodb.client.model.Filters;
-import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
@@ -16,13 +16,11 @@ import io.github.dbstarll.dubai.model.service.test.PrivateClassService;
 import io.github.dbstarll.dubai.model.service.test.ThrowClassService;
 import io.github.dbstarll.dubai.model.service.test4.TestValidEntity;
 import io.github.dbstarll.dubai.model.service.test4.TestValidService;
-import mockit.Expectations;
-import mockit.Mocked;
-import mockit.Verifications;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertEquals;
@@ -33,101 +31,96 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class TestServiceFactory {
-    @Mocked
-    Collection<InterfaceEntity> collection;
-    @Mocked
-    Collection<TestValidEntity> validCollection;
+public class TestServiceFactory extends ServiceTestCase {
+    private final Class<InterfaceEntity> entityClass = InterfaceEntity.class;
+
+    @BeforeClass
+    public static void setup() {
+        MongodTestCase.globalCollectionFactory();
+    }
 
     @Test
     public void testGetInterfaceService() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertEquals(InterfaceEntity.class, service.getEntityClass());
-        assertEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 2;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            assertEquals(entityClass, service.getEntityClass());
+            assertEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
+        });
     }
 
     @Test
     public void testGetNoAnnotationInterfaceService() {
-        try {
-            ServiceFactory.newInstance(NoAnnotationInterfaceService.class, collection);
-            fail("throw UnsupportedOperationException");
-        } catch (Exception ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("Invalid ServiceClass: " + NoAnnotationInterfaceService.class, ex.getMessage());
-        }
+        useCollection(entityClass, c -> {
+            try {
+                ServiceFactory.newInstance(NoAnnotationInterfaceService.class, c);
+                fail("throw UnsupportedOperationException");
+            } catch (Exception ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("Invalid ServiceClass: " + NoAnnotationInterfaceService.class, ex.getMessage());
+            }
+        });
     }
 
     @Test
     public void testGetClassService() {
-        final ClassService service = ServiceFactory.newInstance(ClassService.class, collection);
-        assertEquals(InterfaceEntity.class, service.getEntityClass());
-        assertEquals(ClassService.class, ServiceFactory.getServiceClass(service));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 0;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final ClassService service = ServiceFactory.newInstance(ClassService.class, c);
+            assertEquals(entityClass, service.getEntityClass());
+            assertEquals(ClassService.class, ServiceFactory.getServiceClass(service));
+        });
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testGetAbstractClassService() {
-        try {
-            ServiceFactory.newInstance(AbstractClassService.class, collection);
-            fail("throw UnsupportedOperationException");
-        } catch (Exception ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("Invalid ServiceClass: " + AbstractClassService.class, ex.getMessage());
-        }
+        useCollection(entityClass, c -> {
+            try {
+                ServiceFactory.newInstance(AbstractClassService.class, c);
+                fail("throw UnsupportedOperationException");
+            } catch (Exception ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("Invalid ServiceClass: " + AbstractClassService.class, ex.getMessage());
+            }
+        });
     }
 
     @Test
     public void testGetPrivateClassService() {
-        try {
-            ServiceFactory.newInstance(PrivateClassService.class, collection);
-            fail("throw UnsupportedOperationException");
-        } catch (Exception ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("Invalid ServiceClass: " + PrivateClassService.class, ex.getMessage());
-        }
+        useCollection(entityClass, c -> {
+            try {
+                ServiceFactory.newInstance(PrivateClassService.class, c);
+                fail("throw UnsupportedOperationException");
+            } catch (Exception ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("Invalid ServiceClass: " + PrivateClassService.class, ex.getMessage());
+            }
+        });
     }
 
     @Test
     public void testThrowClassService() {
-        try {
-            ServiceFactory.newInstance(ThrowClassService.class, collection);
-            fail("throw UnsupportedOperationException");
-        } catch (Exception ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("Instantiation fails: " + ThrowClassService.class, ex.getMessage());
-        }
+        useCollection(entityClass, c -> {
+            try {
+                ServiceFactory.newInstance(ThrowClassService.class, c);
+                fail("throw UnsupportedOperationException");
+            } catch (Exception ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("Instantiation fails: " + ThrowClassService.class, ex.getMessage());
+            }
+        });
     }
 
     @Test
     public void testNoAnnotationClassService() {
-        try {
-            ServiceFactory.newInstance(NoAnnotationClassService.class, collection);
-            fail("throw UnsupportedOperationException");
-        } catch (Exception ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("Invalid ServiceClass: " + NoAnnotationClassService.class, ex.getMessage());
-        }
+        useCollection(entityClass, c -> {
+            try {
+                ServiceFactory.newInstance(NoAnnotationClassService.class, c);
+                fail("throw UnsupportedOperationException");
+            } catch (Exception ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("Invalid ServiceClass: " + NoAnnotationClassService.class, ex.getMessage());
+            }
+        });
     }
 
     /**
@@ -135,319 +128,209 @@ public class TestServiceFactory {
      */
     @Test
     public void testGetServiceClassNoServiceFactory() {
-        final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
-                new Class[]{InterfaceService.class, ImplementalAutowirerAware.class, GeneralValidateable.class},
-                (proxy, method, args) -> null);
-        assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
-        assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
+        useCollection(entityClass, c -> {
+            final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
+                    new Class[]{InterfaceService.class, ImplementalAutowirerAware.class, GeneralValidateable.class},
+                    (proxy, method, args) -> null);
+            assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
+            assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
+        });
     }
 
     @Test
     public void testHashCode() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertNotEquals(0, service.hashCode());
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            assertNotEquals(0, service.hashCode());
+        });
     }
 
     @Test
     public void testSetImplementalAutowirer() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-                collection.count((Bson) any);
-                result = 10;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            ((ImplementalAutowirerAware) service).setImplementalAutowirer(null);
 
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        ((ImplementalAutowirerAware) service).setImplementalAutowirer(null);
-
-        assertEquals(10, service.count(Filters.eq(new ObjectId())));
-        assertEquals(10, service.count(Filters.eq(new ObjectId())));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 2;
-                collection.count((Bson) any);
-                times = 2;
-            }
-        };
+            assertEquals(0, service.count(Filters.eq(new ObjectId())));
+        });
     }
 
     @Test
-    public void testInvokeUnImplementation() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
+    public void testInvokeUnImplementation() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.unImplementation();
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("unImplementation");
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
             }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.unImplementation();
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("unImplementation").toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
+        });
     }
 
     @Test
     public void testOverrideMethod() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-
-        assertTrue(service.contains(new ObjectId()));
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 2;
-                collection.count((Bson) any);
-                times = 0;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            assertTrue(service.contains(new ObjectId()));
+        });
     }
 
     @Test
-    public void testFailedMethod() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
+    public void testFailedMethod() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.failed();
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("failed");
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
             }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.failed();
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("failed").toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
+        });
     }
 
     @Test
     public void testThrowExceptionMethod() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.throwException();
-            fail("throw IllegalAccessException");
-        } catch (Exception e) {
-            assertEquals(IllegalAccessException.class, e.getClass());
-            assertEquals("throwException", e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 2;
-            }
-        };
-    }
-
-    @Test
-    public void testNotPublicImplementation() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.notPublic();
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("notPublic").toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void testNotFinalImplementation() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.notFinal();
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("notFinal").toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void testCreateImplementationWithException() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        ((ImplementalAutowirerAware) service).setImplementalAutowirer(new ImplementalAutowirer() {
-            @Override
-            public <I extends Implemental> void autowire(I implemental) throws AutowireException {
-                throw new AutowireException("autowireBeanProperties");
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.throwException();
+                fail("throw IllegalAccessException");
+            } catch (Exception e) {
+                assertEquals(IllegalAccessException.class, e.getClass());
+                assertEquals("throwException", e.getMessage());
             }
         });
-        try {
-            service.contains(new ObjectId());
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("contains", ObjectId.class).toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 2;
-            }
-        };
     }
 
     @Test
-    public void testCall() throws Exception {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
+    public void testNotPublicImplementation() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.notPublic();
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("notPublic");
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
             }
-        };
-
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        try {
-            service.callTest(EntityFactory.newInstance(InterfaceEntity.class));
-            fail("throw UnsupportedOperationException");
-        } catch (Exception e) {
-            assertEquals(UnsupportedOperationException.class, e.getClass());
-            assertEquals(InterfaceService.class.getMethod("callTest", Entity.class).toString(), e.getMessage());
-        }
-
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-            }
-        };
+        });
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
+    public void testNotFinalImplementation() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.notFinal();
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("notFinal");
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
+            }
+        });
+    }
+
+    @Test
+    public void testCreateImplementationWithException() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            ((ImplementalAutowirerAware) service).setImplementalAutowirer(new ImplementalAutowirer() {
+                @Override
+                public <I extends Implemental> void autowire(I implemental) throws AutowireException {
+                    throw new AutowireException("autowireBeanProperties");
+                }
+            });
+            try {
+                service.contains(new ObjectId());
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("contains", ObjectId.class);
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
+            }
+        });
+    }
+
+    @Test
+    public void testCall() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            try {
+                service.callTest(EntityFactory.newInstance(entityClass));
+                fail("throw UnsupportedOperationException");
+            } catch (Exception e) {
+                assertEquals(UnsupportedOperationException.class, e.getClass());
+                final Method method;
+                try {
+                    method = InterfaceService.class.getMethod("callTest", Entity.class);
+                } catch (NoSuchMethodException ex) {
+                    throw new IllegalStateException(ex);
+                }
+                assertEquals(method.toString(), e.getMessage());
+            }
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void testGeneralValidation() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = InterfaceEntity.class;
-            }
-        };
-        final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, collection);
-        assertTrue(service instanceof GeneralValidateable);
-        final java.util.Collection<PositionValidation<InterfaceEntity>> validation = ((GeneralValidateable) service)
-                .generalValidations();
-        assertNotNull(validation);
-        final java.util.Collection<PositionValidation<InterfaceEntity>> validation2 = ((GeneralValidateable) service)
-                .generalValidations();
-        assertSame(validation, validation2);
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 3;
-            }
-        };
+        useCollection(entityClass, c -> {
+            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
+            assertTrue(service instanceof GeneralValidateable);
+            final java.util.Collection<PositionValidation<InterfaceEntity>> validation =
+                    ((GeneralValidateable<InterfaceEntity>) service).generalValidations();
+            assertNotNull(validation);
+            final java.util.Collection<PositionValidation<InterfaceEntity>> validation2 =
+                    ((GeneralValidateable<InterfaceEntity>) service).generalValidations();
+            assertSame(validation, validation2);
+        });
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("unchecked")
     public void testGeneralValidationThrow() {
-        new Expectations() {
-            {
-                validCollection.getEntityClass();
-                result = TestValidEntity.class;
+        useCollection(TestValidEntity.class, c -> {
+            final TestValidService service = ServiceFactory.newInstance(TestValidService.class, c);
+            try {
+                ((GeneralValidateable<TestValidEntity>) service).generalValidations();
+                fail("throw UnsupportedOperationException");
+            } catch (Throwable ex) {
+                assertEquals(UnsupportedOperationException.class, ex.getClass());
+                assertEquals("throwValidation", ex.getMessage());
+                assertNull(ex.getCause());
             }
-        };
-        final TestValidService service = ServiceFactory.newInstance(TestValidService.class, validCollection);
-        try {
-            ((GeneralValidateable) service).generalValidations();
-            fail("throw UnsupportedOperationException");
-        } catch (Throwable ex) {
-            assertEquals(UnsupportedOperationException.class, ex.getClass());
-            assertEquals("throwValidation", ex.getMessage());
-            assertNull(ex.getCause());
-        }
-        new Verifications() {
-            {
-                validCollection.getEntityClass();
-                times = 2;
-            }
-        };
+        });
     }
 }
