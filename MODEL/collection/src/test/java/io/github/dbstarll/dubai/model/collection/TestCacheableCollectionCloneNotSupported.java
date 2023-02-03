@@ -1,11 +1,11 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.NoCloneEntity;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

@@ -1,8 +1,6 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
 import io.github.dbstarll.dubai.model.cache.EntityCacheManager;
-import io.github.dbstarll.dubai.model.collection.CacheableCollection;
-import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.notify.NotifyType;

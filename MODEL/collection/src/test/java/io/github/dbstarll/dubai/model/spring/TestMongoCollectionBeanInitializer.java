@@ -1,7 +1,6 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
-import io.github.dbstarll.dubai.model.spring.MongoCollectionBeanInitializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

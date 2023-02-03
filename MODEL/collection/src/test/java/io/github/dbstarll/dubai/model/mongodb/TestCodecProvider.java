@@ -1,10 +1,11 @@
-package test.io.github.dbstarll.dubai.model.mongodb;
+package io.github.dbstarll.dubai.model.mongodb;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.internal.MongoClientImpl;
 import de.flapdoodle.embed.mongo.commands.ServerAddress;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.collection.test.DiffGetterSetterEntity;
 import io.github.dbstarll.dubai.model.collection.test.DirectMethodGenericEntity;
 import io.github.dbstarll.dubai.model.collection.test.InheritMethodGenericEntity;
@@ -40,7 +41,6 @@ import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

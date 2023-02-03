@@ -1,4 +1,4 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
@@ -6,12 +6,10 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
-import io.github.dbstarll.dubai.model.collection.BaseCollection;
-import io.github.dbstarll.dubai.model.collection.CacheableCollection;
-import io.github.dbstarll.dubai.model.collection.DefunctableCollection;
-import io.github.dbstarll.dubai.model.collection.test.CacheableEntity;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.collection.test.Delay;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity.Type;
+import io.github.dbstarll.dubai.model.collection.test.SimpleNotifiableEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
@@ -21,7 +19,6 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -41,8 +38,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class TestComplexCollection extends MongodTestCase {
-    private final Class<CacheableEntity> entityClass = CacheableEntity.class;
+public class TestSimpleNotifiableCollection extends MongodTestCase {
+    private final Class<SimpleNotifiableEntity> entityClass = SimpleNotifiableEntity.class;
 
     @BeforeClass
     public static void beforeClass() {
@@ -81,13 +78,13 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testSaveWithId() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             assertNull(entity.getId());
             assertNull(entity.getDateCreated());
             assertNull(entity.getLastModified());
 
             final ObjectId id = new ObjectId();
-            final CacheableEntity savedEntity = c.save(entity, id);
+            final SimpleNotifiableEntity savedEntity = c.save(entity, id);
             assertSame(entity, savedEntity);
             assertNotNull(savedEntity.getId());
             assertNotNull(savedEntity.getDateCreated());
@@ -100,12 +97,12 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testSave() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             assertNull(entity.getId());
             assertNull(entity.getDateCreated());
             assertNull(entity.getLastModified());
 
-            final CacheableEntity savedEntity = c.save(entity);
+            final SimpleNotifiableEntity savedEntity = c.save(entity);
             assertSame(entity, savedEntity);
             assertNotNull(savedEntity.getId());
             assertNotNull(savedEntity.getDateCreated());
@@ -121,7 +118,7 @@ public class TestComplexCollection extends MongodTestCase {
                 throw new RuntimeException(e);
             }
 
-            final CacheableEntity savedAgainEntity = c.save(savedEntity);
+            final SimpleNotifiableEntity savedAgainEntity = c.save(savedEntity);
             assertSame(entity, savedAgainEntity);
             assertSame(id, savedAgainEntity.getId());
             assertSame(dateCreated, savedAgainEntity.getDateCreated());
@@ -137,7 +134,7 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testSaveNoEntityModifier() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = (CacheableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
+            final SimpleNotifiableEntity entity = (SimpleNotifiableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
                     new Class[]{entityClass}, (proxy, method, args) -> null);
             final ObjectId id = new ObjectId();
             try {
@@ -152,13 +149,12 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testDeleteById() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
 
             assertNull(c.deleteById(null));
 
             assertNotNull(c.save(entity));
 
-            entity.setDefunct(true);
             assertEquals(entity, c.deleteById(entity.getId()));
         });
     }
@@ -166,7 +162,7 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindById() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
 
             assertNull(c.findById(null));
 
@@ -179,7 +175,7 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindOne() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             assertNotNull(c.save(entity));
             assertEquals(entity, c.findOne());
         });
@@ -190,11 +186,11 @@ public class TestComplexCollection extends MongodTestCase {
         useCollection(entityClass, c -> {
             assertNull(null, c.findByIds(Collections.singleton(new ObjectId())).first());
 
-            final CacheableEntity entity1 = c.save(EntityFactory.newInstance(entityClass));
-            final CacheableEntity entity2 = c.save(EntityFactory.newInstance(entityClass));
-            final CacheableEntity entity3 = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity1 = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity2 = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity3 = c.save(EntityFactory.newInstance(entityClass));
 
-            final Set<CacheableEntity> found = c.findByIds(Arrays.asList(entity1.getId(), entity3.getId()))
+            final Set<SimpleNotifiableEntity> found = c.findByIds(Arrays.asList(entity1.getId(), entity3.getId()))
                     .into(new HashSet<>());
             assertEquals(2, found.size());
             assertTrue(found.contains(entity1));
@@ -209,7 +205,7 @@ public class TestComplexCollection extends MongodTestCase {
             assertNull(null, c.find().first());
             assertNull(null, c.find(entityClass).first());
 
-            final CacheableEntity entity = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity = c.save(EntityFactory.newInstance(entityClass));
 
             assertEquals(entity, c.find().first());
             assertEquals(entity, c.find(entityClass).first());
@@ -219,25 +215,25 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindQuery() {
         useCollection(entityClass, c -> {
-            assertNull(c.find(Filters.eq("type", CacheableEntity.Type.t1)).first());
+            assertNull(c.find(Filters.eq("type", SimpleNotifiableEntity.Type.t1)).first());
             assertNull(c.find(Filters.eq("bytes", new byte[0])).first());
 
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             entity1.setBytes("entity1".getBytes(StandardCharsets.UTF_8));
             c.save(entity1);
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
             entity2.setBytes(new byte[0]);
             c.save(entity2);
 
-            final List<CacheableEntity> found1 = c.find(Filters.eq("type", CacheableEntity.Type.t1))
+            final List<SimpleNotifiableEntity> found1 = c.find(Filters.eq("type", SimpleNotifiableEntity.Type.t1))
                     .into(new ArrayList<>());
             assertEquals(1, found1.size());
             assertEquals(entity1, found1.get(0));
 
-            final List<CacheableEntity> found2 = c.find(Filters.eq("bytes", new byte[0]))
+            final List<SimpleNotifiableEntity> found2 = c.find(Filters.eq("bytes", new byte[0]))
                     .into(new ArrayList<>());
             assertEquals(1, found2.size());
             assertEquals(entity2, found2.get(0));
@@ -249,15 +245,15 @@ public class TestComplexCollection extends MongodTestCase {
         useCollection(entityClass, c -> {
             assertNull(c.distinct(Namable.FIELD_NAME_NAME, String.class).first());
 
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             c.save(entity1);
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
             c.save(entity2);
 
-            final CacheableEntity entity3 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity3 = EntityFactory.newInstance(entityClass);
             c.save(entity3);
 
             final Set<Type> found = c.distinct("type", Type.class).into(new HashSet<>());
@@ -281,7 +277,7 @@ public class TestComplexCollection extends MongodTestCase {
         useCollection(entityClass, c -> {
             assertEquals(0, c.deleteOne(Filters.eq(new ObjectId())).getDeletedCount());
 
-            final CacheableEntity entity = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity = c.save(EntityFactory.newInstance(entityClass));
             assertEquals(entity, c.findById(entity.getId()));
 
             assertEquals(1, c.deleteOne(Filters.eq(entity.getId())).getDeletedCount());
@@ -294,8 +290,8 @@ public class TestComplexCollection extends MongodTestCase {
         useCollection(entityClass, c -> {
             assertEquals(0, c.deleteMany(Filters.eq(new ObjectId())).getDeletedCount());
 
-            final CacheableEntity entity1 = c.save(EntityFactory.newInstance(entityClass));
-            final CacheableEntity entity2 = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity1 = c.save(EntityFactory.newInstance(entityClass));
+            final SimpleNotifiableEntity entity2 = c.save(EntityFactory.newInstance(entityClass));
             assertEquals(entity1, c.findById(entity1.getId()));
             assertEquals(entity2, c.findById(entity2.getId()));
 
@@ -309,13 +305,13 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testUpdateById() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setType(Type.t1);
             c.save(entity);
 
             assertNull(c.updateById(null, Updates.set("type", Type.t2)));
 
-            final CacheableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2));
+            final SimpleNotifiableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
@@ -325,7 +321,7 @@ public class TestComplexCollection extends MongodTestCase {
     public void testUpdateOne() {
         useCollection(entityClass, c -> {
 
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setType(Type.t1);
             c.save(entity);
 
@@ -343,17 +339,17 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testUpdateMany() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             entity1.setBytes("t1".getBytes(StandardCharsets.UTF_8));
             c.save(entity1);
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
             entity2.setBytes("t2".getBytes(StandardCharsets.UTF_8));
             c.save(entity2);
 
-            final CacheableEntity entity3 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity3 = EntityFactory.newInstance(entityClass);
             entity3.setType(Type.t1);
             c.save(entity3);
 
@@ -369,17 +365,16 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindOneAndDelete() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             c.save(entity1);
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
             c.save(entity2);
 
             assertNull(c.findOneAndDelete(Filters.eq(new ObjectId())));
 
-            entity1.setDefunct(true);
             assertEquals(entity1, c.findOneAndDelete(Filters.eq("type", Type.t1)));
             assertNull(c.findById(entity1.getId()));
             assertEquals(entity2, c.findById(entity2.getId()));
@@ -389,16 +384,16 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindOneAndReplace() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             c.save(entity1);
 
             assertNull(c.findOneAndReplace(Filters.eq(new ObjectId()), entity1));
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
 
-            final CacheableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2);
+            final SimpleNotifiableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2);
             assertNotNull(replaced);
             ((EntityModifier) entity2).setId(entity1.getId());
             assertEquals(entity2, replaced);
@@ -408,13 +403,13 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testFindOneAndUpdate() {
         useCollection(entityClass, c -> {
-            final CacheableEntity entity = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setType(Type.t1);
             c.save(entity);
 
             assertNull(c.findOneAndUpdate(Filters.eq(new ObjectId()), Updates.set("type", Type.t2)));
 
-            final CacheableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2));
+            final SimpleNotifiableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
@@ -429,11 +424,11 @@ public class TestComplexCollection extends MongodTestCase {
             assertNull(c.aggregate(pipelines).first());
             assertNull(c.aggregate(pipelines, Document.class).first());
 
-            final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
             c.save(entity1);
 
-            final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
+            final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
             c.save(entity2);
 
@@ -445,9 +440,8 @@ public class TestComplexCollection extends MongodTestCase {
     @Test
     public void testOriginal() {
         useCollection(entityClass, c -> {
-            assertEquals(DefunctableCollection.class, c.getClass());
-            assertEquals(CacheableCollection.class, c.original().getClass());
-            assertEquals(BaseCollection.class, c.original().original().getClass());
+            assertEquals(NotifiableCollection.class, c.getClass());
+            assertEquals(BaseCollection.class, c.original().getClass());
         });
     }
 }

@@ -1,8 +1,5 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
-import io.github.dbstarll.dubai.model.collection.AnnotationCollectionNameGenerator;
-import io.github.dbstarll.dubai.model.collection.CollectionInitializeException;
-import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.Namespace;
 import io.github.dbstarll.dubai.model.entity.Table;

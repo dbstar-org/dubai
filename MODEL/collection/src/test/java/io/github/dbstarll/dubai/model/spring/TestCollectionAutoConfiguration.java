@@ -1,4 +1,4 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 
 import io.github.dbstarll.dubai.model.collection.Collection;

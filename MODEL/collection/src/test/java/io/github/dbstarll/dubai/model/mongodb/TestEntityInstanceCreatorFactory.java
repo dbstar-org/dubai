@@ -1,7 +1,6 @@
-package test.io.github.dbstarll.dubai.model.mongodb;
+package io.github.dbstarll.dubai.model.mongodb;
 
 import io.github.dbstarll.dubai.model.collection.test.SimpleGenericEntity;
-import io.github.dbstarll.dubai.model.mongodb.EntityInstanceCreatorFactory;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.EntityConvention;
 import org.bson.codecs.pojo.InstanceCreator;

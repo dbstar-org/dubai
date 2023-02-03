@@ -1,11 +1,10 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
-import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity.Type;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

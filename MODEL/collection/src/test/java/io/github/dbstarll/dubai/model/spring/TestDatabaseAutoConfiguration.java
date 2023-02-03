@@ -1,4 +1,4 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 
 import com.mongodb.client.MongoDatabase;
@@ -7,6 +7,7 @@ import de.flapdoodle.embed.mongo.distribution.Version.Main;
 import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
 import de.flapdoodle.reverse.TransitionWalker.ReachedState;
 import de.flapdoodle.reverse.transitions.Start;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.dubai.model.spring.autoconfigure.DatabaseAutoConfiguration;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -19,7 +20,6 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

@@ -1,6 +1,5 @@
-package test.io.github.dbstarll.dubai.model.mongodb;
+package io.github.dbstarll.dubai.model.mongodb;
 
-import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import junit.framework.TestCase;
 
 public class TestMongoClientFactory extends TestCase {

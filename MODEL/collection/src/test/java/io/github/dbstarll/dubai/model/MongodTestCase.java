@@ -1,4 +1,4 @@
-package test.io.github.dbstarll.dubai.model;
+package io.github.dbstarll.dubai.model;
 
 
 import com.mongodb.MongoClientSettings;

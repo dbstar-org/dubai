@@ -1,11 +1,10 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
 import com.mongodb.client.MongoCollection;
-import io.github.dbstarll.dubai.model.collection.BaseCollection;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

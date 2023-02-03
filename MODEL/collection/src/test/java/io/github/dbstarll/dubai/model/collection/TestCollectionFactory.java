@@ -1,11 +1,7 @@
-package test.io.github.dbstarll.dubai.model.collection;
+package io.github.dbstarll.dubai.model.collection;
 
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.cache.EntityCacheManager;
-import io.github.dbstarll.dubai.model.collection.AnnotationCollectionNameGenerator;
-import io.github.dbstarll.dubai.model.collection.Collection;
-import io.github.dbstarll.dubai.model.collection.CollectionFactory;
-import io.github.dbstarll.dubai.model.collection.CollectionInitializeException;
-import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.collection.test.CacheableEntity;
 import io.github.dbstarll.dubai.model.collection.test.DefunctableEntity;
 import io.github.dbstarll.dubai.model.collection.test.NotifiableEntity;
@@ -18,7 +14,6 @@ import io.github.dbstarll.dubai.model.notify.NotifyType;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
