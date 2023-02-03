@@ -1,14 +1,14 @@
-package test.io.github.dbstarll.dubai.model.service.impl;
+package io.github.dbstarll.dubai.model.service.impl;
 
 import com.mongodb.client.model.Filters;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
+import io.github.dbstarll.dubai.model.service.ServiceTestCase;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.service.ServiceTestCase;
 
 import java.util.concurrent.atomic.AtomicReference;
 

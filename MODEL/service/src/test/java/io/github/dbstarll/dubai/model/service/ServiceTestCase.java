@@ -1,9 +1,7 @@
-package test.io.github.dbstarll.dubai.model.service;
+package io.github.dbstarll.dubai.model.service;
 
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.entity.Entity;
-import io.github.dbstarll.dubai.model.service.Service;
-import io.github.dbstarll.dubai.model.service.ServiceFactory;
-import test.io.github.dbstarll.dubai.model.MongodTestCase;
 
 import java.util.function.Consumer;
 

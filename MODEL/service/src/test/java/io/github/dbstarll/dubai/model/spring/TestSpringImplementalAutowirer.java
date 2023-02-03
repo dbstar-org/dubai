@@ -1,8 +1,7 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.service.AutowireException;
 import io.github.dbstarll.dubai.model.service.Implemental;
-import io.github.dbstarll.dubai.model.spring.SpringImplementalAutowirer;
 import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 import org.springframework.beans.MethodInvocationException;

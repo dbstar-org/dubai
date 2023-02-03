@@ -1,12 +1,12 @@
-package test.io.github.dbstarll.dubai.model.service.attach;
+package io.github.dbstarll.dubai.model.service.attach;
 
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
+import io.github.dbstarll.dubai.model.service.ServiceTestCase;
 import io.github.dbstarll.dubai.model.service.test.TestEntity;
 import io.github.dbstarll.dubai.model.service.test.TestEntityService;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import test.io.github.dbstarll.dubai.model.service.ServiceTestCase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

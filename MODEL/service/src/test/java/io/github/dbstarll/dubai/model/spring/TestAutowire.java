@@ -1,12 +1,9 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
-import io.github.dbstarll.dubai.model.spring.MongoCollectionBeanInitializer;
-import io.github.dbstarll.dubai.model.spring.ServiceBeanInitializer;
-import io.github.dbstarll.dubai.model.spring.SpringImplementalAutowirer;
 import junit.framework.TestCase;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ConfigurableApplicationContext;

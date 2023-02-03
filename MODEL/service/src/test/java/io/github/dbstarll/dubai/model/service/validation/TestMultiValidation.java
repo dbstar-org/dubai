@@ -1,12 +1,9 @@
-package test.io.github.dbstarll.dubai.model.service.validation;
+package io.github.dbstarll.dubai.model.service.validation;
 
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o2.PublicPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
-import io.github.dbstarll.dubai.model.service.validation.AbstractValidation;
-import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
-import io.github.dbstarll.dubai.model.service.validation.Validation;
 import junit.framework.TestCase;
 
 import java.util.concurrent.atomic.AtomicInteger;

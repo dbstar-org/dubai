@@ -1,10 +1,9 @@
-package test.io.github.dbstarll.dubai.model.service;
+package io.github.dbstarll.dubai.model.service;
 
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.entity.func.Defunctable;
-import io.github.dbstarll.dubai.model.service.ServiceFactory;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;

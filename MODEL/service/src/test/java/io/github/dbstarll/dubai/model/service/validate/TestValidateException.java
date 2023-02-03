@@ -1,8 +1,5 @@
-package test.io.github.dbstarll.dubai.model.service.validate;
+package io.github.dbstarll.dubai.model.service.validate;
 
-import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
-import io.github.dbstarll.dubai.model.service.validate.Validate;
-import io.github.dbstarll.dubai.model.service.validate.ValidateException;
 import junit.framework.TestCase;
 
 public class TestValidateException extends TestCase {

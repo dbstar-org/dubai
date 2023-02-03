@@ -1,8 +1,7 @@
-package test.io.github.dbstarll.dubai.model.spring;
+package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test2.InterfaceService;
-import io.github.dbstarll.dubai.model.spring.ServiceBeanInitializer;
 import junit.framework.TestCase;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
