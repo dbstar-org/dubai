@@ -102,4 +102,24 @@ public class TestDefunctAttach extends ServiceTestCase {
             assertEquals(0, s.count(Filters.eq(entity.getId()), false));
         });
     }
+
+    @Test
+    public void testCountNullWithDefunct() {
+        useService(serviceClass, s -> {
+            assertEquals(0, s.count(null, null));
+            assertEquals(0, s.count(null, true));
+            assertEquals(0, s.count(null, false));
+
+            final TestEntity entity = s.save(EntityFactory.newInstance(entityClass), null);
+            assertEquals(1, s.count(null, null));
+            assertEquals(0, s.count(null, true));
+            assertEquals(1, s.count(null, false));
+
+            entity.setDefunct(true);
+            assertEquals(entity, s.deleteById(entity.getId()));
+            assertEquals(1, s.count(null, null));
+            assertEquals(1, s.count(null, true));
+            assertEquals(0, s.count(null, false));
+        });
+    }
 }

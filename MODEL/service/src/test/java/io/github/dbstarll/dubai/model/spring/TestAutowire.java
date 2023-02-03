@@ -20,7 +20,7 @@ public class TestAutowire extends TestCase {
         applicationContext.registerSingleton("implementalAutowirer", SpringImplementalAutowirer.class);
         applicationContext.registerBeanDefinition("mongoDatabase", BeanDefinitionBuilder
                 .genericBeanDefinition(TestAutowire.class).setFactoryMethod("getDatabase").getBeanDefinition());
-        final MongoCollectionBeanInitializer initializer = new MongoCollectionBeanInitializer();
+        final CollectionBeanInitializer initializer = new CollectionBeanInitializer();
         initializer.setMongoDatabaseBeanName("mongoDatabase");
         initializer.setBasePackageClasses(TestEntity.class);
         applicationContext.addBeanFactoryPostProcessor(initializer);

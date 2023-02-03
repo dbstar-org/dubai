@@ -4,6 +4,8 @@ import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.service.test.TestImplementals;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
 import io.github.dbstarll.dubai.model.service.validate.ValidateException;
+import io.github.dbstarll.dubai.model.service.validation.EmptyValidation;
+import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.bson.types.ObjectId;
 
@@ -34,5 +36,10 @@ public final class TestServiceImplemental extends TestImplementals<TestEntity, T
         public void validate(TestEntity entity, TestEntity original, Validate validate) {
             validate.addActionError("SaveFailed");
         }
+    }
+
+    @GeneralValidation
+    public Validation<TestEntity> emptyValidation() {
+        return EmptyValidation.warp(entityClass);
     }
 }

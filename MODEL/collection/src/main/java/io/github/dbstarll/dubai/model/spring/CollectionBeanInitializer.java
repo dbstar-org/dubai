@@ -1,5 +1,6 @@
 package io.github.dbstarll.dubai.model.spring;
 
+import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -28,8 +30,8 @@ import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
 
-public final class MongoCollectionBeanInitializer implements BeanDefinitionRegistryPostProcessor {
-    private static final Logger LOGER = LoggerFactory.getLogger(MongoCollectionBeanInitializer.class);
+public final class CollectionBeanInitializer implements BeanDefinitionRegistryPostProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollectionBeanInitializer.class);
 
     private static final String CLASS_RESOURCE_PATTERN = "*.class";
     private static final String CLASS_RESOURCE_PATTERN_RECURSION = "**/*.class";
@@ -54,13 +56,15 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
     public void postProcessBeanDefinitionRegistry(@NonNull final BeanDefinitionRegistry registry)
             throws BeansException {
         createIfMissCollectionFactory(registry);
-        for (String basePackage : basePackages) {
-            try {
-                doScan(basePackage, registry);
-            } catch (BeansException ex) {
-                throw ex;
-            } catch (Exception ex) {
-                throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
+        if (basePackages != null) {
+            for (String basePackage : basePackages) {
+                try {
+                    doScan(basePackage, registry);
+                } catch (BeansException ex) {
+                    throw ex;
+                } catch (Exception ex) {
+                    throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
+                }
             }
         }
     }
@@ -73,7 +77,7 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
                     .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                     .addConstructorArgReference(mongoDatabaseBeanName)
                     .getBeanDefinition();
-            LOGER.info("registerBeanDefinition: [{}] with: {}", collectionFactoryBeanName, definition);
+            LOGGER.info("registerBeanDefinition: [{}] with: {}", collectionFactoryBeanName, definition);
             registry.registerBeanDefinition(collectionFactoryBeanName, definition);
         }
     }
@@ -100,22 +104,37 @@ public final class MongoCollectionBeanInitializer implements BeanDefinitionRegis
         final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
         if (registry.containsBeanDefinition(beanName)) {
             final BeanDefinition definition = registry.getBeanDefinition(beanName);
-            if (entityClass.getName().equals(definition.getBeanClassName())) {
+            if (isCollectionBeanDefinition(definition, entityClass)) {
                 throw new BeanDefinitionValidationException(
                         "collection already exist: [" + beanName + "] of entity: " + entityClass);
             }
-            LOGER.warn("bean already exist: [{}] with definition: {}", beanName, definition);
+            LOGGER.warn("bean already exist: [{}] with definition: {}", beanName, definition);
             registerBeanDefinition(registry, entityClass, baseBeanName, index + 1);
         } else {
             final BeanDefinition definition = buildCollection(entityClass);
-            LOGER.info("register collection[{}] of entity: {}", beanName, entityClass);
+            LOGGER.info("register collection[{}] of entity: {}", beanName, entityClass);
             registry.registerBeanDefinition(beanName, definition);
         }
     }
 
+    /**
+     * 判定一个BeanDefinition是否是一个匹配实体类的CollectionBeanDefinition.
+     *
+     * @param definition  待检查的BeanDefinition
+     * @param entityClass 待匹配的实体类
+     * @return 返回是否匹配
+     */
+    public static boolean isCollectionBeanDefinition(final BeanDefinition definition, final Class<?> entityClass) {
+        if (Collection.class.getName().equals(definition.getBeanClassName())) {
+            final ValueHolder v = definition.getConstructorArgumentValues().getIndexedArgumentValue(0, null);
+            return v != null && v.getValue() == entityClass;
+        }
+        return false;
+    }
+
+
     private BeanDefinition buildCollection(final Class<?> entityClass) {
-        return BeanDefinitionBuilder
-                .genericBeanDefinition(entityClass)
+        return BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", collectionFactoryBeanName)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)

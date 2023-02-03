@@ -20,11 +20,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class TestMongoCollectionBeanInitializer {
+public class TestCollectionBeanInitializer {
     private static final String COLLECTION_FACTORY_BEAN_NAME = "collectionFactory";
     private static final String MONGO_DATABASE_BEAN_NAME = "mongoDatabase";
 
-    private MongoCollectionBeanInitializer initializer;
+    private CollectionBeanInitializer initializer;
 
     private BeanDefinitionRegistry beanDefinitionRegistry;
 
@@ -33,7 +33,7 @@ public class TestMongoCollectionBeanInitializer {
      */
     @Before
     public void setup() {
-        this.initializer = new MongoCollectionBeanInitializer();
+        this.initializer = new CollectionBeanInitializer();
         initializer.setCollectionFactoryBeanName(COLLECTION_FACTORY_BEAN_NAME);
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
         this.beanDefinitionRegistry = new SimpleBeanDefinitionRegistry();
@@ -91,6 +91,28 @@ public class TestMongoCollectionBeanInitializer {
         assertEquals(1, registerCounter.get());
         assertEquals(1, registry.getBeanDefinitionCount());
     }
+
+
+    /**
+     * 测试未设置basePackages.
+     */
+    @Test
+    public void testEmptyBasePackages() {
+        initializer.setBasePackages();
+        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+        assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
+    }
+
+
+    /**
+     * 测试未设置basePackages.
+     */
+    @Test
+    public void testNullBasePackages() {
+        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+        assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
+    }
+
 
     @Test
     public void testNoRecursion() {

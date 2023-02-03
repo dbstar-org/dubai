@@ -41,10 +41,9 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @Test
     public void testGetInterfaceService() {
-        useCollection(entityClass, c -> {
-            final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
-            assertEquals(entityClass, service.getEntityClass());
-            assertEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
+        useService(InterfaceService.class, s -> {
+            assertEquals(entityClass, s.getEntityClass());
+            assertEquals(InterfaceService.class, ServiceFactory.getServiceClass(s));
         });
     }
 

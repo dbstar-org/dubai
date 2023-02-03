@@ -4,7 +4,7 @@ import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.collection.AnnotationCollectionNameGenerator;
 import io.github.dbstarll.dubai.model.collection.CollectionNameGenerator;
 import io.github.dbstarll.dubai.model.entity.Entity;
-import io.github.dbstarll.dubai.model.spring.MongoCollectionBeanInitializer;
+import io.github.dbstarll.dubai.model.spring.CollectionBeanInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -30,11 +30,11 @@ public class CollectionAutoConfiguration {
      */
     @Bean
     @ConditionalOnBean(name = "mongoDatabase", value = MongoDatabase.class)
-    @ConditionalOnMissingBean(MongoCollectionBeanInitializer.class)
+    @ConditionalOnMissingBean(CollectionBeanInitializer.class)
     BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {
-        final MongoCollectionBeanInitializer initializer = new MongoCollectionBeanInitializer();
-        initializer.setBasePackageClasses(
-                loadBasePackages(Entity.class, CollectionAutoConfiguration.class.getClassLoader()));
+        final CollectionBeanInitializer initializer = new CollectionBeanInitializer();
+        initializer.setBasePackageClasses(loadBasePackages(Entity.class,
+                CollectionAutoConfiguration.class.getClassLoader()));
         initializer.setMongoDatabaseBeanName("mongoDatabase");
         return initializer;
     }
