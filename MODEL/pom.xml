@@ -36,12 +36,8 @@
       </activation>
       <properties>
         <version.junit>4.13.2</version.junit>
-        <version.jmockit>1.49</version.jmockit>
         <version.surefire-junit47>3.0.0-M8</version.surefire-junit47>
         <version.de.flapdoodle.embed.mongo>4.4.0</version.de.flapdoodle.embed.mongo>
-        <argLine>
-          -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar
-        </argLine>
       </properties>
       <dependencyManagement>
         <dependencies>
@@ -49,11 +45,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${version.junit}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>${version.jmockit}</version>
           </dependency>
           <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -71,11 +62,6 @@
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.jmockit</groupId>
-          <artifactId>jmockit</artifactId>
           <scope>test</scope>
         </dependency>
         <dependency>
