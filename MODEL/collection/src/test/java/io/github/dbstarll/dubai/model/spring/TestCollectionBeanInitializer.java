@@ -1,5 +1,6 @@
 package io.github.dbstarll.dubai.model.spring;
 
+import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -7,6 +8,8 @@ import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -16,6 +19,7 @@ import org.springframework.lang.NonNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -92,7 +96,6 @@ public class TestCollectionBeanInitializer {
         assertEquals(1, registry.getBeanDefinitionCount());
     }
 
-
     /**
      * 测试未设置basePackages.
      */
@@ -103,7 +106,6 @@ public class TestCollectionBeanInitializer {
         assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
     }
 
-
     /**
      * 测试未设置basePackages.
      */
@@ -112,7 +114,6 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
         assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
     }
-
 
     @Test
     public void testNoRecursion() {
@@ -133,6 +134,26 @@ public class TestCollectionBeanInitializer {
         assertEquals(20, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection2"));
+    }
+
+    @Test
+    public void testIsCollectionBeanDefinition() {
+        initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
+        initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+
+        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
+        final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition("simpleEntityCollection");
+        assertNotNull(df);
+        assertTrue(CollectionBeanInitializer.isCollectionBeanDefinition(df, SimpleEntity.class));
+        assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(df,
+                io.github.dbstarll.dubai.model.collection.test.SimpleEntity.class));
+
+        final BeanDefinition df2 = BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
+                .setFactoryMethodOnBean("newInstance", "collectionFactory")
+                .setScope(BeanDefinition.SCOPE_SINGLETON)
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                .getBeanDefinition();
+        assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(df2, SimpleEntity.class));
     }
 
     @Test
@@ -163,7 +184,6 @@ public class TestCollectionBeanInitializer {
                 super.registerBeanDefinition(beanName, beanDefinition);
             }
         };
-
 
         initializer.setBasePackageClasses(SimpleEntity.class);
         try {
