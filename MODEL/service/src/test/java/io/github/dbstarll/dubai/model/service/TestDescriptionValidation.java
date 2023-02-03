@@ -1,19 +1,13 @@
 package io.github.dbstarll.dubai.model.service;
 
-import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
-import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.entity.info.Describable;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
-import mockit.Expectations;
-import mockit.Mocked;
-import mockit.Verifications;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -23,141 +17,79 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class TestDescriptionValidation {
-    @Mocked
-    Collection<TestEntity> collection;
+public class TestDescriptionValidation extends ServiceTestCase {
+    private final Class<TestEntity> entityClass = TestEntity.class;
+    private final Class<TestService> serviceClass = TestService.class;
 
-    TestService service;
-
-    /**
-     * 初始化.
-     */
-    @Before
-    public void setUp() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = TestEntity.class;
-            }
-        };
-        this.service = ServiceFactory.newInstance(TestService.class, collection);
-    }
-
-    @After
-    public void tearDown() {
-        this.service = null;
+    @BeforeClass
+    public static void setup() {
+        MongodTestCase.globalCollectionFactory();
     }
 
     @Test
     public void testInsertSetDescription() {
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        entity.setDescription("description");
-        final DefaultValidate validate = new DefaultValidate();
-        new Expectations() {
-            {
-                collection.save(entity, null);
-                result = entity;
-            }
-        };
-        assertEquals(entity, service.save(entity, validate));
-        assertFalse(validate.hasErrors());
-        new Verifications() {
-            {
-                collection.save(entity, null);
-                times = 1;
-            }
-        };
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setDescription("description");
+            final DefaultValidate validate = new DefaultValidate();
+            assertEquals(entity, s.save(entity, validate));
+            assertFalse(validate.hasErrors());
+        });
     }
 
     @Test
     public void testInsertSetDescriptionEmpty() {
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        entity.setDescription("    ");
-        final DefaultValidate validate = new DefaultValidate();
-        new Expectations() {
-            {
-                collection.save(entity, null);
-                result = entity;
-            }
-        };
-        assertEquals(entity, service.save(entity, validate));
-        assertFalse(validate.hasErrors());
-        assertNull(entity.getDescription());
-        new Verifications() {
-            {
-                collection.save(entity, null);
-                times = 1;
-            }
-        };
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setDescription("    ");
+            final DefaultValidate validate = new DefaultValidate();
+            assertEquals(entity, s.save(entity, validate));
+            assertFalse(validate.hasErrors());
+            assertNull(entity.getDescription());
+        });
     }
 
     @Test
     public void testInsertSetDescriptionLong() {
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        entity.setDescription(StringUtils.repeat("0123456789", 6));
-        final DefaultValidate validate = new DefaultValidate();
-        assertNull(service.save(entity, validate));
-        assertTrue(validate.hasFieldErrors());
-        assertEquals(1, validate.getFieldErrors().size());
-        assertEquals(Collections.singletonList("备注不能超过 50 字符"),
-                validate.getFieldErrors().get(Describable.FIELD_NAME_DESCRIPTION));
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setDescription(StringUtils.repeat("0123456789", 6));
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(s.save(entity, validate));
+            assertTrue(validate.hasFieldErrors());
+            assertEquals(1, validate.getFieldErrors().size());
+            assertEquals(Collections.singletonList("备注不能超过 50 字符"),
+                    validate.getFieldErrors().get(Describable.FIELD_NAME_DESCRIPTION));
+        });
     }
 
     @Test
     public void testUpdateSetDescription() {
-        final ObjectId id = new ObjectId();
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        ((EntityModifier) entity).setId(id);
-        final TestEntity original = EntityFactory.clone(entity);
-        entity.setDescription("description");
-        final DefaultValidate validate = new DefaultValidate();
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
 
-        new Expectations() {
-            {
-                collection.findById(id);
-                result = original;
-                collection.save(entity, null);
-                result = entity;
-            }
-        };
+            final DefaultValidate validate = new DefaultValidate();
+            assertEquals(entity, s.save(entity, validate));
+            assertFalse(validate.hasErrors());
 
-        assertEquals(entity, service.save(entity, validate));
-        assertFalse(validate.hasErrors());
-
-        new Verifications() {
-            {
-                collection.findById(id);
-                times = 1;
-                collection.save(entity, null);
-                times = 1;
-            }
-        };
+            entity.setDescription("description");
+            assertEquals(entity, s.save(entity, validate));
+            assertFalse(validate.hasErrors());
+        });
     }
 
     @Test
     public void testUpdateSetDescriptionSame() {
-        final ObjectId id = new ObjectId();
-        final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
-        ((EntityModifier) entity).setId(id);
-        entity.setDescription("description");
-        final TestEntity original = EntityFactory.clone(entity);
-        final DefaultValidate validate = new DefaultValidate();
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setDescription("description");
 
-        new Expectations() {
-            {
-                collection.findById(id);
-                result = original;
-            }
-        };
+            final DefaultValidate validate = new DefaultValidate();
+            assertEquals(entity, s.save(entity, validate));
+            assertFalse(validate.hasErrors());
 
-        assertNull(service.save(entity, validate));
-        assertFalse(validate.hasErrors());
-
-        new Verifications() {
-            {
-                collection.findById(id);
-                times = 1;
-            }
-        };
+            assertNull(s.save(entity, validate));
+            assertFalse(validate.hasErrors());
+        });
     }
 }
