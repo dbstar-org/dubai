@@ -12,6 +12,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.InsertOneOptions;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -391,7 +392,8 @@ public interface Collection<E extends Entity> {
      * after the update. If no documents matched the query filter, then null will be returned
      */
     default E findOneAndReplace(Bson filter, E replacement) {
-        return findOneAndReplace(filter, replacement, new FindOneAndReplaceOptions());
+        return findOneAndReplace(filter, replacement, new FindOneAndReplaceOptions()
+                .returnDocument(ReturnDocument.AFTER));
     }
 
     /**
@@ -416,7 +418,7 @@ public interface Collection<E extends Entity> {
      * the query filter, then null will be returned
      */
     default E findOneAndUpdate(Bson filter, Bson update) {
-        return findOneAndUpdate(filter, update, new FindOneAndUpdateOptions());
+        return findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
     }
 
     /**
@@ -482,7 +484,7 @@ public interface Collection<E extends Entity> {
      * @return 更新后的实体
      */
     default E updateById(ObjectId id, Bson update) {
-        return updateById(id, update, new FindOneAndUpdateOptions());
+        return updateById(id, update, new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
     }
 
     /**

@@ -3,9 +3,6 @@ package test.io.github.dbstarll.dubai.model.collection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
@@ -161,6 +158,7 @@ public class TestComplexCollection extends MongodTestCase {
 
             assertNotNull(c.save(entity));
 
+            entity.setDefunct(true);
             assertEquals(entity, c.deleteById(entity.getId()));
         });
     }
@@ -317,8 +315,7 @@ public class TestComplexCollection extends MongodTestCase {
 
             assertNull(c.updateById(null, Updates.set("type", Type.t2)));
 
-            final CacheableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final CacheableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
@@ -382,6 +379,7 @@ public class TestComplexCollection extends MongodTestCase {
 
             assertNull(c.findOneAndDelete(Filters.eq(new ObjectId())));
 
+            entity1.setDefunct(true);
             assertEquals(entity1, c.findOneAndDelete(Filters.eq("type", Type.t1)));
             assertNull(c.findById(entity1.getId()));
             assertEquals(entity2, c.findById(entity2.getId()));
@@ -400,8 +398,7 @@ public class TestComplexCollection extends MongodTestCase {
             final CacheableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
 
-            final CacheableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2,
-                    new FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER));
+            final CacheableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2);
             assertNotNull(replaced);
             ((EntityModifier) entity2).setId(entity1.getId());
             assertEquals(entity2, replaced);
@@ -417,8 +414,7 @@ public class TestComplexCollection extends MongodTestCase {
 
             assertNull(c.findOneAndUpdate(Filters.eq(new ObjectId()), Updates.set("type", Type.t2)));
 
-            final CacheableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final CacheableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });

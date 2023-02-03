@@ -3,9 +3,6 @@ package test.io.github.dbstarll.dubai.model.collection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
@@ -315,8 +312,7 @@ public class TestSimpleCollection extends MongodTestCase {
 
             assertNull(c.updateById(null, Updates.set("type", Type.t2)));
 
-            final SimpleEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
@@ -398,8 +394,7 @@ public class TestSimpleCollection extends MongodTestCase {
             final SimpleEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
 
-            final SimpleEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2,
-                    new FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2);
             assertNotNull(replaced);
             ((EntityModifier) entity2).setId(entity1.getId());
             assertEquals(entity2, replaced);
@@ -415,8 +410,7 @@ public class TestSimpleCollection extends MongodTestCase {
 
             assertNull(c.findOneAndUpdate(Filters.eq(new ObjectId()), Updates.set("type", Type.t2)));
 
-            final SimpleEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });

@@ -3,9 +3,6 @@ package test.io.github.dbstarll.dubai.model.collection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
@@ -316,8 +313,7 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
 
             assertNull(c.updateById(null, Updates.set("type", Type.t2)));
 
-            final SimpleNotifiableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleNotifiableEntity updated = c.updateById(entity.getId(), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
@@ -399,8 +395,7 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
             final SimpleNotifiableEntity entity2 = EntityFactory.newInstance(entityClass);
             entity2.setType(Type.t2);
 
-            final SimpleNotifiableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2,
-                    new FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleNotifiableEntity replaced = c.findOneAndReplace(Filters.eq(entity1.getId()), entity2);
             assertNotNull(replaced);
             ((EntityModifier) entity2).setId(entity1.getId());
             assertEquals(entity2, replaced);
@@ -416,8 +411,7 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
 
             assertNull(c.findOneAndUpdate(Filters.eq(new ObjectId()), Updates.set("type", Type.t2)));
 
-            final SimpleNotifiableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2),
-                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            final SimpleNotifiableEntity updated = c.findOneAndUpdate(Filters.eq(entity.getId()), Updates.set("type", Type.t2));
             assertNotNull(updated);
             assertSame(Type.t2, updated.getType());
         });
