@@ -1,20 +1,9 @@
-package test.io.github.dbstarll.dubai.model.entity;
+package io.github.dbstarll.dubai.model.entity.test;
 
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityFactory.PojoFields;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
-import io.github.dbstarll.dubai.model.entity.test.AbstractEntity;
-import io.github.dbstarll.dubai.model.entity.test.ClassEntity;
-import io.github.dbstarll.dubai.model.entity.test.ClassNoTableEntity;
-import io.github.dbstarll.dubai.model.entity.test.FieldNoSerializable;
-import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
-import io.github.dbstarll.dubai.model.entity.test.NoCloneEntity;
-import io.github.dbstarll.dubai.model.entity.test.NoModifierCloneEntity;
-import io.github.dbstarll.dubai.model.entity.test.NoModifierEntity;
-import io.github.dbstarll.dubai.model.entity.test.NoPublicClassEntity;
-import io.github.dbstarll.dubai.model.entity.test.NoTableEntity;
-import io.github.dbstarll.dubai.model.entity.test.ThrowClassEntity;
 import io.github.dbstarll.dubai.model.entity.test.other.ClassPackageInterfaceEntity;
 import org.bson.types.ObjectId;
 import org.junit.Assert;

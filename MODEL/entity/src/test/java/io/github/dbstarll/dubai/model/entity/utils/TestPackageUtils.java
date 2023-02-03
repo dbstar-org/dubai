@@ -1,11 +1,10 @@
-package test.io.github.dbstarll.dubai.model.entity.utils;
+package io.github.dbstarll.dubai.model.entity.utils;
 
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o2.Package;
 import io.github.dbstarll.dubai.model.entity.test.o2.PublicPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o3.NoPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o4.ClassPackageInterfaceEntity;
-import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
 import junit.framework.TestCase;
 
 import static org.junit.Assert.assertThrows;

@@ -1,8 +1,7 @@
-package test.io.github.dbstarll.dubai.model.entity.utils;
+package io.github.dbstarll.dubai.model.entity.utils;
 
 import io.github.dbstarll.dubai.model.entity.test.ClassEntity;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
-import io.github.dbstarll.dubai.model.entity.utils.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

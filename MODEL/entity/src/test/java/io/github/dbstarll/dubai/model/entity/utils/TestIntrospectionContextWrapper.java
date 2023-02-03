@@ -1,7 +1,6 @@
-package test.io.github.dbstarll.dubai.model.entity.utils;
+package io.github.dbstarll.dubai.model.entity.utils;
 
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
-import io.github.dbstarll.dubai.model.entity.utils.IntrospectionContextWrapper;
 import org.apache.commons.beanutils.IntrospectionContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
