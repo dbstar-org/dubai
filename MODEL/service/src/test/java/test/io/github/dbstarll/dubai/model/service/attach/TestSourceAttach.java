@@ -1,134 +1,124 @@
 package test.io.github.dbstarll.dubai.model.service.attach;
 
-import com.mongodb.client.result.UpdateResult;
-import io.github.dbstarll.dubai.model.collection.Collection;
-import io.github.dbstarll.dubai.model.service.ServiceFactory;
-import io.github.dbstarll.dubai.model.service.attach.SourceAttach;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
-import mockit.Expectations;
-import mockit.Mocked;
-import mockit.Verifications;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import test.io.github.dbstarll.dubai.model.service.ServiceTestCase;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
-public class TestSourceAttach {
-    @Mocked
-    Collection<TestEntity> collection;
+public class TestSourceAttach extends ServiceTestCase {
+    private final Class<TestEntity> entityClass = TestEntity.class;
+    private final Class<TestService> serviceClass = TestService.class;
 
-    SourceAttach service;
-
-    /**
-     * 测试初始化.
-     */
-    @Before
-    public void init() {
-        new Expectations() {
-            {
-                collection.getEntityClass();
-                result = TestEntity.class;
-            }
-        };
-        this.service = ServiceFactory.newInstance(TestService.class, collection);
-    }
-
-    @After
-    public void destory() {
-        this.service = null;
+    @BeforeClass
+    public static void setup() {
+        globalCollectionFactory();
     }
 
     @Test
     public void testMergeSource() {
-        final UpdateResult updateResult = UpdateResult.acknowledged(20, 10L, null);
-        new Expectations() {
-            {
-                collection.updateMany((Bson) any, (Bson) any);
-                result = updateResult;
-            }
-        };
+        useService(serviceClass, s -> {
+            final ObjectId from = new ObjectId();
+            final ObjectId to = new ObjectId();
 
-        assertEquals(updateResult, service.mergeSource("source", new ObjectId(), new ObjectId()));
+            assertEquals(0, s.mergeSource("test", from, to).getModifiedCount());
 
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-                collection.updateMany((Bson) any, (Bson) any);
-                times = 1;
-            }
-        };
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setSources(Collections.singletonMap("test", from));
+            assertSame(entity, s.save(entity, null));
+
+            assertEquals(1, s.mergeSource("test", from, to).getModifiedCount());
+
+            final TestEntity loaded = s.findById(entity.getId());
+            assertNotNull(loaded);
+            assertEquals(to, loaded.getSources().get("test"));
+        });
     }
 
     @Test
     public void testUpdateSource() {
-        final ObjectId faceImageId = new ObjectId();
-        final UpdateResult updateResult = UpdateResult.acknowledged(20, 10L, null);
-        new Expectations() {
-            {
-                collection.updateMany((Bson) any, (Bson) any);
-                result = updateResult;
-            }
-        };
+        useService(serviceClass, s -> {
+            final ObjectId src = new ObjectId();
+            final ObjectId from = new ObjectId();
+            final ObjectId from2 = new ObjectId();
+            final ObjectId to = new ObjectId();
 
-        assertEquals(updateResult, service.updateSource(faceImageId, Collections.singletonMap("source", new ObjectId())));
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setSources(new HashMap<String, ObjectId>() {{
+                put("src", src);
+                put("from", from);
+            }});
+            assertSame(entity, s.save(entity, null));
 
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-                collection.updateMany((Bson) any, (Bson) any);
-                times = 1;
-            }
-        };
+            assertEquals(1, s.updateSource(entity.getId(), new HashMap<String, ObjectId>() {{
+                put("from", from2);
+                put("to", to);
+            }}).getModifiedCount());
+
+            final TestEntity loaded = s.findById(entity.getId());
+            assertNotNull(loaded);
+            assertEquals(3, loaded.getSources().size());
+            assertEquals(src, loaded.getSources().get("src"));
+            assertEquals(from2, loaded.getSources().get("from"));
+            assertEquals(to, loaded.getSources().get("to"));
+        });
     }
 
     @Test
     public void testUpdateSourceNull() {
-        try {
-            service.updateSource(new ObjectId(), Collections.singletonMap("source", null));
-        } catch (Throwable ex) {
-            assertEquals(IllegalArgumentException.class, ex.getClass());
-            assertEquals("来源不能包含空的key或者value", ex.getMessage());
-        }
+        useService(serviceClass, s -> {
+            try {
+                s.updateSource(new ObjectId(), Collections.singletonMap("source", null));
+            } catch (Throwable ex) {
+                assertEquals(IllegalArgumentException.class, ex.getClass());
+                assertEquals("来源不能包含空的key或者value", ex.getMessage());
+            }
+        });
     }
 
     @Test
     public void testRemoveSource() {
-        final ObjectId faceImageId = new ObjectId();
-        final UpdateResult updateResult = UpdateResult.acknowledged(20, 10L, null);
-        new Expectations() {
-            {
-                collection.updateMany((Bson) any, (Bson) any);
-                result = updateResult;
-            }
-        };
+        useService(serviceClass, s -> {
+            final ObjectId src = new ObjectId();
+            final ObjectId from = new ObjectId();
+            final ObjectId from2 = new ObjectId();
 
-        assertEquals(updateResult, service.removeSource(faceImageId, Collections.singletonMap("source", new ObjectId())));
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            entity.setSources(new HashMap<String, ObjectId>() {{
+                put("src", src);
+                put("from", from);
+            }});
+            assertSame(entity, s.save(entity, null));
 
-        new Verifications() {
-            {
-                collection.getEntityClass();
-                times = 1;
-                collection.updateMany((Bson) any, (Bson) any);
-                times = 1;
-            }
-        };
+            assertEquals(0, s.removeSource(entity.getId(), Collections.singletonMap("from", from2)).getModifiedCount());
+
+            assertEquals(1, s.removeSource(entity.getId(), Collections.singletonMap("from", from)).getModifiedCount());
+
+            final TestEntity loaded = s.findById(entity.getId());
+            assertNotNull(loaded);
+            assertEquals(1, loaded.getSources().size());
+            assertEquals(src, loaded.getSources().get("src"));
+        });
     }
 
     @Test
     public void testRemoveSourceNull() {
-        try {
-            service.removeSource(new ObjectId(), Collections.singletonMap("source", null));
-        } catch (Throwable ex) {
-            assertEquals(IllegalArgumentException.class, ex.getClass());
-            assertEquals("来源不能包含空的key或者value", ex.getMessage());
-        }
+        useService(serviceClass, s -> {
+            try {
+                s.removeSource(new ObjectId(), Collections.singletonMap("source", null));
+            } catch (Throwable ex) {
+                assertEquals(IllegalArgumentException.class, ex.getClass());
+                assertEquals("来源不能包含空的key或者value", ex.getMessage());
+            }
+        });
     }
 }
