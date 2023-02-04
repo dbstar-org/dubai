@@ -14,6 +14,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,9 +27,9 @@ public class TestEntityFactory {
     @Test
     public void testNewInstanceWithClass() {
         final ClassEntity entity = EntityFactory.newInstance(ClassEntity.class);
-        Assert.assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity));
-        Assert.assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity.getClass()));
-        Assert.assertEquals(ClassEntity.class, entity.getClass());
+        assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity));
+        assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity.getClass()));
+        assertEquals(ClassEntity.class, entity.getClass());
     }
 
     /**
@@ -40,7 +41,7 @@ public class TestEntityFactory {
             EntityFactory.newInstance(ClassNoTableEntity.class);
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
-            Assert.assertEquals("Invalid EntityClass: " + ClassNoTableEntity.class, ex.getMessage());
+            assertEquals("Invalid EntityClass: " + ClassNoTableEntity.class, ex.getMessage());
         }
     }
 
@@ -53,7 +54,7 @@ public class TestEntityFactory {
             EntityFactory.newInstance(AbstractEntity.class);
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
-            Assert.assertEquals("Invalid EntityClass: " + AbstractEntity.class, ex.getMessage());
+            assertEquals("Invalid EntityClass: " + AbstractEntity.class, ex.getMessage());
         }
     }
 
@@ -66,7 +67,7 @@ public class TestEntityFactory {
             EntityFactory.newInstance(NoPublicClassEntity.class);
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
-            Assert.assertEquals("Invalid EntityClass: " + NoPublicClassEntity.class, ex.getMessage());
+            assertEquals("Invalid EntityClass: " + NoPublicClassEntity.class, ex.getMessage());
         }
     }
 
@@ -80,9 +81,9 @@ public class TestEntityFactory {
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
             Assert.assertNotNull(ex.getCause());
-            Assert.assertEquals("Instantiation fails: " + ThrowClassEntity.class, ex.getMessage());
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
-            Assert.assertEquals("ThrowClassEntity", ex.getCause().getMessage());
+            assertEquals("Instantiation fails: " + ThrowClassEntity.class, ex.getMessage());
+            assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
+            assertEquals("ThrowClassEntity", ex.getCause().getMessage());
         }
     }
 
@@ -96,8 +97,8 @@ public class TestEntityFactory {
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
             Assert.assertNotNull(ex.getCause());
-            Assert.assertEquals("Instantiation fails: " + PackageClassEntity.class, ex.getMessage());
-            Assert.assertEquals(IllegalAccessException.class, ex.getCause().getClass());
+            assertEquals("Instantiation fails: " + PackageClassEntity.class, ex.getMessage());
+            assertEquals(IllegalAccessException.class, ex.getCause().getClass());
         }
     }
 
@@ -107,8 +108,8 @@ public class TestEntityFactory {
     @Test
     public void testNewInstanceWithInterface() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
-        Assert.assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity));
-        Assert.assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
+        assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity));
+        assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
         assertNotEquals(InterfaceEntity.class, entity.getClass());
         Assert.assertTrue(entity.toString().startsWith(InterfaceEntity.class.getName() + "{"));
     }
@@ -122,7 +123,7 @@ public class TestEntityFactory {
             EntityFactory.newInstance(NoTableEntity.class);
             Assert.fail("throw UnsupportedOperationException");
         } catch (UnsupportedOperationException ex) {
-            Assert.assertEquals("Invalid EntityClass: " + NoTableEntity.class, ex.getMessage());
+            assertEquals("Invalid EntityClass: " + NoTableEntity.class, ex.getMessage());
         }
     }
 
@@ -144,10 +145,12 @@ public class TestEntityFactory {
     @Test
     public void testGetEntityClassNoEntityFactory() {
         final InterfaceEntity entity = (InterfaceEntity) Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
-                new Class[]{EntityModifier.class, InterfaceEntity.class}, (proxy, method, args) -> null);
+                new Class[]{EntityModifier.class, PojoFields.class, InterfaceEntity.class},
+                (proxy, method, args) -> null);
+        assertFalse(EntityFactory.isEntityClass(entity.getClass()));
         assertNotEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity));
-        Assert.assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
-        Assert.assertEquals(entity.getClass(), EntityFactory.getEntityClass(entity));
+        assertEquals(entity.getClass(), EntityFactory.getEntityClass(entity));
+        assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
     }
 
     /**
@@ -165,7 +168,7 @@ public class TestEntityFactory {
         final InterfaceEntity entity4 = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap(Entity.FIELD_NAME_ID, id2));
         assertNotEquals(entity1.hashCode(), entity2.hashCode());
-        Assert.assertEquals(entity2.hashCode(), entity3.hashCode());
+        assertEquals(entity2.hashCode(), entity3.hashCode());
         assertNotEquals(entity1.hashCode(), entity2.hashCode());
         assertNotEquals(entity1.hashCode(), entity4.hashCode());
         assertNotEquals(entity2.hashCode(), entity4.hashCode());
@@ -186,14 +189,14 @@ public class TestEntityFactory {
         final InterfaceEntity entity4 = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap(Entity.FIELD_NAME_ID, id2));
         assertNotEquals(entity1, entity2);
-        Assert.assertEquals(entity2, entity3);
+        assertEquals(entity2, entity3);
         assertNotEquals(entity1, entity2);
         assertNotEquals(entity1, entity4);
         assertNotEquals(entity2, entity4);
 
         assertNotEquals(entity1, null);
         assertNotEquals(entity1, new Object());
-        Assert.assertEquals(entity1, entity1);
+        assertEquals(entity1, entity1);
         assertNotEquals(entity1, Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
                 new Class[]{InterfaceEntity.class}, (proxy, method, args) -> null));
         assertNotEquals(entity1, EntityFactory.newInstance(ClassPackageInterfaceEntity.class));
@@ -207,8 +210,8 @@ public class TestEntityFactory {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap("booleanFromNoTableEntity", true));
         final Map<String, Object> fields = ((PojoFields) entity).fields();
-        Assert.assertEquals(0, fields.get("intFromInterfaceEntity"));
-        Assert.assertEquals(true, fields.get("booleanFromNoTableEntity"));
+        assertEquals(0, fields.get("intFromInterfaceEntity"));
+        assertEquals(true, fields.get("booleanFromNoTableEntity"));
         Assert.assertFalse(fields.containsKey("stringFromInterfaceEntity"));
     }
 
@@ -219,12 +222,12 @@ public class TestEntityFactory {
     public void testGetAndSet() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
         Assert.assertNull(entity.getId());
-        Assert.assertEquals(0, entity.getIntFromInterfaceEntity());
+        assertEquals(0, entity.getIntFromInterfaceEntity());
         Assert.assertFalse(entity.isBooleanFromNoTableEntity());
         Assert.assertNull(entity.getStringFromInterfaceEntity());
 
         entity.setIntFromInterfaceEntity(100);
-        Assert.assertEquals(100, entity.getIntFromInterfaceEntity());
+        assertEquals(100, entity.getIntFromInterfaceEntity());
 
         entity.setBooleanFromNoTableEntity(true);
         Assert.assertTrue(entity.isBooleanFromNoTableEntity());
@@ -246,19 +249,19 @@ public class TestEntityFactory {
             entity.getNoReturn();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.getIntWithParam(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.obtainInt();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
     }
 
@@ -272,31 +275,31 @@ public class TestEntityFactory {
             entity.setIntWithReturn(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.setNoParam();
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.setTwoParam(1, "2");
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.setField(new FieldNoSerializable());
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
         try {
             entity.giveInt(100);
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
         }
     }
 
@@ -315,8 +318,8 @@ public class TestEntityFactory {
         assertNotNull(entity2);
 
         Assert.assertNotSame(entity1, entity2);
-        Assert.assertEquals(entity1.hashCode(), entity2.hashCode());
-        Assert.assertEquals(entity1, entity2);
+        assertEquals(entity1.hashCode(), entity2.hashCode());
+        assertEquals(entity1, entity2);
 
         Assert.assertSame(stringValue, entity1.getStringFromInterfaceEntity());
         Assert.assertSame(stringValue, entity2.getStringFromInterfaceEntity());
@@ -339,10 +342,10 @@ public class TestEntityFactory {
             EntityFactory.clone(new NoCloneEntity());
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
             Assert.assertNotNull(ex.getCause());
-            Assert.assertEquals(CloneNotSupportedException.class, ex.getCause().getClass());
-            Assert.assertEquals("java.lang.CloneNotSupportedException", ex.getMessage());
+            assertEquals(CloneNotSupportedException.class, ex.getCause().getClass());
+            assertEquals("java.lang.CloneNotSupportedException", ex.getMessage());
         }
     }
 
@@ -352,10 +355,10 @@ public class TestEntityFactory {
             EntityFactory.clone(new NoModifierCloneEntity());
             Assert.fail("throw UnsupportedOperationException");
         } catch (Throwable ex) {
-            Assert.assertEquals(UnsupportedOperationException.class, ex.getClass());
+            assertEquals(UnsupportedOperationException.class, ex.getClass());
             Assert.assertNotNull(ex.getCause());
-            Assert.assertEquals(CloneNotSupportedException.class, ex.getCause().getClass());
-            Assert.assertEquals("Exception cloning Cloneable type " + NoModifierCloneEntity.class.getName(),
+            assertEquals(CloneNotSupportedException.class, ex.getCause().getClass());
+            assertEquals("Exception cloning Cloneable type " + NoModifierCloneEntity.class.getName(),
                     ex.getMessage());
         }
     }

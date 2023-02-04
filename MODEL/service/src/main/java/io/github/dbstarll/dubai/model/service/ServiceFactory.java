@@ -332,7 +332,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      */
     @SuppressWarnings("unchecked")
     public static <E extends Entity, S extends Service<E>> Class<S> getServiceClass(final S proxy) {
-        if (Proxy.isProxyClass(proxy.getClass())) {
+        if (isServiceProxy(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof ServiceFactory) {
                 return ((ServiceFactory<E, S>) handler).serviceClass;
@@ -346,16 +346,16 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      * 获得代理类的原始接口.
      *
      * @param proxyClass 代理类
-     * @param <E>        服务类
+     * @param <S>        服务类
      * @return 代理类的原始接口
      */
     @SuppressWarnings("unchecked")
-    public static <E> Class<E> getServiceClass(final Class<E> proxyClass) {
-        Class<E> c = proxyClass;
+    public static <S> Class<S> getServiceClass(final Class<S> proxyClass) {
+        Class<S> c = proxyClass;
         if (Proxy.isProxyClass(proxyClass)) {
             for (Class<?> i : proxyClass.getInterfaces()) {
                 if (isServiceInterface(i)) {
-                    c = (Class<E>) i;
+                    c = (Class<S>) i;
                 }
             }
         }

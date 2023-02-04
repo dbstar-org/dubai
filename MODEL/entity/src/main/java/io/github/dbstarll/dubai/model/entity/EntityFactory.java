@@ -284,7 +284,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      */
     @SuppressWarnings("unchecked")
     public static <E extends Entity> Class<E> getEntityClass(final E proxy) {
-        if (Proxy.isProxyClass(proxy.getClass())) {
+        if (isEntityProxy(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof EntityFactory) {
                 return ((EntityFactory<E>) handler).entityClass;
