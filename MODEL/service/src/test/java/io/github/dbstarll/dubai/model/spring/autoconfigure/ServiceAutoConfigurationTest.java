@@ -39,8 +39,5 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     @Test
     public void implementalAutowirer() {
         assertNotNull(ctx.getBean("implementalAutowirer", ImplementalAutowirer.class));
-        for (String name : ctx.getBeanDefinitionNames()) {
-            System.out.println(name);
-        }
     }
 }
