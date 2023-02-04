@@ -145,7 +145,6 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
         return false;
     }
 
-
     private BeanDefinition buildCollection(final Class<?> entityClass) {
         return BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", collectionFactoryBeanName)

@@ -2,14 +2,18 @@ package io.github.dbstarll.dubai.model.spring;
 
 import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
+import io.github.dbstarll.dubai.model.service.ServiceFactory;
 import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test2.InterfaceService;
 import junit.framework.TestCase;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.context.support.StaticApplicationContext;
 
 public class TestServiceBeanInitializer extends TestCase {
@@ -124,5 +128,117 @@ public class TestServiceBeanInitializer extends TestCase {
         initializer.setBasePackageClasses(TestServices.class, InterfaceService.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
         assertEquals(11, registry.getBeanDefinitionCount());
+    }
+
+    /**
+     * 测试有重复的Service.
+     */
+    public void testDuplicateService() {
+        registry.registerBeanDefinition("mongoDatabase",
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
+
+        final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
+        collectionBeanInitializer.setBasePackageClasses(InterfaceEntity.class);
+        collectionBeanInitializer.setMongoDatabaseBeanName("mongoDatabase");
+        collectionBeanInitializer.postProcessBeanDefinitionRegistry(registry);
+
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        initializer.setBasePackageClasses(TestServices.class);
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(10, registry.getBeanDefinitionCount());
+
+        try {
+            initializer.postProcessBeanDefinitionRegistry(registry);
+        } catch (BeansException ex) {
+            assertEquals(BeanDefinitionValidationException.class, ex.getClass());
+            assertNotNull(ex.getMessage());
+            assertTrue(ex.getMessage().startsWith("service already exist: "));
+        }
+    }
+
+    /**
+     * 测试有抛出BeansException.
+     */
+    public void testBeansException() {
+        final BeanDefinitionRegistry testRegistry = new SimpleBeanDefinitionRegistry() {
+            @Override
+            public boolean containsBeanDefinition(String beanName) {
+                throw new NoSuchBeanDefinitionException("no");
+            }
+        };
+
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        initializer.setBasePackageClasses(TestServices.class);
+
+        try {
+            initializer.postProcessBeanDefinitionRegistry(testRegistry);
+        } catch (BeansException ex) {
+            assertEquals(NoSuchBeanDefinitionException.class, ex.getClass());
+            assertEquals("No bean named 'no' available", ex.getMessage());
+        }
+    }
+
+    /**
+     * 测试有同名的非serviceBean.
+     */
+    public void testSameNameNoService() {
+        registry.registerBeanDefinition("mongoDatabase",
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
+        registry.registerBeanDefinition("classService",
+                BeanDefinitionBuilder.genericBeanDefinition(MongoDatabase.class).getBeanDefinition());
+
+        final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
+        collectionBeanInitializer.setBasePackageClasses(InterfaceEntity.class);
+        collectionBeanInitializer.setMongoDatabaseBeanName("mongoDatabase");
+        collectionBeanInitializer.postProcessBeanDefinitionRegistry(registry);
+
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        initializer.setBasePackageClasses(TestServices.class);
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(11, registry.getBeanDefinitionCount());
+        assertTrue(registry.containsBeanDefinition("classService2"));
+    }
+
+    /**
+     * 测试有同名的非serviceBean.
+     */
+    public void testSameNameService2() {
+        registry.registerBeanDefinition("mongoDatabase",
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
+        registry.registerBeanDefinition("classService",
+                BeanDefinitionBuilder.genericBeanDefinition(ServiceFactory.class)
+                        .addConstructorArgValue(InterfaceEntity.class).getBeanDefinition());
+
+        final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
+        collectionBeanInitializer.setBasePackageClasses(InterfaceEntity.class);
+        collectionBeanInitializer.setMongoDatabaseBeanName("mongoDatabase");
+        collectionBeanInitializer.postProcessBeanDefinitionRegistry(registry);
+
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        initializer.setBasePackageClasses(TestServices.class);
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(11, registry.getBeanDefinitionCount());
+        assertTrue(registry.containsBeanDefinition("classService2"));
+    }
+
+    /**
+     * 测试有同名的非serviceBean.
+     */
+    public void testSameNameService3() {
+        registry.registerBeanDefinition("mongoDatabase",
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
+        registry.registerBeanDefinition("classService",
+                BeanDefinitionBuilder.genericBeanDefinition(ServiceFactory.class).getBeanDefinition());
+
+        final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
+        collectionBeanInitializer.setBasePackageClasses(InterfaceEntity.class);
+        collectionBeanInitializer.setMongoDatabaseBeanName("mongoDatabase");
+        collectionBeanInitializer.postProcessBeanDefinitionRegistry(registry);
+
+        final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
+        initializer.setBasePackageClasses(TestServices.class);
+        initializer.postProcessBeanDefinitionRegistry(registry);
+        assertEquals(11, registry.getBeanDefinitionCount());
+        assertTrue(registry.containsBeanDefinition("classService2"));
     }
 }

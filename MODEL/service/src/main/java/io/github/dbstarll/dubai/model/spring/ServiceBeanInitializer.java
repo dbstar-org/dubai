@@ -11,6 +11,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -97,7 +98,7 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
         final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
         if (registry.containsBeanDefinition(beanName)) {
             final BeanDefinition definition = registry.getBeanDefinition(beanName);
-            if (serviceClass.getName().equals(definition.getBeanClassName())) {
+            if (isServiceBeanDefinition(definition, serviceClass)) {
                 throw new BeanDefinitionValidationException(
                         "service already exist: [" + beanName + "]" + serviceClass);
             }
@@ -126,9 +127,16 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
         return null;
     }
 
-
     private <E extends Entity, S extends Service<E>> String getServiceBeanName(final Class<S> serviceClass) {
         return StringUtils.uncapitalize(serviceClass.getSimpleName());
+    }
+
+    private boolean isServiceBeanDefinition(final BeanDefinition definition, final Class<?> serviceClass) {
+        if (ServiceFactory.class.getName().equals(definition.getBeanClassName())) {
+            final ValueHolder v = definition.getConstructorArgumentValues().getIndexedArgumentValue(0, null);
+            return v != null && v.getValue() == serviceClass;
+        }
+        return false;
     }
 
     private <E extends Entity, S extends Service<E>> BeanDefinition buildService(
