@@ -7,7 +7,6 @@ import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.spring.CollectionBeanInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -27,18 +26,15 @@ public class CollectionAutoConfiguration {
     /**
      * 遍历所有Entity并为其装配CollectionBean，然后注入到Spring Context中.
      *
-     * @param mongoDatabaseBeanName mongoDatabase实例的Bean名称
      * @return MongoCollectionBeanInitializer实例.
      */
     @Bean
     @ConditionalOnBean(name = "mongoDatabase", value = MongoDatabase.class)
     @ConditionalOnMissingBean(CollectionBeanInitializer.class)
-    BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer(
-            @Value("${dubai.mongodb.bean-name:mongoDatabase}") final String mongoDatabaseBeanName) {
+    static BeanDefinitionRegistryPostProcessor mongoCollectionBeanInitializer() {
         final CollectionBeanInitializer initializer = new CollectionBeanInitializer();
-        initializer.setBasePackageClasses(loadBasePackages(Entity.class,
-                CollectionAutoConfiguration.class.getClassLoader()));
-        initializer.setMongoDatabaseBeanName(mongoDatabaseBeanName);
+        initializer.setBasePackageClasses(loadBasePackages(Entity.class, Entity.class.getClassLoader()));
+        initializer.setMongoDatabaseBeanName("mongoDatabase");
         return initializer;
     }
 

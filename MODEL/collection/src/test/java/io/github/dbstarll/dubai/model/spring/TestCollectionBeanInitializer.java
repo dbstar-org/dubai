@@ -1,5 +1,6 @@
 package io.github.dbstarll.dubai.model.spring;
 
+import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import org.junit.After;
@@ -7,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -41,6 +43,8 @@ public class TestCollectionBeanInitializer {
         initializer.setCollectionFactoryBeanName(COLLECTION_FACTORY_BEAN_NAME);
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
         this.beanDefinitionRegistry = new SimpleBeanDefinitionRegistry();
+        beanDefinitionRegistry.registerBeanDefinition(MONGO_DATABASE_BEAN_NAME,
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
     }
 
     @After
@@ -80,6 +84,8 @@ public class TestCollectionBeanInitializer {
                 }
             }
         };
+        registry.registerBeanDefinition(MONGO_DATABASE_BEAN_NAME,
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
 
         assertEquals(0, containsCounter.get());
         assertEquals(0, registerCounter.get());
@@ -88,12 +94,12 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(registry);
         assertEquals(1, containsCounter.get());
         assertEquals(1, registerCounter.get());
-        assertEquals(1, registry.getBeanDefinitionCount());
+        assertEquals(2, registry.getBeanDefinitionCount());
 
         initializer.postProcessBeanDefinitionRegistry(registry);
         assertEquals(2, containsCounter.get());
         assertEquals(1, registerCounter.get());
-        assertEquals(1, registry.getBeanDefinitionCount());
+        assertEquals(2, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -103,7 +109,7 @@ public class TestCollectionBeanInitializer {
     public void testEmptyBasePackages() {
         initializer.setBasePackages();
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
-        assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
     }
 
     /**
@@ -112,7 +118,40 @@ public class TestCollectionBeanInitializer {
     @Test
     public void testNullBasePackages() {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
-        assertEquals(1, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
+    }
+
+    @Test
+    public void testNullMongoDatabaseBeanName() {
+        initializer.setMongoDatabaseBeanName(null);
+        try {
+            initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+            fail("throw BeanDefinitionValidationException");
+        } catch (BeanDefinitionValidationException ex) {
+            assertEquals("mongoDatabaseBeanName not set.", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testEmptyMongoDatabaseBeanName() {
+        initializer.setMongoDatabaseBeanName("");
+        try {
+            initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+            fail("throw BeanDefinitionValidationException");
+        } catch (BeanDefinitionValidationException ex) {
+            assertEquals("mongoDatabaseBeanName not set.", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testOtherMongoDatabaseBeanName() {
+        initializer.setMongoDatabaseBeanName("other");
+        try {
+            initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
+            fail("throw NoSuchBeanDefinitionException");
+        } catch (NoSuchBeanDefinitionException ex) {
+            assertEquals("No bean named 'other' available", ex.getMessage());
+        }
     }
 
     @Test
@@ -120,7 +159,7 @@ public class TestCollectionBeanInitializer {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME));
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
     }
@@ -131,7 +170,7 @@ public class TestCollectionBeanInitializer {
         initializer.setRecursion(true);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(20, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(21, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
         assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection2"));
     }
@@ -141,7 +180,7 @@ public class TestCollectionBeanInitializer {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
         final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition("simpleEntityCollection");
         assertNotNull(df);
         assertTrue(CollectionBeanInitializer.isCollectionBeanDefinition(df, SimpleEntity.class));
@@ -161,7 +200,7 @@ public class TestCollectionBeanInitializer {
         initializer.setBasePackageClasses(SimpleEntity.class);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
-        assertEquals(6, beanDefinitionRegistry.getBeanDefinitionCount());
+        assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
 
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
@@ -184,6 +223,8 @@ public class TestCollectionBeanInitializer {
                 super.registerBeanDefinition(beanName, beanDefinition);
             }
         };
+        registry.registerBeanDefinition(MONGO_DATABASE_BEAN_NAME,
+                BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
 
         initializer.setBasePackageClasses(SimpleEntity.class);
         try {

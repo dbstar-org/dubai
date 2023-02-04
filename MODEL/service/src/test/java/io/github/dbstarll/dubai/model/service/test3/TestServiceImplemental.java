@@ -21,6 +21,11 @@ public final class TestServiceImplemental extends TestImplementals<TestEntity, T
     }
 
     @Override
+    public TestEntity deleteById(ObjectId id, Validate validate) throws ValidateException {
+        return validateAndDelete(id, validate);
+    }
+
+    @Override
     public TestEntity saveFailed(TestEntity entity, Validate validate) throws ValidateException {
         return validateAndSave(entity, null, validate, new FailedValidation());
     }

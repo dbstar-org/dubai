@@ -18,8 +18,11 @@ public class TestAutowire extends TestCase {
     protected void setUp() {
         final StaticApplicationContext applicationContext = new StaticApplicationContext();
         applicationContext.registerSingleton("implementalAutowirer", SpringImplementalAutowirer.class);
+        applicationContext.registerBeanDefinition("testAutowire", BeanDefinitionBuilder
+                .genericBeanDefinition(TestAutowire.class).getBeanDefinition());
         applicationContext.registerBeanDefinition("mongoDatabase", BeanDefinitionBuilder
-                .genericBeanDefinition(TestAutowire.class).setFactoryMethod("getDatabase").getBeanDefinition());
+                .genericBeanDefinition(MongoDatabase.class)
+                .setFactoryMethodOnBean("getDatabase", "testAutowire").getBeanDefinition());
         final CollectionBeanInitializer initializer = new CollectionBeanInitializer();
         initializer.setMongoDatabaseBeanName("mongoDatabase");
         initializer.setBasePackageClasses(TestEntity.class);
@@ -27,7 +30,7 @@ public class TestAutowire extends TestCase {
         this.context = applicationContext;
     }
 
-    static MongoDatabase getDatabase() {
+    MongoDatabase getDatabase() {
         return new MongoClientFactory().createWithPojoCodec("mongodb://localhost:12345/pumpkin").getDatabase("test");
     }
 
@@ -46,8 +49,8 @@ public class TestAutowire extends TestCase {
         context.addBeanFactoryPostProcessor(initializer);
         context.refresh();
 
-        assertEquals(5, context.getBeanDefinitionCount());
-        assertArrayEquals(new String[]{"implementalAutowirer", "mongoDatabase", "collectionFactory",
+        assertEquals(6, context.getBeanDefinitionCount());
+        assertArrayEquals(new String[]{"implementalAutowirer", "testAutowire", "mongoDatabase", "collectionFactory",
                 "testEntityCollection", "testService"}, context.getBeanDefinitionNames());
 
         assertNotNull(context.getBean(TestService.class));

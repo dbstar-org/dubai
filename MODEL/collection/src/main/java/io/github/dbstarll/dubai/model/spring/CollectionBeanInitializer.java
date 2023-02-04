@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
@@ -75,10 +76,22 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
                     .genericBeanDefinition(CollectionFactory.class)
                     .setScope(BeanDefinition.SCOPE_SINGLETON)
                     .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
-                    .addConstructorArgReference(mongoDatabaseBeanName)
+                    .addConstructorArgReference(validateMongoDatabaseBeanName(registry))
                     .getBeanDefinition();
             LOGGER.info("registerBeanDefinition: [{}] with: {}", collectionFactoryBeanName, definition);
             registry.registerBeanDefinition(collectionFactoryBeanName, definition);
+        }
+    }
+
+    private String validateMongoDatabaseBeanName(final BeanDefinitionRegistry registry) throws BeansException {
+        if (!StringUtils.isBlank(mongoDatabaseBeanName)) {
+            if (registry.containsBeanDefinition(mongoDatabaseBeanName)) {
+                return mongoDatabaseBeanName;
+            } else {
+                throw new NoSuchBeanDefinitionException(mongoDatabaseBeanName);
+            }
+        } else {
+            throw new BeanDefinitionValidationException("mongoDatabaseBeanName not set.");
         }
     }
 
