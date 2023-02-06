@@ -35,5 +35,5 @@ public interface EntityModifier extends FunctionalBase {
      * @return 克隆后的新实体.
      * @throws CloneNotSupportedException 不支持克隆操作时抛出
      */
-    Object clone() throws CloneNotSupportedException;
+    Object copy() throws CloneNotSupportedException;
 }

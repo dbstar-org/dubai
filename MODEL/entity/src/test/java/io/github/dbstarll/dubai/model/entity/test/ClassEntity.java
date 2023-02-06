@@ -46,7 +46,7 @@ public class ClassEntity implements Entity, EntityModifier {
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Object copy() throws CloneNotSupportedException {
         return super.clone();
     }
 

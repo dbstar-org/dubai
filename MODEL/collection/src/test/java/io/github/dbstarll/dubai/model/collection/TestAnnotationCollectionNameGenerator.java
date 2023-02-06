@@ -95,11 +95,6 @@ public class TestAnnotationCollectionNameGenerator extends TestCase {
         public Date getLastModified() {
             return null;
         }
-
-        @Override
-        public Object clone() throws CloneNotSupportedException {
-            return super.clone();
-        }
     }
 
     @Table

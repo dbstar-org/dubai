@@ -126,7 +126,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
             final String property = getReadProperty(method);
             if (StringUtils.isNotBlank(property)) {
                 return fields.get(property);
-            } else if ("clone".equals(method.getName())) {
+            } else if ("copy".equals(method.getName())) {
                 return EntityFactory.newInstance(entityClass, fields);
             }
         }
@@ -264,7 +264,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
             if (proxy == null) {
                 return null;
             } else if (proxy instanceof EntityModifier) {
-                return (E) ((EntityModifier) proxy).clone();
+                return (E) ((EntityModifier) proxy).copy();
             } else {
                 return ObjectUtils.clone(proxy);
             }
