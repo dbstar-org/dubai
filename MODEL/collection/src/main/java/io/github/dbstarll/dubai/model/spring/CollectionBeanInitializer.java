@@ -17,6 +17,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -144,13 +145,14 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
     }
 
     private BeanDefinition buildCollection(final Class<?> entityClass) {
-        final ResolvableType beanType = ResolvableType.forClassWithGenerics(Collection.class, entityClass);
-        return BeanDefinitionBuilder.rootBeanDefinition(beanType, null)
+        final AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", COLLECTION_FACTORY_BEAN_NAME)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(entityClass)
                 .getBeanDefinition();
+        ((RootBeanDefinition) bd).setTargetType(ResolvableType.forClassWithGenerics(Collection.class, entityClass));
+        return bd;
     }
 
     /**
