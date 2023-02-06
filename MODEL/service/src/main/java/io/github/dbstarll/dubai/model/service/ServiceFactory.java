@@ -133,18 +133,14 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     @SuppressWarnings("unchecked")
-    private java.util.Collection<PositionValidation<E>> buildGeneralValidation(final Object proxy) throws Throwable {
+    private java.util.Collection<PositionValidation<E>> buildGeneralValidation(final Object proxy)
+            throws InvocationTargetException, IllegalAccessException {
         if (validationRef.get() == null) {
             final java.util.Collection<PositionValidation<E>> validations = new LinkedList<>();
             for (PositionMethod entry : positionMethods) {
                 final Implemental implemental = findOrPutImplemental(proxy, entry.getValue().getKey());
                 if (implemental != null) {
-                    final Validation<E> validation;
-                    try {
-                        validation = (Validation<E>) entry.getValue().getValue().invoke(implemental);
-                    } catch (InvocationTargetException ex) {
-                        throw ex.getTargetException();
-                    }
+                    final Validation<E> validation = (Validation<E>) entry.getValue().getValue().invoke(implemental);
                     if (validation != null) {
                         validations.add(new PositionValidation<>(entry.getKey(), validation));
                     }
@@ -162,7 +158,11 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         } else if (method.getDeclaringClass() == ImplementalAutowirerAware.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == GeneralValidateable.class) {
-            return buildGeneralValidation(proxy);
+            try {
+                return buildGeneralValidation(proxy);
+            } catch (InvocationTargetException ex) {
+                throw ex.getTargetException();
+            }
         }
 
         final MethodValue entry = methods.get(new MethodKey(method, entityClass).getKey());
