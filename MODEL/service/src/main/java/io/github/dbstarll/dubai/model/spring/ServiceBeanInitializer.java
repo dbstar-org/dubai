@@ -3,8 +3,6 @@ package io.github.dbstarll.dubai.model.spring;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.service.Service;
 import io.github.dbstarll.dubai.model.service.ServiceFactory;
-import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -28,7 +27,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
-import java.util.Map.Entry;
 
 public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBeanInitializer.class);
@@ -39,8 +37,6 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     private static final ResourcePatternResolver RESOURCE_RESOLVER = new PathMatchingResourcePatternResolver();
     private static final MetadataReaderFactory METADATA_FACTORY = new CachingMetadataReaderFactory(RESOURCE_RESOLVER);
     private static final TypeFilter TYPE_FILTER = new AssignableTypeFilter(Service.class);
-
-    private static final String SERVICE_FACTORY_BEAN_NAME = ServiceBeanFactory.class.getName();
 
     private String[] basePackages;
 
@@ -55,7 +51,6 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     @Override
     public void postProcessBeanDefinitionRegistry(@NonNull final BeanDefinitionRegistry registry)
             throws BeansException {
-        createIfMissServiceFactory(registry);
         if (basePackages != null) {
             for (String basePackage : basePackages) {
                 try {
@@ -66,18 +61,6 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
                     throw new BeanDefinitionStoreException("failure during classpath scanning: " + basePackage, ex);
                 }
             }
-        }
-    }
-
-    private void createIfMissServiceFactory(final BeanDefinitionRegistry registry) throws BeansException {
-        if (!registry.containsBeanDefinition(SERVICE_FACTORY_BEAN_NAME)) {
-            final BeanDefinition definition = BeanDefinitionBuilder
-                    .genericBeanDefinition(ServiceBeanFactory.class)
-                    .setScope(BeanDefinition.SCOPE_SINGLETON)
-                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
-                    .getBeanDefinition();
-            LOGGER.info("registerBeanDefinition: [{}] with: {}", SERVICE_FACTORY_BEAN_NAME, definition);
-            registry.registerBeanDefinition(SERVICE_FACTORY_BEAN_NAME, definition);
         }
     }
 
@@ -102,26 +85,19 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
                                                                           final BeanDefinitionRegistry registry) {
         final Class<E> entityClass = ServiceFactory.getEntityClass(serviceClass);
         if (entityClass != null) {
-            registerBeanDefinition(registry, entityClass, serviceClass, getServiceBeanName(serviceClass), 0);
+            registerBeanDefinition(registry, entityClass, serviceClass);
         }
     }
 
     private <E extends Entity, S extends Service<E>> void registerBeanDefinition(
-            final BeanDefinitionRegistry registry, final Class<E> entityClass, final Class<S> serviceClass,
-            final String baseBeanName, final int index) {
-        final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
+            final BeanDefinitionRegistry registry, final Class<E> entityClass, final Class<S> serviceClass) {
+        final String beanName = serviceClass.getName();
         if (registry.containsBeanDefinition(beanName)) {
-            final BeanDefinition definition = registry.getBeanDefinition(beanName);
-            if (isServiceBeanDefinition(definition, serviceClass)) {
-                throw new BeanDefinitionValidationException(
-                        "service already exist: [" + beanName + "]" + serviceClass);
-            }
-            LOGGER.warn("bean already exist: [{}] with definition: {}", beanName, definition);
-            registerBeanDefinition(registry, entityClass, serviceClass, baseBeanName, index + 1);
+            throw new BeanDefinitionValidationException("service already exist: " + beanName);
         } else {
-            final Entry<String, BeanDefinition> match = findCollectionBeanDefinition(registry, entityClass);
-            if (match != null) {
-                final BeanDefinition definition = buildService(serviceClass, match.getKey());
+            final String collectionBeanName = findCollectionBeanName(registry, entityClass);
+            if (collectionBeanName != null) {
+                final BeanDefinition definition = buildService(serviceClass, collectionBeanName);
                 LOGGER.info("register service[{}] of entity: {} with: {}", beanName, entityClass, serviceClass);
                 registry.registerBeanDefinition(beanName, definition);
             } else {
@@ -130,34 +106,26 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
         }
     }
 
-    private Entry<String, BeanDefinition> findCollectionBeanDefinition(final BeanDefinitionRegistry registry,
-                                                                       final Class<?> entityClass) {
+    private String findCollectionBeanName(final BeanDefinitionRegistry registry, final Class<?> entityClass) {
         for (final String beanName : registry.getBeanDefinitionNames()) {
             final BeanDefinition definition = registry.getBeanDefinition(beanName);
             if (CollectionBeanInitializer.isCollectionBeanDefinition(definition, entityClass)) {
-                return EntryWrapper.wrap(beanName, definition);
+                return beanName;
             }
         }
         return null;
     }
 
-    private <E extends Entity, S extends Service<E>> String getServiceBeanName(final Class<S> serviceClass) {
-        return StringUtils.uncapitalize(serviceClass.getSimpleName());
-    }
-
-    private boolean isServiceBeanDefinition(final BeanDefinition definition, final Class<?> serviceClass) {
-        return serviceClass == definition.getResolvableType().resolve();
-    }
-
     private <E extends Entity, S extends Service<E>> BeanDefinition buildService(
             final Class<S> serviceClass, final String collectionBeanName) {
-        return BeanDefinitionBuilder.genericBeanDefinition(serviceClass)
-                .setFactoryMethodOnBean("newInstance", SERVICE_FACTORY_BEAN_NAME)
+        final AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(ServiceFactory.class, "newInstance")
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(serviceClass)
                 .addConstructorArgReference(collectionBeanName)
                 .getBeanDefinition();
+        ((RootBeanDefinition) bd).setTargetType(serviceClass);
+        return bd;
     }
 
     /**

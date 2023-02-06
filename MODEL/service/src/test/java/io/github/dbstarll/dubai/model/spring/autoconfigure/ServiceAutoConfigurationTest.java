@@ -1,10 +1,13 @@
 package io.github.dbstarll.dubai.model.spring.autoconfigure;
 
+import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.service.ImplementalAutowirer;
+import io.github.dbstarll.dubai.model.service.test.InterfaceService;
 import io.github.dbstarll.dubai.model.spring.ServiceBeanInitializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -14,6 +17,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE,
@@ -25,6 +30,12 @@ import static org.junit.Assert.assertNotNull;
         })
 public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     private ApplicationContext ctx;
+
+    @Autowired(required = false)
+    private InterfaceService service1;
+
+    @Autowired(required = false)
+    private io.github.dbstarll.dubai.model.service.test2.InterfaceService service2;
 
     @Override
     public void setApplicationContext(@NonNull ApplicationContext ctx) throws BeansException {
@@ -39,5 +50,19 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     @Test
     public void implementalAutowirer() {
         assertNotNull(ctx.getBean("implementalAutowirer", ImplementalAutowirer.class));
+        for (String name : ctx.getBeanDefinitionNames()) {
+            System.out.println(name);
+        }
+    }
+
+    @Test
+    public void interfaceService() {
+        assertNotNull(service1);
+        assertSame(InterfaceEntity.class, service1.getEntityClass());
+    }
+
+    @Test
+    public void interfaceService2() {
+        assertNull(service2);
     }
 }

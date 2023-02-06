@@ -4,6 +4,7 @@ import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
+import io.github.dbstarll.dubai.model.entity.Entity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,6 +53,10 @@ public class TestCollectionBeanInitializer {
     public void clean() {
         this.initializer = null;
         this.beanDefinitionRegistry = null;
+    }
+
+    private <E extends Entity> String getCollectionBeanName(final Class<E> entityClass) {
+        return ResolvableType.forClassWithGenerics(Collection.class, entityClass).toString();
     }
 
     @Test
@@ -161,7 +167,7 @@ public class TestCollectionBeanInitializer {
 
         assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
         assertTrue(beanDefinitionRegistry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME));
-        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition(getCollectionBeanName(SimpleEntity.class)));
     }
 
     @Test
@@ -171,8 +177,8 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
         assertEquals(21, beanDefinitionRegistry.getBeanDefinitionCount());
-        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection"));
-        assertTrue(beanDefinitionRegistry.containsBeanDefinition("simpleEntityCollection2"));
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition(getCollectionBeanName(SimpleEntity.class)));
+        assertTrue(beanDefinitionRegistry.containsBeanDefinition(getCollectionBeanName(io.github.dbstarll.dubai.model.collection.test.SimpleEntity.class)));
     }
 
     @Test
@@ -181,7 +187,7 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
         assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
-        final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition("simpleEntityCollection");
+        final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition(getCollectionBeanName(SimpleEntity.class));
         assertNotNull(df);
         assertTrue(CollectionBeanInitializer.isCollectionBeanDefinition(df, SimpleEntity.class));
         assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(df,
@@ -217,7 +223,7 @@ public class TestCollectionBeanInitializer {
             @Override
             public void registerBeanDefinition(@NonNull String beanName, BeanDefinition beanDefinition)
                     throws BeanDefinitionStoreException {
-                if ("simpleEntityCollection".equals(beanName)) {
+                if (beanName.startsWith(Collection.class.getName() + "<")) {
                     throw new IllegalArgumentException("TestIOException");
                 }
                 super.registerBeanDefinition(beanName, beanDefinition);

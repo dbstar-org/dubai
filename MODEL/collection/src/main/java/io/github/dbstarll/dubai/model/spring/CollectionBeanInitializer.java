@@ -107,26 +107,19 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
             if (TYPE_FILTER.match(metadataReader, METADATA_FACTORY)) {
                 final Class<?> entityClass = Class.forName(metadataReader.getClassMetadata().getClassName());
                 if (EntityFactory.isEntityClass(entityClass)) {
-                    final String beanName = StringUtils.uncapitalize(entityClass.getSimpleName()) + "Collection";
-                    registerBeanDefinition(registry, entityClass, beanName, 0);
+                    registerBeanDefinition(registry, entityClass);
                 }
             }
         }
     }
 
-    private void registerBeanDefinition(final BeanDefinitionRegistry registry, final Class<?> entityClass,
-                                        final String baseBeanName, final int index) {
-        final String beanName = baseBeanName + (index > 0 ? index + 1 : "");
+    private void registerBeanDefinition(final BeanDefinitionRegistry registry, final Class<?> entityClass) {
+        final ResolvableType targetType = ResolvableType.forClassWithGenerics(Collection.class, entityClass);
+        final String beanName = targetType.toString();
         if (registry.containsBeanDefinition(beanName)) {
-            final BeanDefinition definition = registry.getBeanDefinition(beanName);
-            if (isCollectionBeanDefinition(definition, entityClass)) {
-                throw new BeanDefinitionValidationException(
-                        "collection already exist: [" + beanName + "] of entity: " + entityClass);
-            }
-            LOGGER.warn("bean already exist: [{}] with definition: {}", beanName, definition);
-            registerBeanDefinition(registry, entityClass, baseBeanName, index + 1);
+            throw new BeanDefinitionValidationException("collection already exist: " + beanName);
         } else {
-            final BeanDefinition definition = buildCollection(entityClass);
+            final BeanDefinition definition = buildCollection(entityClass, targetType);
             LOGGER.info("register collection[{}] of entity: {}", beanName, entityClass);
             registry.registerBeanDefinition(beanName, definition);
         }
@@ -144,14 +137,14 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
         return Collection.class == beanType.resolve() && entityClass == beanType.resolveGeneric();
     }
 
-    private BeanDefinition buildCollection(final Class<?> entityClass) {
+    private BeanDefinition buildCollection(final Class<?> entityClass, final ResolvableType targetType) {
         final AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", COLLECTION_FACTORY_BEAN_NAME)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(entityClass)
                 .getBeanDefinition();
-        ((RootBeanDefinition) bd).setTargetType(ResolvableType.forClassWithGenerics(Collection.class, entityClass));
+        ((RootBeanDefinition) bd).setTargetType(targetType);
         return bd;
     }
 

@@ -1,6 +1,7 @@
 package io.github.dbstarll.dubai.model.spring;
 
 import com.mongodb.client.MongoDatabase;
+import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
@@ -49,10 +50,11 @@ public class TestAutowire extends TestCase {
         context.addBeanFactoryPostProcessor(initializer);
         context.refresh();
 
-        assertEquals(7, context.getBeanDefinitionCount());
+        assertEquals(6, context.getBeanDefinitionCount());
         assertArrayEquals(new String[]{"implementalAutowirer", "testAutowire", "mongoDatabase",
-                        "io.github.dbstarll.dubai.model.collection.CollectionFactory", "testEntityCollection",
-                        "io.github.dbstarll.dubai.model.spring.ServiceBeanFactory", "testService"},
+                        CollectionFactory.class.getName(),
+                        "io.github.dbstarll.dubai.model.collection.Collection<io.github.dbstarll.dubai.model.service.test3.TestEntity>",
+                        TestService.class.getName()},
                 context.getBeanDefinitionNames());
 
         assertNotNull(context.getBean(TestService.class));
