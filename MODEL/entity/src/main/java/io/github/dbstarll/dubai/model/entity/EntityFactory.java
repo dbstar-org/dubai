@@ -15,6 +15,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -155,7 +156,8 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
             return false;
         }
         final EntityFactory<?> other = (EntityFactory<?>) handler;
-        return entityClass.equals(other.entityClass) && fields.equals(other.fields);
+        return entityClass.equals(other.entityClass) && fields.size() == other.fields.size() && fields.entrySet()
+                .stream().allMatch(e -> Objects.deepEquals(e.getValue(), other.fields.get(e.getKey())));
     }
 
     @Override
@@ -208,23 +210,45 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * 判断是否有效的实体类.
      *
      * @param entityClass 实体类
-     * @param <E>         实体类
      * @return 如果是一个有效的实体类，返回true，否则返回false
      */
-    public static <E extends Entity> boolean isEntityClass(final Class<E> entityClass) {
-        if (!Modifier.isAbstract(entityClass.getModifiers())) {
-            if (entityClass.getAnnotation(Table.class) != null) {
-                try {
-                    entityClass.getConstructor();
-                } catch (NoSuchMethodException | SecurityException e) {
-                    return false;
+    public static boolean isEntityClass(final Class<?> entityClass) {
+        if (Entity.class.isAssignableFrom(entityClass)) {
+            if (!Modifier.isAbstract(entityClass.getModifiers())) {
+                if (entityClass.getAnnotation(Table.class) != null) {
+                    try {
+                        entityClass.getConstructor();
+                    } catch (NoSuchMethodException | SecurityException e) {
+                        return false;
+                    }
+                    return true;
                 }
-                return true;
+            } else if (entityClass.isInterface()) {
+                return entityClass.getAnnotation(Table.class) != null;
             }
-        } else if (entityClass.isInterface()) {
-            return entityClass.getAnnotation(Table.class) != null;
         }
         return false;
+    }
+
+    /**
+     * 判断是否有效的接口型实体类.
+     *
+     * @param entityClass 实体类
+     * @return 如果是一个有效的接口型实体类，返回true，否则返回false
+     */
+    public static boolean isEntityInterface(final Class<?> entityClass) {
+        return isEntityClass(entityClass) && entityClass.isInterface();
+    }
+
+    /**
+     * 判断是否有效的代理型实体类.
+     *
+     * @param proxyClass 代理类
+     * @return 如果是一个有效的代理型实体类，返回true，否则返回false
+     */
+    public static boolean isEntityProxy(final Class<?> proxyClass) {
+        return Proxy.isProxyClass(proxyClass) && PojoFields.class.isAssignableFrom(proxyClass)
+                && isEntityInterface(getEntityClass(proxyClass));
     }
 
     /**
@@ -260,7 +284,7 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      */
     @SuppressWarnings("unchecked")
     public static <E extends Entity> Class<E> getEntityClass(final E proxy) {
-        if (Proxy.isProxyClass(proxy.getClass())) {
+        if (isEntityProxy(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof EntityFactory) {
                 return ((EntityFactory<E>) handler).entityClass;
@@ -277,11 +301,11 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
      * @return 代理类的原始接口
      */
     @SuppressWarnings("unchecked")
-    public static <E extends Entity> Class<E> getEntityClass(final Class<E> proxyClass) {
+    public static <E> Class<E> getEntityClass(final Class<E> proxyClass) {
         Class<E> c = proxyClass;
         if (Proxy.isProxyClass(proxyClass)) {
             for (Class<?> i : proxyClass.getInterfaces()) {
-                if (Entity.class.isAssignableFrom(i)) {
+                if (isEntityInterface(i)) {
                     c = (Class<E>) i;
                 }
             }

@@ -36,11 +36,8 @@
       </activation>
       <properties>
         <version.junit>4.13.2</version.junit>
-        <version.jmockit>1.49</version.jmockit>
         <version.surefire-junit47>3.0.0-M8</version.surefire-junit47>
-        <argLine>
-          -javaagent:${settings.localRepository}/org/jmockit/jmockit/${version.jmockit}/jmockit-${version.jmockit}.jar
-        </argLine>
+        <version.de.flapdoodle.embed.mongo>4.4.0</version.de.flapdoodle.embed.mongo>
       </properties>
       <dependencyManagement>
         <dependencies>
@@ -50,9 +47,14 @@
             <version>${version.junit}</version>
           </dependency>
           <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>${version.jmockit}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${version.spring-boot}</version>
+          </dependency>
+          <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+            <version>${version.de.flapdoodle.embed.mongo}</version>
           </dependency>
         </dependencies>
       </dependencyManagement>
@@ -63,8 +65,13 @@
           <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.jmockit</groupId>
-          <artifactId>jmockit</artifactId>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-test</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>de.flapdoodle.embed</groupId>
+          <artifactId>de.flapdoodle.embed.mongo</artifactId>
           <scope>test</scope>
         </dependency>
       </dependencies>

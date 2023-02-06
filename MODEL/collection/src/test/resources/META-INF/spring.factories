@@ -1,2 +1,4 @@
 io.github.dbstarll.dubai.model.entity.Entity=\
-io.github.dbstarll.dubai.model.collection.test.SimpleEntity
+io.github.dbstarll.dubai.model.collection.test.SimpleEntity,\
+io.github.dbstarll.dubai.model.collection.test.ClassNotFoundEntity,\
+io.github.dbstarll.dubai.model.collection.test.NotEntity

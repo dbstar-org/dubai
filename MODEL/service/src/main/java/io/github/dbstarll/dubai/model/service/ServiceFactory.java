@@ -2,6 +2,7 @@ package io.github.dbstarll.dubai.model.service;
 
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
@@ -261,8 +262,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             if (serviceClass.isInterface()) {
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(serviceClass, Package.class);
                 return (S) Proxy.newProxyInstance(serviceClass.getClassLoader(),
-                        new Class[]{serviceClass, ImplementalAutowirerAware.class, GeneralValidateable.class,
-                                packageInterface},
+                        new Class[]{serviceClass, ServiceProxy.class, ImplementalAutowirerAware.class,
+                                GeneralValidateable.class, packageInterface},
                         new ServiceFactory<>(serviceClass, collection));
             } else {
                 try {
@@ -280,24 +281,45 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      * 判断是否有效的服务类.
      *
      * @param serviceClass 服务类
-     * @param <E>          实体类
-     * @param <S>          服务类
      * @return 如果是一个有效的服务类，返回true，否则返回false
      */
-    public static <E extends Entity, S extends Service<E>> boolean isServiceClass(final Class<S> serviceClass) {
-        if (!Modifier.isAbstract(serviceClass.getModifiers())) {
-            if (serviceClass.getAnnotation(EntityService.class) != null) {
-                try {
-                    serviceClass.getConstructor();
-                } catch (NoSuchMethodException | SecurityException e) {
-                    return false;
+    public static boolean isServiceClass(final Class<?> serviceClass) {
+        if (Service.class.isAssignableFrom(serviceClass)) {
+            if (!Modifier.isAbstract(serviceClass.getModifiers())) {
+                if (serviceClass.getAnnotation(EntityService.class) != null) {
+                    try {
+                        serviceClass.getConstructor();
+                    } catch (NoSuchMethodException | SecurityException e) {
+                        return false;
+                    }
+                    return true;
                 }
-                return true;
+            } else if (serviceClass.isInterface()) {
+                return serviceClass.getAnnotation(EntityService.class) != null;
             }
-        } else if (serviceClass.isInterface()) {
-            return serviceClass.getAnnotation(EntityService.class) != null;
         }
         return false;
+    }
+
+    /**
+     * 判断是否有效的接口型服务类.
+     *
+     * @param serviceClass 服务类
+     * @return 如果是一个有效的接口型服务类，返回true，否则返回false
+     */
+    public static boolean isServiceInterface(final Class<?> serviceClass) {
+        return isServiceClass(serviceClass) && serviceClass.isInterface();
+    }
+
+    /**
+     * 判断是否有效的代理型服务类.
+     *
+     * @param proxyClass 代理类
+     * @return 如果是一个有效的代理型服务类，返回true，否则返回false
+     */
+    public static boolean isServiceProxy(final Class<?> proxyClass) {
+        return Proxy.isProxyClass(proxyClass) && ServiceProxy.class.isAssignableFrom(proxyClass)
+                && isServiceInterface(getServiceClass(proxyClass));
     }
 
     /**
@@ -310,13 +332,71 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
      */
     @SuppressWarnings("unchecked")
     public static <E extends Entity, S extends Service<E>> Class<S> getServiceClass(final S proxy) {
-        if (Proxy.isProxyClass(proxy.getClass())) {
+        if (isServiceProxy(proxy.getClass())) {
             final InvocationHandler handler = Proxy.getInvocationHandler(proxy);
             if (handler instanceof ServiceFactory) {
                 return ((ServiceFactory<E, S>) handler).serviceClass;
             }
         }
         return (Class<S>) proxy.getClass();
+    }
+
+
+    /**
+     * 获得代理类的原始接口.
+     *
+     * @param proxyClass 代理类
+     * @param <S>        服务类
+     * @return 代理类的原始接口
+     */
+    @SuppressWarnings("unchecked")
+    public static <S> Class<S> getServiceClass(final Class<S> proxyClass) {
+        Class<S> c = proxyClass;
+        if (Proxy.isProxyClass(proxyClass)) {
+            for (Class<?> i : proxyClass.getInterfaces()) {
+                if (isServiceInterface(i)) {
+                    c = (Class<S>) i;
+                }
+            }
+        }
+        return c;
+    }
+
+    /**
+     * 获得一个服务类对应的实体类.
+     *
+     * @param serviceClass 服务类
+     * @param <E>          实体类
+     * @param <S>          服务类
+     * @return 实体类
+     */
+    public static <E extends Entity, S extends Service<E>> Class<E> getEntityClass(final Class<S> serviceClass) {
+        final Type genericSuperclass = serviceClass.getGenericSuperclass();
+        if (genericSuperclass != null) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericSuperclass);
+            if (entityClass != null && EntityFactory.isEntityClass(entityClass)) {
+                return entityClass;
+            }
+        }
+        for (Type genericInterface : serviceClass.getGenericInterfaces()) {
+            final Class<E> entityClass = getEntityClassFromGeneric(genericInterface);
+            if (entityClass != null && EntityFactory.isEntityClass(entityClass)) {
+                return entityClass;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
+        if (genericType instanceof ParameterizedType) {
+            for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
+                if (EntityFactory.isEntityClass((Class<?>) type)) {
+                    return (Class<E>) type;
+                }
+            }
+        }
+        return null;
     }
 
     public interface GeneralValidateable<E extends Entity> {
@@ -344,5 +424,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         PositionMethod(final Position key, final MethodValue value) {
             super(key, value);
         }
+    }
+
+    public interface ServiceProxy {
     }
 }

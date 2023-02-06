@@ -1,6 +1,7 @@
 package org.bson.codecs.pojo;
 
 import io.github.dbstarll.dubai.model.entity.Entity;
+import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.EntityModifier;
 import io.github.dbstarll.dubai.model.mongodb.EntityInstanceCreatorFactory;
 import org.bson.codecs.configuration.CodecConfigurationException;
@@ -18,9 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.Collections.reverse;
+import static org.bson.assertions.Assertions.notNull;
+import static org.bson.codecs.pojo.PropertyReflectionUtils.getPropertyMethods;
+import static org.bson.codecs.pojo.PropertyReflectionUtils.isGetter;
+import static org.bson.codecs.pojo.PropertyReflectionUtils.toPropertyName;
 
 public final class EntityConvention implements Convention {
     @Override
@@ -31,86 +37,64 @@ public final class EntityConvention implements Convention {
     @SuppressWarnings("unchecked")
     private <T> void process(final ClassModelBuilder<T> classModelBuilder) {
         final Class<T> entityClass = classModelBuilder.getType();
-        if (Entity.class.isAssignableFrom(entityClass) && entityClass.isInterface()) {
-            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder);
+        if (EntityFactory.isEntityInterface(entityClass)) {
+            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder, false);
+        } else if (EntityFactory.isEntityProxy(entityClass)) {
+            processEntity((ClassModelBuilder<? extends Entity>) classModelBuilder, true);
         }
     }
 
-    private <T extends Entity> void processEntity(final ClassModelBuilder<T> classModelBuilder) {
-        final Class<T> entityClass = classModelBuilder.getType();
-
-        final Set<String> propertyNames = new TreeSet<>();
-        final Map<String, PropertyMetadata<?>> propertyMetadatas = new HashMap<>();
-        final ArrayList<Annotation> annotations = new ArrayList<>();
-        final Map<String, TypeParameterMap> typeParameters = new HashMap<>();
-
-        collectMethods(EntityModifier.class, propertyNames, propertyMetadatas, annotations, typeParameters, null);
-        collectMethods(entityClass, propertyNames, propertyMetadatas, annotations, typeParameters, null);
-
-        for (final String propertyName : propertyNames) {
-            final PropertyMetadata<?> propertyMetadata = propertyMetadatas.get(propertyName);
-            if (propertyMetadata.isSerializable() && propertyMetadata.isDeserializable()) {
-                classModelBuilder.addProperty(createPropertyModelBuilder(propertyMetadata));
-            } else {
-                throw new CodecConfigurationException(
-                        String.format("Property '%s' in %s with data types: %s, need both getter[%s] and setter[%s]",
-                                propertyName,
-                                propertyMetadata.getDeclaringClassName(), propertyMetadata.getTypeData(),
-                                propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()));
-            }
+    private <T extends Entity> void processEntity(final ClassModelBuilder<T> classModelBuilder, final boolean proxy) {
+        final Class<T> entityClass;
+        if (proxy) {
+            entityClass = EntityFactory.getEntityClass(classModelBuilder.getType());
+        } else {
+            entityClass = classModelBuilder.getType();
         }
-
-        classModelBuilder.annotations(annotations);
-        classModelBuilder.propertyNameToTypeParameterMap(typeParameters);
-
         classModelBuilder.instanceCreatorFactory(new EntityInstanceCreatorFactory<>(entityClass));
+
+        final Context context = new Context();
+        collectMethods(EntityModifier.class, context, null);
+        collectMethods(entityClass, context, null);
+        context.process(classModelBuilder);
     }
 
-    private static <T, S> void collectMethods(final Class<T> entityInterface, final Set<String> propertyNames,
-                                              final Map<String, PropertyMetadata<?>> propertyMetadatas,
-                                              final ArrayList<Annotation> annotations,
-                                              final Map<String, TypeParameterMap> typeParameterMaps,
+    private static <T, S> void collectMethods(final Class<T> entityInterface, final Context context,
                                               final TypeData<S> parentClassTypeData) {
+        final String declaringClassName = entityInterface.toString();
+
+        context.annotations.addAll(Arrays.asList(entityInterface.getDeclaredAnnotations()));
+
+        final List<String> genericTypeNames = Arrays.stream(entityInterface.getTypeParameters())
+                .map(TypeVariable::getName).collect(Collectors.toList());
+
+        final PropertyMethods propertyMethods = getPropertyMethods(entityInterface);
+        // Note that we're processing setters before getters. It's typical for setters to have more general types
+        // than getters (e.g.: getter returning ImmutableList, but setter accepting Collection), so by evaluating
+        // setters first, we'll initialize the PropertyMetadata with the more general type
+        propertyMethods.getSetterMethods().stream().map(method -> collectMethod(declaringClassName, context,
+                parentClassTypeData, genericTypeNames, method, false)).forEach(context.propertyNames::add);
+        propertyMethods.getGetterMethods().stream().map(method -> collectMethod(declaringClassName, context,
+                parentClassTypeData, genericTypeNames, method, true)).forEach(context.propertyNames::add);
+
         for (Type t : entityInterface.getGenericInterfaces()) {
             final TypeData<T> classTypeData = TypeData.newInstance(t, entityInterface);
             if (t instanceof ParameterizedType) {
                 t = ((ParameterizedType) t).getRawType();
             }
-            collectMethods((Class<?>) t, propertyNames, propertyMetadatas, annotations, typeParameterMaps,
-                    classTypeData);
+            collectMethods((Class<?>) t, context, classTypeData);
         }
-
-        final String declaringClassName = entityInterface.toString();
-        final List<String> genericTypeNames = Arrays.stream(entityInterface.getTypeParameters())
-                .map(TypeVariable::getName).collect(Collectors.toList());
-
-        final PropertyMethods propertyMethods = PropertyReflectionUtils.getPropertyMethods(entityInterface);
-        propertyMethods.getSetterMethods().stream()
-                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                        parentClassTypeData, genericTypeNames, method, false))
-                .forEach(propertyNames::add);
-        propertyMethods.getGetterMethods().stream()
-                .map(method -> collectMethod(declaringClassName, propertyMetadatas, typeParameterMaps,
-                        parentClassTypeData, genericTypeNames, method, true))
-                .forEach(propertyNames::add);
-
-        annotations.addAll(Arrays.asList(entityInterface.getDeclaredAnnotations()));
     }
 
-    private static <S> String collectMethod(final String declaringClassName,
-                                            final Map<String, PropertyMetadata<?>> propertyNameMap,
-                                            final Map<String, TypeParameterMap> propertyTypeParameterMap,
-                                            final TypeData<S> parentClassTypeData,
-                                            final List<String> genericTypeNames,
-                                            final Method method,
-                                            final boolean getter) {
-        final String propertyName = PropertyReflectionUtils.toPropertyName(method);
+    private static String collectMethod(final String declaringClassName, final Context context,
+                                        final TypeData<?> parentClassTypeData, final List<String> genericTypeNames,
+                                        final Method method, final boolean getter) {
+        final String propertyName = toPropertyName(method);
 
-        final Type genericType = getter ? method.getGenericReturnType() : method.getGenericParameterTypes()[0];
-        final PropertyMetadata<?> propertyMetadata = getOrCreateMethodPropertyMetadata(
-                propertyName, declaringClassName, propertyNameMap, TypeData.newInstance(method));
-        cachePropertyTypeData(propertyMetadata, propertyTypeParameterMap, parentClassTypeData, genericTypeNames,
-                genericType);
+        final PropertyMetadata<?> propertyMetadata = getOrCreateMethodPropertyMetadata(propertyName, declaringClassName,
+                context, TypeData.newInstance(method));
+        cachePropertyTypeData(propertyMetadata, context, parentClassTypeData, genericTypeNames, getGenericType(method));
+
         if (!getter && propertyMetadata.getSetter() == null) {
             propertyMetadata.setSetter(method);
             for (final Annotation annotation : method.getDeclaredAnnotations()) {
@@ -123,38 +107,43 @@ public final class EntityConvention implements Convention {
             }
         }
 
-        return propertyName;
+        return propertyMetadata.getName();
     }
 
     private static <T> PropertyMetadata<T> getOrCreateMethodPropertyMetadata(
             final String propertyName, final String declaringClassName,
-            final Map<String, PropertyMetadata<?>> propertyNameMap, final TypeData<T> typeData) {
+            final Context context, final TypeData<T> typeData) {
         final PropertyMetadata<T> propertyMetadata = getOrCreatePropertyMetadata(propertyName, declaringClassName,
-                propertyNameMap, typeData);
-        if (!propertyMetadata.getTypeData().getType().isAssignableFrom(typeData.getType())) {
+                context, typeData);
+        if (!isAssignableClass(propertyMetadata.getTypeData().getType(), typeData.getType())) {
             throw new CodecConfigurationException(
-                    String.format("Property '%s' in %s, has differing data types: %s and %s",
-                            propertyName, declaringClassName, propertyMetadata.getTypeData(), typeData));
+                    format("Property '%s' in %s, has differing data types: %s and %s.", propertyName,
+                            declaringClassName, propertyMetadata.getTypeData(), typeData));
         }
         return propertyMetadata;
+    }
+
+    private static boolean isAssignableClass(final Class<?> propertyTypeClass, final Class<?> typeDataClass) {
+        notNull("propertyTypeClass", propertyTypeClass);
+        notNull("typeDataClass", typeDataClass);
+        return typeDataClass.isAssignableFrom(propertyTypeClass);
     }
 
     @SuppressWarnings("unchecked")
     private static <T> PropertyMetadata<T> getOrCreatePropertyMetadata(
             final String propertyName, final String declaringClassName,
-            final Map<String, PropertyMetadata<?>> propertyNameMap, final TypeData<T> typeData) {
-        return (PropertyMetadata<T>) propertyNameMap.computeIfAbsent(propertyName,
+            final Context context, final TypeData<T> typeData) {
+        return (PropertyMetadata<T>) context.propertyNameMap.computeIfAbsent(propertyName,
                 k -> new PropertyMetadata<>(k, declaringClassName, typeData));
     }
 
-    private static <T, S> void cachePropertyTypeData(final PropertyMetadata<T> propertyMetadata,
-                                                     final Map<String, TypeParameterMap> propertyTypeParameterMap,
+    private static <T, S> void cachePropertyTypeData(final PropertyMetadata<T> propertyMetadata, final Context context,
                                                      final TypeData<S> parentClassTypeData,
                                                      final List<String> genericTypeNames, final Type genericType) {
         if (parentClassTypeData != null && !parentClassTypeData.getTypeParameters().isEmpty()) {
             final TypeParameterMap typeParameter = getTypeParameterMap(propertyMetadata, genericTypeNames, genericType);
             if (typeParameter.hasTypeParameters()) {
-                propertyTypeParameterMap.put(propertyMetadata.getName(), typeParameter);
+                context.propertyTypeParameterMap.put(propertyMetadata.getName(), typeParameter);
                 propertyMetadata.typeParameterInfo(typeParameter, parentClassTypeData);
             }
         } else if (genericType instanceof TypeVariable) {
@@ -162,6 +151,10 @@ public final class EntityConvention implements Convention {
                     String.format("Property '%s' in %s, has unsupported type variable: %s",
                             propertyMetadata.getName(), propertyMetadata.getDeclaringClassName(), genericType));
         }
+    }
+
+    private static Type getGenericType(final Method method) {
+        return isGetter(method) ? method.getGenericReturnType() : method.getGenericParameterTypes()[0];
     }
 
     private static <T> TypeParameterMap getTypeParameterMap(final PropertyMetadata<T> propertyMetadata,
@@ -200,65 +193,32 @@ public final class EntityConvention implements Convention {
         return index;
     }
 
-    private static <T> PropertyModelBuilder<T> createPropertyModelBuilder(final PropertyMetadata<T> propertyMetadata) {
-        final PropertyModelBuilder<T> propertyModelBuilder = PropertyModel.builder();
-        propertyModelBuilder.propertyName(propertyMetadata.getName()).readName(propertyMetadata.getName())
-                .writeName(propertyMetadata.getName()).typeData(propertyMetadata.getTypeData())
-                .readAnnotations(propertyMetadata.getReadAnnotations())
-                .writeAnnotations(propertyMetadata.getWriteAnnotations())
-                .propertySerialization(new PropertyModelSerializationImpl<>())
-                .propertyAccessor(new PropertyAccessorImpl<>(propertyMetadata));
+    private static class Context {
+        private final Set<String> propertyNames = new TreeSet<>();
+        private final Map<String, PropertyMetadata<?>> propertyNameMap = new HashMap<>();
+        private final ArrayList<Annotation> annotations = new ArrayList<>();
+        private final Map<String, TypeParameterMap> propertyTypeParameterMap = new HashMap<>();
 
-        if (propertyMetadata.getTypeParameters() != null) {
-            //TODO 检查这一段代码的逻辑
-            specializePropertyModelBuilder(propertyModelBuilder, propertyMetadata.getTypeParameterMap(),
-                    propertyMetadata.getTypeParameters());
-        }
-
-        return propertyModelBuilder;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <V> void specializePropertyModelBuilder(final PropertyModelBuilder<V> propertyModelBuilder,
-                                                           final TypeParameterMap typeParameterMap,
-                                                           final List<TypeData<?>> parentClassTypeParameters) {
-        final TypeData<V> specializedFieldType;
-        final Map<Integer, Either<Integer, TypeParameterMap>> fieldToClassParamIndexMap
-                = typeParameterMap.getPropertyToClassParamIndexMap();
-        final Either<Integer, TypeParameterMap> classTypeParamRepresentsWholeField = fieldToClassParamIndexMap.get(-1);
-        if (classTypeParamRepresentsWholeField != null) {
-            final Integer index = classTypeParamRepresentsWholeField.map(Function.identity(), r -> null);
-            if (index != null) {
-                specializedFieldType = (TypeData<V>) parentClassTypeParameters.get(index);
-            } else {
-                specializedFieldType = specializeFieldType(fieldToClassParamIndexMap, parentClassTypeParameters,
-                        propertyModelBuilder.getTypeData(), new AtomicInteger());
+        private <T> void process(final ClassModelBuilder<T> classModelBuilder) {
+            for (final String propertyName : propertyNames) {
+                final PropertyMetadata<?> propertyMetadata = propertyNameMap.get(propertyName);
+                classModelBuilder.removeProperty(propertyMetadata.getName());
+                if (propertyMetadata.isSerializable() && propertyMetadata.isDeserializable()) {
+                    classModelBuilder.addProperty(PojoBuilderHelper.createPropertyModelBuilder(propertyMetadata));
+                } else {
+                    throw new CodecConfigurationException(
+                            String.format("Property '%s'[%s] in %s, need both getter[%s] and setter[%s]",
+                                    propertyName, propertyMetadata.getTypeData(),
+                                    propertyMetadata.getDeclaringClassName(),
+                                    propertyMetadata.isSerializable(), propertyMetadata.isDeserializable()
+                            )
+                    );
+                }
             }
-        } else {
-            specializedFieldType = specializeFieldType(fieldToClassParamIndexMap, parentClassTypeParameters,
-                    propertyModelBuilder.getTypeData(), new AtomicInteger());
-        }
-        propertyModelBuilder.typeData(specializedFieldType);
-    }
 
-    @SuppressWarnings("unchecked")
-    private static <V> TypeData<V> specializeFieldType(
-            final Map<Integer, Either<Integer, TypeParameterMap>> fieldToClassParamIndexMap,
-            final List<TypeData<?>> parentClassTypeParameters, final TypeData<V> typeData, final AtomicInteger index) {
-        final Either<Integer, TypeParameterMap> paramIndex = fieldToClassParamIndexMap.get(index.get());
-        index.incrementAndGet();
-        if (paramIndex != null) {
-            final Integer realIndex = paramIndex.map(Function.identity(), r -> null);
-            if (realIndex != null) {
-                return (TypeData<V>) parentClassTypeParameters.get(realIndex);
-            }
+            reverse(annotations);
+            classModelBuilder.annotations(annotations);
+            classModelBuilder.propertyNameToTypeParameterMap(propertyTypeParameterMap);
         }
-
-        final TypeData.Builder<V> builder = TypeData.builder(typeData.getType());
-        for (TypeData<?> typeParameter : typeData.getTypeParameters()) {
-            builder.addTypeParameter(
-                    specializeFieldType(fieldToClassParamIndexMap, parentClassTypeParameters, typeParameter, index));
-        }
-        return builder.build();
     }
 }

@@ -1,0 +1,5 @@
+io.github.dbstarll.dubai.model.entity.Entity=\
+io.github.dbstarll.dubai.model.service.test.TestEntities,\
+io.github.dbstarll.dubai.model.entity.test.InterfaceEntity
+io.github.dbstarll.dubai.model.service.Service=\
+io.github.dbstarll.dubai.model.service.test.TestServices

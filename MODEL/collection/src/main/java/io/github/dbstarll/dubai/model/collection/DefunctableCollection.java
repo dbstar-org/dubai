@@ -9,6 +9,7 @@ import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
@@ -96,8 +97,10 @@ public class DefunctableCollection<E extends Entity> extends CollectionWrapper<E
 
     @Override
     public E findOneAndDelete(final Bson filter, final FindOneAndDeleteOptions options) {
-        FindOneAndUpdateOptions updateOptions = new FindOneAndUpdateOptions();
-        updateOptions.collation(options.getCollation()).projection(options.getProjection()).sort(options.getSort())
+        final FindOneAndUpdateOptions updateOptions = new FindOneAndUpdateOptions()
+                .hint(options.getHint()).hintString(options.getHintString()).comment(options.getComment())
+                .collation(options.getCollation()).projection(options.getProjection()).sort(options.getSort())
+                .let(options.getLet()).returnDocument(ReturnDocument.AFTER)
                 .maxTime(options.getMaxTime(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
         return super.findOneAndUpdate(queryFilter(filter), DEFUNCT, updateOptions);
     }
