@@ -2,6 +2,7 @@ package io.github.dbstarll.dubai.model.spring;
 
 import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -27,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class TestCollectionBeanInitializer {
-    private static final String COLLECTION_FACTORY_BEAN_NAME = "collectionFactory";
+    private static final String COLLECTION_FACTORY_BEAN_NAME = CollectionFactory.class.getName();
     private static final String MONGO_DATABASE_BEAN_NAME = "mongoDatabase";
 
     private CollectionBeanInitializer initializer;
@@ -40,7 +41,6 @@ public class TestCollectionBeanInitializer {
     @Before
     public void setup() {
         this.initializer = new CollectionBeanInitializer();
-        initializer.setCollectionFactoryBeanName(COLLECTION_FACTORY_BEAN_NAME);
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
         this.beanDefinitionRegistry = new SimpleBeanDefinitionRegistry();
         beanDefinitionRegistry.registerBeanDefinition(MONGO_DATABASE_BEAN_NAME,

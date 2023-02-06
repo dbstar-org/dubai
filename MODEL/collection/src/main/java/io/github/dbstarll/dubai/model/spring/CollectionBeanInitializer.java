@@ -12,12 +12,12 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -41,9 +41,10 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
     private static final MetadataReaderFactory METADATA_FACTORY = new CachingMetadataReaderFactory(RESOURCE_RESOLVER);
     private static final TypeFilter TYPE_FILTER = new AssignableTypeFilter(Entity.class);
 
+    private static final String COLLECTION_FACTORY_BEAN_NAME = CollectionFactory.class.getName();
+
     private String[] basePackages;
     private String mongoDatabaseBeanName;
-    private String collectionFactoryBeanName = StringUtils.uncapitalize(CollectionFactory.class.getSimpleName());
 
     private boolean recursion;
 
@@ -71,15 +72,15 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
     }
 
     private void createIfMissCollectionFactory(final BeanDefinitionRegistry registry) throws BeansException {
-        if (!registry.containsBeanDefinition(collectionFactoryBeanName)) {
+        if (!registry.containsBeanDefinition(COLLECTION_FACTORY_BEAN_NAME)) {
             final BeanDefinition definition = BeanDefinitionBuilder
                     .genericBeanDefinition(CollectionFactory.class)
                     .setScope(BeanDefinition.SCOPE_SINGLETON)
                     .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                     .addConstructorArgReference(validateMongoDatabaseBeanName(registry))
                     .getBeanDefinition();
-            LOGGER.info("registerBeanDefinition: [{}] with: {}", collectionFactoryBeanName, definition);
-            registry.registerBeanDefinition(collectionFactoryBeanName, definition);
+            LOGGER.info("registerBeanDefinition: [{}] with: {}", COLLECTION_FACTORY_BEAN_NAME, definition);
+            registry.registerBeanDefinition(COLLECTION_FACTORY_BEAN_NAME, definition);
         }
     }
 
@@ -138,16 +139,14 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
      * @return 返回是否匹配
      */
     public static boolean isCollectionBeanDefinition(final BeanDefinition definition, final Class<?> entityClass) {
-        if (Collection.class.getName().equals(definition.getBeanClassName())) {
-            final ValueHolder v = definition.getConstructorArgumentValues().getIndexedArgumentValue(0, null);
-            return v != null && v.getValue() == entityClass;
-        }
-        return false;
+        final ResolvableType beanType = definition.getResolvableType();
+        return Collection.class == beanType.resolve() && entityClass == beanType.resolveGeneric();
     }
 
     private BeanDefinition buildCollection(final Class<?> entityClass) {
-        return BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
-                .setFactoryMethodOnBean("newInstance", collectionFactoryBeanName)
+        final ResolvableType beanType = ResolvableType.forClassWithGenerics(Collection.class, entityClass);
+        return BeanDefinitionBuilder.rootBeanDefinition(beanType, null)
+                .setFactoryMethodOnBean("newInstance", COLLECTION_FACTORY_BEAN_NAME)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(entityClass)
@@ -182,15 +181,6 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
      */
     public void setMongoDatabaseBeanName(final String mongoDatabaseBeanName) {
         this.mongoDatabaseBeanName = mongoDatabaseBeanName;
-    }
-
-    /**
-     * 设置collectionFactory实例在spring context中的Bean名称.
-     *
-     * @param collectionFactoryBeanName collectionFactory实例的Bean名称
-     */
-    public void setCollectionFactoryBeanName(final String collectionFactoryBeanName) {
-        this.collectionFactoryBeanName = collectionFactoryBeanName;
     }
 
     /**

@@ -11,7 +11,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -41,6 +40,8 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     private static final MetadataReaderFactory METADATA_FACTORY = new CachingMetadataReaderFactory(RESOURCE_RESOLVER);
     private static final TypeFilter TYPE_FILTER = new AssignableTypeFilter(Service.class);
 
+    private static final String SERVICE_FACTORY_BEAN_NAME = ServiceBeanFactory.class.getName();
+
     private String[] basePackages;
 
     private boolean recursion;
@@ -54,6 +55,7 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     @Override
     public void postProcessBeanDefinitionRegistry(@NonNull final BeanDefinitionRegistry registry)
             throws BeansException {
+        createIfMissServiceFactory(registry);
         if (basePackages != null) {
             for (String basePackage : basePackages) {
                 try {
@@ -64,6 +66,18 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
                     throw new BeanDefinitionStoreException("failure during classpath scanning: " + basePackage, ex);
                 }
             }
+        }
+    }
+
+    private void createIfMissServiceFactory(final BeanDefinitionRegistry registry) throws BeansException {
+        if (!registry.containsBeanDefinition(SERVICE_FACTORY_BEAN_NAME)) {
+            final BeanDefinition definition = BeanDefinitionBuilder
+                    .genericBeanDefinition(ServiceBeanFactory.class)
+                    .setScope(BeanDefinition.SCOPE_SINGLETON)
+                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                    .getBeanDefinition();
+            LOGGER.info("registerBeanDefinition: [{}] with: {}", SERVICE_FACTORY_BEAN_NAME, definition);
+            registry.registerBeanDefinition(SERVICE_FACTORY_BEAN_NAME, definition);
         }
     }
 
@@ -132,17 +146,13 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
     }
 
     private boolean isServiceBeanDefinition(final BeanDefinition definition, final Class<?> serviceClass) {
-        if (ServiceFactory.class.getName().equals(definition.getBeanClassName())) {
-            final ValueHolder v = definition.getConstructorArgumentValues().getIndexedArgumentValue(0, null);
-            return v != null && v.getValue() == serviceClass;
-        }
-        return false;
+        return serviceClass == definition.getResolvableType().resolve();
     }
 
     private <E extends Entity, S extends Service<E>> BeanDefinition buildService(
             final Class<S> serviceClass, final String collectionBeanName) {
-        return BeanDefinitionBuilder.genericBeanDefinition(ServiceFactory.class)
-                .setFactoryMethod("newInstance")
+        return BeanDefinitionBuilder.genericBeanDefinition(serviceClass)
+                .setFactoryMethodOnBean("newInstance", SERVICE_FACTORY_BEAN_NAME)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
                 .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(serviceClass)

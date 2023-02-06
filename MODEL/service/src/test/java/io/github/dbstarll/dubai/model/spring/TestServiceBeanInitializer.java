@@ -52,7 +52,7 @@ public class TestServiceBeanInitializer extends TestCase {
     public void testNullBasePackages() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(0, registry.getBeanDefinitionCount());
+        assertEquals(1, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -62,7 +62,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackages();
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(0, registry.getBeanDefinitionCount());
+        assertEquals(1, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -94,7 +94,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(10, registry.getBeanDefinitionCount());
+        assertEquals(11, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -111,7 +111,7 @@ public class TestServiceBeanInitializer extends TestCase {
         initializer.setBasePackageClasses(TestServices.class);
         initializer.setRecursion(true);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(11, registry.getBeanDefinitionCount());
+        assertEquals(12, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -127,7 +127,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class, InterfaceService.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(11, registry.getBeanDefinitionCount());
+        assertEquals(12, registry.getBeanDefinitionCount());
     }
 
     /**
@@ -145,7 +145,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(10, registry.getBeanDefinitionCount());
+        assertEquals(11, registry.getBeanDefinitionCount());
 
         try {
             initializer.postProcessBeanDefinitionRegistry(registry);
@@ -195,7 +195,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(11, registry.getBeanDefinitionCount());
+        assertEquals(12, registry.getBeanDefinitionCount());
         assertTrue(registry.containsBeanDefinition("classService2"));
     }
 
@@ -217,7 +217,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(11, registry.getBeanDefinitionCount());
+        assertEquals(12, registry.getBeanDefinitionCount());
         assertTrue(registry.containsBeanDefinition("classService2"));
     }
 
@@ -238,7 +238,7 @@ public class TestServiceBeanInitializer extends TestCase {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestServices.class);
         initializer.postProcessBeanDefinitionRegistry(registry);
-        assertEquals(11, registry.getBeanDefinitionCount());
+        assertEquals(12, registry.getBeanDefinitionCount());
         assertTrue(registry.containsBeanDefinition("classService2"));
     }
 }

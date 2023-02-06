@@ -49,9 +49,11 @@ public class TestAutowire extends TestCase {
         context.addBeanFactoryPostProcessor(initializer);
         context.refresh();
 
-        assertEquals(6, context.getBeanDefinitionCount());
-        assertArrayEquals(new String[]{"implementalAutowirer", "testAutowire", "mongoDatabase", "collectionFactory",
-                "testEntityCollection", "testService"}, context.getBeanDefinitionNames());
+        assertEquals(7, context.getBeanDefinitionCount());
+        assertArrayEquals(new String[]{"implementalAutowirer", "testAutowire", "mongoDatabase",
+                        "io.github.dbstarll.dubai.model.collection.CollectionFactory", "testEntityCollection",
+                        "io.github.dbstarll.dubai.model.spring.ServiceBeanFactory", "testService"},
+                context.getBeanDefinitionNames());
 
         assertNotNull(context.getBean(TestService.class));
     }
