@@ -11,7 +11,6 @@ import io.github.dbstarll.dubai.model.service.Service;
 import io.github.dbstarll.dubai.model.service.ServiceHelper;
 import io.github.dbstarll.dubai.model.service.attach.CompanyAttach;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
-import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -66,14 +65,11 @@ public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S ex
         if (matchFilter != null) {
             pipeline.add(Aggregates.match(matchFilter));
         }
-        pipeline.add(Aggregates.lookup(companyHelper.getNamespace().getCollectionName(),
-                CompanyBase.FIELD_NAME_COMPANY_ID, Entity.FIELD_NAME_ID, "_companies"));
+        pipeline.add(companyHelper.lookup(CompanyBase.FIELD_NAME_COMPANY_ID, "_companies"));
 
         return getCollection().aggregate(pipeline, BsonDocument.class).map(t -> {
-            final BsonArray companies = t.getArray("_companies");
             final E entity = helper.decode(t.asBsonReader(), DEFAULT_CONTEXT);
-            final E1 company = companies.isEmpty() ? null
-                    : companyHelper.decode(companies.get(0).asDocument().asBsonReader(), DEFAULT_CONTEXT);
+            final E1 company = companyHelper.decodeOne(t.getArray("_companies"), DEFAULT_CONTEXT);
             return EntryWrapper.wrap(entity, company);
         });
     }
