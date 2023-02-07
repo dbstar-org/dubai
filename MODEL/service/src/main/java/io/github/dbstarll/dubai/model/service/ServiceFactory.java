@@ -1,6 +1,8 @@
 package io.github.dbstarll.dubai.model.service;
 
+import io.github.dbstarll.dubai.model.collection.BaseCollection;
 import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
@@ -8,6 +10,8 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
+import org.bson.BsonReader;
+import org.bson.codecs.DecoderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class ServiceFactory<E extends Entity, S extends Service<E>>
-        implements InvocationHandler, ImplementalAutowirerAware {
+        implements InvocationHandler, ImplementalAutowirerAware, ServiceHelper<E, S> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
     private final Class<S> serviceClass;
@@ -132,6 +136,16 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         this.autowirer = implementalAutowirer;
     }
 
+    @Override
+    public BaseCollection<E> getBaseCollection() {
+        return CollectionFactory.getBaseCollection(collection);
+    }
+
+    @Override
+    public E decode(final BsonReader reader, final DecoderContext decoderContext) {
+        return getMongoCollection().getCodecRegistry().get(entityClass).decode(reader, decoderContext);
+    }
+
     @SuppressWarnings("unchecked")
     private java.util.Collection<PositionValidation<E>> buildGeneralValidation(final Object proxy)
             throws InvocationTargetException, IllegalAccessException {
@@ -156,6 +170,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == ImplementalAutowirerAware.class) {
+            return method.invoke(this, args);
+        } else if (method.getDeclaringClass() == ServiceHelper.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == GeneralValidateable.class) {
             try {
@@ -263,7 +279,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(serviceClass, Package.class);
                 return (S) Proxy.newProxyInstance(serviceClass.getClassLoader(),
                         new Class[]{serviceClass, ServiceProxy.class, ImplementalAutowirerAware.class,
-                                GeneralValidateable.class, packageInterface},
+                                ServiceHelper.class, GeneralValidateable.class, packageInterface},
                         new ServiceFactory<>(serviceClass, collection));
             } else {
                 try {
