@@ -196,7 +196,7 @@ public class TestCollectionBeanInitializer {
         final BeanDefinition df2 = BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", "collectionFactory")
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
-                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
                 .getBeanDefinition();
         assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(df2, SimpleEntity.class));
     }

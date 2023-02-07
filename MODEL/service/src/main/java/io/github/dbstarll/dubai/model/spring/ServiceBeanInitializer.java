@@ -120,7 +120,7 @@ public final class ServiceBeanInitializer implements BeanDefinitionRegistryPostP
             final Class<S> serviceClass, final String collectionBeanName) {
         final AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(ServiceFactory.class, "newInstance")
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
-                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
                 .addConstructorArgValue(serviceClass)
                 .addConstructorArgReference(collectionBeanName)
                 .getBeanDefinition();

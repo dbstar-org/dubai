@@ -20,7 +20,7 @@ public class SpringImplementalAutowirer implements ImplementalAutowirer, Applica
     public <I extends Implemental> void autowire(final I implemental) throws AutowireException {
         if (factory != null) {
             try {
-                factory.autowireBeanProperties(implemental, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false);
+                factory.autowireBeanProperties(implemental, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
             } catch (BeansException ex) {
                 throw new AutowireException(ex);
             }
