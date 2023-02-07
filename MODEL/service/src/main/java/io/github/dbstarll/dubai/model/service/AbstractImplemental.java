@@ -20,6 +20,7 @@ import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.bson.codecs.DecoderContext;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     private static final int NAME_MIN_LENGTH = 2;
     private static final int NAME_MAX_LENGTH = 16;
     private static final int DESCRIPTION_MAX_LENGTH = 50;
+
+    protected static final DecoderContext DEFAULT_CONTEXT = DecoderContext.builder().checkedDiscriminator(true).build();
 
     protected final S service;
     protected final Class<E> entityClass;

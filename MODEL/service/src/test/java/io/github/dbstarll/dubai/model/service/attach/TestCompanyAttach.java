@@ -1,12 +1,18 @@
 package io.github.dbstarll.dubai.model.service.attach;
 
+import com.mongodb.client.model.Filters;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
+import io.github.dbstarll.dubai.model.service.ServiceFactory;
 import io.github.dbstarll.dubai.model.service.ServiceTestCase;
 import io.github.dbstarll.dubai.model.service.test.TestEntity;
 import io.github.dbstarll.dubai.model.service.test.TestEntityService;
+import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableEntity;
+import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableService;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Map.Entry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -60,6 +66,37 @@ public class TestCompanyAttach extends ServiceTestCase {
 
             assertEquals(0, s.deleteByCompanyId(new ObjectId()).getDeletedCount());
             assertEquals(1, s.deleteByCompanyId(companyId).getDeletedCount());
+        });
+    }
+
+    @Test
+    public void testFindWithCompany() {
+        useCollectionFactory(cf -> {
+            final TestEntityService service = ServiceFactory.newInstance(serviceClass, cf.newInstance(entityClass));
+            final TestNamableService companyService = ServiceFactory.newInstance(TestNamableService.class,
+                    cf.newInstance(TestNamableEntity.class));
+
+            assertNull(service.findWithCompany(companyService, null).first());
+
+            final TestNamableEntity company = EntityFactory.newInstance(TestNamableEntity.class);
+            company.setName("测试公司");
+            assertNotNull(companyService.save(company, null));
+
+            final TestEntity entity = service.save(EntityFactory.newInstance(entityClass), null);
+            assertNotNull(entity);
+
+            final Entry<TestEntity, TestNamableEntity> match = service.findWithCompany(companyService, Filters.eq(entity.getId())).first();
+            assertNotNull(match);
+            assertEquals(entity, match.getKey());
+            assertNull(match.getValue());
+
+            entity.setCompanyId(company.getId());
+            assertNotNull(service.save(entity, null));
+
+            final Entry<TestEntity, TestNamableEntity> match2 = service.findWithCompany(companyService, Filters.eq(entity.getId())).first();
+            assertNotNull(match2);
+            assertEquals(entity, match2.getKey());
+            assertEquals(company, match2.getValue());
         });
     }
 }
