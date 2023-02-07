@@ -56,10 +56,10 @@ public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S ex
 
     @SuppressWarnings("unchecked")
     @Override
-    public <EOC extends Entity, SOC extends Service<EOC>> MongoIterable<Entry<E, EOC>> findWithCompany(
-            final SOC companyService, final Bson filter) {
-        final ServiceHelper<E, S> helper = (ServiceHelper<E, S>) service;
-        final ServiceHelper<EOC, SOC> companyHelper = (ServiceHelper<EOC, SOC>) companyService;
+    public <E1 extends Entity, S1 extends Service<E1>> MongoIterable<Entry<E, E1>> findWithCompany(
+            final S1 companyService, final Bson filter) {
+        final ServiceHelper<E> helper = (ServiceHelper<E>) service;
+        final ServiceHelper<E1> companyHelper = (ServiceHelper<E1>) companyService;
 
         final List<Bson> pipeline = new LinkedList<>();
         final Bson matchFilter = aggregateMatchFilter(filter);
@@ -72,9 +72,8 @@ public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S ex
         return getCollection().aggregate(pipeline, BsonDocument.class).map(t -> {
             final BsonArray companies = t.getArray("_companies");
             final E entity = helper.decode(t.asBsonReader(), DEFAULT_CONTEXT);
-            final EOC company = companies.size() > 0
-                    ? companyHelper.decode(companies.get(0).asDocument().asBsonReader(), DEFAULT_CONTEXT)
-                    : null;
+            final E1 company = companies.isEmpty() ? null
+                    : companyHelper.decode(companies.get(0).asDocument().asBsonReader(), DEFAULT_CONTEXT);
             return EntryWrapper.wrap(entity, company);
         });
     }

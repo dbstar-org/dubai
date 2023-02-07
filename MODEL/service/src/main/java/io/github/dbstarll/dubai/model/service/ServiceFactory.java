@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class ServiceFactory<E extends Entity, S extends Service<E>>
-        implements InvocationHandler, ImplementalAutowirerAware, ServiceHelper<E, S> {
+        implements InvocationHandler, ImplementalAutowirerAware, ServiceHelper<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
     private final Class<S> serviceClass;

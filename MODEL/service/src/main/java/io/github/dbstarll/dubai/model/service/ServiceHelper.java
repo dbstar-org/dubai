@@ -7,7 +7,7 @@ import io.github.dbstarll.dubai.model.entity.Entity;
 import org.bson.BsonReader;
 import org.bson.codecs.DecoderContext;
 
-public interface ServiceHelper<E extends Entity, S extends Service<E>> {
+public interface ServiceHelper<E extends Entity> {
     /**
      * 从封装的CollectionWrapper中找到原始的BaseCollection.
      *

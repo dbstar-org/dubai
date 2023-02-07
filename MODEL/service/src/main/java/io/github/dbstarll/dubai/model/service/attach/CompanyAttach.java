@@ -52,10 +52,10 @@ public interface CompanyAttach<E extends Entity & CompanyBase> extends CoreAttac
      *
      * @param companyService 外部公司服务
      * @param filter         过滤条件
-     * @param <EOC>          外部关联公司的实体类
-     * @param <SOC>          外部关联公司的服务类
+     * @param <E1>           外部关联公司的实体类
+     * @param <S1>           外部关联公司的服务类
      * @return 实体与外部公司关联的结果列表
      */
-    <EOC extends Entity, SOC extends Service<EOC>> MongoIterable<Entry<E, EOC>> findWithCompany(SOC companyService,
-                                                                                                Bson filter);
+    <E1 extends Entity, S1 extends Service<E1>> MongoIterable<Entry<E, E1>> findWithCompany(S1 companyService,
+                                                                                            Bson filter);
 }
