@@ -105,4 +105,19 @@ public final class CollectionFactory {
     private <E extends Entity> DefunctableCollection<E> buildDefunctableCollection(final Collection<E> base) {
         return new DefunctableCollection<>(base);
     }
+
+    /**
+     * 从封装的CollectionWrapper中找到原始的BaseCollection.
+     *
+     * @param collection 封装的CollectionWrapper
+     * @param <E>        实体类
+     * @return 原始的BaseCollection
+     */
+    public static <E extends Entity> BaseCollection<E> getBaseCollection(final Collection<E> collection) {
+        Collection<E> match = collection;
+        while (match instanceof CollectionWrapper) {
+            match = ((CollectionWrapper<E>) match).getCollection();
+        }
+        return match instanceof BaseCollection ? (BaseCollection<E>) match : null;
+    }
 }
