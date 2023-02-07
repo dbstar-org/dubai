@@ -122,13 +122,9 @@ public class BaseCollection<E extends Entity> extends AbstractCollection<E> {
         mongoCollection.insertMany(documents, options);
     }
 
-    /**
-     * 获得namespace信息.
-     *
-     * @return namespace
-     */
-    public final String getNamespace() {
-        return mongoCollection.getNamespace().getFullName();
+    @Override
+    public Collection<E> original() {
+        return this;
     }
 
     /**
@@ -138,10 +134,5 @@ public class BaseCollection<E extends Entity> extends AbstractCollection<E> {
      */
     public final MongoCollection<E> getMongoCollection() {
         return mongoCollection;
-    }
-
-    @Override
-    public Collection<E> original() {
-        return this;
     }
 }
