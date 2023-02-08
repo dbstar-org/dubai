@@ -33,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 public final class ServiceFactory<E extends Entity, S extends Service<E>>
         implements InvocationHandler, ImplementalAutowirerAware, ServiceHelper<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
@@ -69,7 +71,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             for (Method m : typeClass.getMethods()) {
                 methods.put(new MethodKey(m, entityClass).getKey(), new MethodValue(typeClass, m));
             }
-            for (Method m : getImplementalClass(typeClass).getMethods()) {
+            for (Method m : notNull(getImplementalClass(typeClass)).getMethods()) {
                 collectPositionMethods(findPositionMethod(m, typeClass, entityClass), validations, positionMethods);
             }
         }
@@ -409,10 +411,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     private static <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
         if (genericType instanceof ParameterizedType) {
             for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
-                if (type instanceof Class) {
-                    if (EntityFactory.isEntityClass((Class<?>) type)) {
-                        return (Class<E>) type;
-                    }
+                if (type instanceof Class && EntityFactory.isEntityClass((Class<?>) type)) {
+                    return (Class<E>) type;
                 }
             }
         }
