@@ -7,12 +7,14 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.service.ServiceFactory.GeneralValidateable;
 import io.github.dbstarll.dubai.model.service.ServiceFactory.PositionValidation;
+import io.github.dbstarll.dubai.model.service.ServiceFactory.ServiceProxy;
 import io.github.dbstarll.dubai.model.service.test.AbstractClassService;
 import io.github.dbstarll.dubai.model.service.test.ClassService;
 import io.github.dbstarll.dubai.model.service.test.InterfaceService;
 import io.github.dbstarll.dubai.model.service.test.NoAnnotationClassService;
 import io.github.dbstarll.dubai.model.service.test.NoAnnotationInterfaceService;
 import io.github.dbstarll.dubai.model.service.test.PrivateClassService;
+import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test.ThrowClassService;
 import io.github.dbstarll.dubai.model.service.test4.TestValidEntity;
 import io.github.dbstarll.dubai.model.service.test4.TestValidService;
@@ -24,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -129,8 +132,17 @@ public class TestServiceFactory extends ServiceTestCase {
     public void testGetServiceClassNoServiceFactory() {
         useCollection(entityClass, c -> {
             final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
-                    new Class[]{InterfaceService.class, ImplementalAutowirerAware.class, GeneralValidateable.class},
-                    (proxy, method, args) -> null);
+                    new Class[]{InterfaceService.class, ServiceProxy.class}, (proxy, method, args) -> null);
+            assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
+            assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
+        });
+    }
+
+    @Test
+    public void testGetServiceClassNoServiceProxy() {
+        useCollection(entityClass, c -> {
+            final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
+                    new Class[]{InterfaceService.class}, (proxy, method, args) -> null);
             assertNotEquals(InterfaceService.class, ServiceFactory.getServiceClass(service));
             assertEquals(service.getClass(), ServiceFactory.getServiceClass(service));
         });
@@ -331,5 +343,37 @@ public class TestServiceFactory extends ServiceTestCase {
                 assertNull(ex.getCause());
             }
         });
+    }
+
+    @Test
+    public void testGetServiceClassNoProxy() {
+        assertSame(String.class, ServiceFactory.getServiceClass(String.class));
+    }
+
+    @Test
+    public void testIsServiceInterface() {
+        assertFalse(ServiceFactory.isServiceInterface(String.class));
+        assertTrue(ServiceFactory.isServiceInterface(InterfaceService.class));
+        assertFalse(ServiceFactory.isServiceInterface(ClassService.class));
+    }
+
+    @Test
+    public void testIsServiceProxy() {
+        useCollection(InterfaceEntity.class, c -> {
+            assertFalse(ServiceFactory.isServiceProxy(String.class));
+            assertTrue(ServiceFactory.isServiceProxy(ServiceFactory.newInstance(InterfaceService.class, c).getClass()));
+
+            final NoAnnotationInterfaceService service = (NoAnnotationInterfaceService) Proxy.newProxyInstance(
+                    NoAnnotationInterfaceService.class.getClassLoader(),
+                    new Class[]{NoAnnotationInterfaceService.class, ServiceProxy.class}, (proxy, method, args) -> null);
+            assertFalse(ServiceFactory.isServiceProxy(service.getClass()));
+        });
+    }
+
+    @Test
+    public void testGetEntityClass() {
+        assertSame(InterfaceEntity.class, ServiceFactory.getEntityClass(InterfaceService.class));
+        assertSame(InterfaceEntity.class, ServiceFactory.getEntityClass(ClassService.class));
+        assertNull(ServiceFactory.getEntityClass(TestServices.class));
     }
 }
