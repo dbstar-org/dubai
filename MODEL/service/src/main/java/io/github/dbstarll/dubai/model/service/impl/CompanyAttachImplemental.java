@@ -53,7 +53,7 @@ public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S ex
     @Override
     public <E1 extends Entity, S1 extends Service<E1>> MongoIterable<Entry<E, E1>> findWithCompany(
             final S1 companyService, final Bson filter) {
-        return Aggregator.builder(service, getCollection(), digestor)
+        return Aggregator.builder(service, getCollection())
                 .match(aggregateMatchFilter(filter))
                 .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                 .build()

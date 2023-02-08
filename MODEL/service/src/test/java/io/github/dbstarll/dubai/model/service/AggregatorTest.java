@@ -9,14 +9,11 @@ import io.github.dbstarll.dubai.model.service.test.TestEntity;
 import io.github.dbstarll.dubai.model.service.test.TestEntityService;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableEntity;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableService;
-import io.github.dbstarll.utils.lang.digest.Digestor;
-import io.github.dbstarll.utils.lang.digest.Md5Digestor;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
 import org.bson.codecs.DecoderContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -26,15 +23,13 @@ import static org.junit.Assert.assertNull;
 
 public class AggregatorTest extends ServiceTestCase {
     private static final DecoderContext DEFAULT_CONTEXT = DecoderContext.builder().checkedDiscriminator(true).build();
-    private static Digestor digestor;
 
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestEntityService> serviceClass = TestEntityService.class;
 
     @BeforeClass
-    public static void setup() throws NoSuchAlgorithmException {
+    public static void setup() {
         globalCollectionFactory();
-        digestor = new Md5Digestor();
     }
 
     @Test
@@ -45,7 +40,7 @@ public class AggregatorTest extends ServiceTestCase {
             final TestNamableService companyService = ServiceFactory.newInstance(TestNamableService.class,
                     cf.newInstance(TestNamableEntity.class));
 
-            final Aggregator<TestEntity, TestEntityService> aggregator = Aggregator.builder(service, collection, digestor)
+            final Aggregator<TestEntity, TestEntityService> aggregator = Aggregator.builder(service, collection)
                     .match(null)
                     .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                     .build();
@@ -95,7 +90,7 @@ public class AggregatorTest extends ServiceTestCase {
             final TestEntity entity = service.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(entity);
 
-            final Aggregator<TestEntity, TestEntityService> aggregator = Aggregator.builder(service, collection, digestor)
+            final Aggregator<TestEntity, TestEntityService> aggregator = Aggregator.builder(service, collection)
                     .match(Filters.eq(entity.getId()))
                     .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                     .build();

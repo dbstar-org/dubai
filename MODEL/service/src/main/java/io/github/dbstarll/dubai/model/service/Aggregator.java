@@ -4,14 +4,12 @@ import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Aggregates;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
-import io.github.dbstarll.utils.lang.digest.Digestor;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bson.BsonDocument;
 import org.bson.codecs.DecoderContext;
 import org.bson.conversions.Bson;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -80,23 +78,20 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
      *
      * @param service    服务类
      * @param collection 集合类
-     * @param digestor   摘要算法实现类
      * @param <E>        实体类
      * @param <S>        服务类
      * @return Builder实例
      */
     public static <E extends Entity, S extends Service<E>> Builder<E, S> builder(
-            final S service, final Collection<E> collection, final Digestor digestor) {
-        return new Builder<>(service, collection, digestor);
+            final S service, final Collection<E> collection) {
+        return new Builder<>(service, collection);
     }
 
     public static final class Builder<E extends Entity, S extends Service<E>> {
         private final Aggregator<E, S> aggregator;
-        private final Digestor digestor;
 
-        private Builder(final S service, final Collection<E> collection, final Digestor digestor) {
+        private Builder(final S service, final Collection<E> collection) {
             this.aggregator = new Aggregator<>(service, collection);
-            this.digestor = digestor;
         }
 
         /**
@@ -124,8 +119,7 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          */
         public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(final S1 joinService,
                                                                               final String localField) {
-            aggregator.asMap.computeIfAbsent(Hex.encodeHexString(digestor.digest(
-                    joinService.getEntityClass().getName().getBytes(StandardCharsets.UTF_8))), as -> {
+            aggregator.asMap.computeIfAbsent(DigestUtils.md5Hex(joinService.getEntityClass().getName()), as -> {
                 aggregator.pipelines.add(helper(joinService).lookup(localField, as));
                 return joinService;
             });
