@@ -12,6 +12,7 @@ import org.bson.codecs.DecoderContext;
 import org.bson.conversions.Bson;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +49,27 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
                         helper(joinService).decodeOne(t.getArray(e.getKey()), decoderContext));
             }).collect((Supplier<Map<Class<? extends Entity>, Entity>>) HashMap::new,
                     (map, entry) -> map.computeIfAbsent(entry.getKey(), k -> entry.getValue()),
+                    Map::putAll);
+            return EntryWrapper.wrap(entity, joins);
+        });
+    }
+
+    /**
+     * 每个left join的Service取所有匹配实体的聚合结果.
+     *
+     * @param decoderContext the decoder context
+     * @return an iterable containing the result of the aggregation operation
+     */
+    public MongoIterable<Entry<E, Map<Class<? extends Entity>, List<Entity>>>> aggregate(
+            final DecoderContext decoderContext) {
+        return collection.aggregate(pipelines, BsonDocument.class).map(t -> {
+            final E entity = helper(service).decode(t.asBsonReader(), decoderContext);
+            final Map<Class<? extends Entity>, List<Entity>> joins = asMap.entrySet().stream().map(e -> {
+                final Service<? extends Entity> joinService = e.getValue();
+                return EntryWrapper.wrap(joinService.getEntityClass(),
+                        helper(joinService).decode(t.getArray(e.getKey()), decoderContext));
+            }).collect((Supplier<Map<Class<? extends Entity>, List<Entity>>>) HashMap::new,
+                    (map, entry) -> map.computeIfAbsent(entry.getKey(), k -> new ArrayList<>(entry.getValue())),
                     Map::putAll);
             return EntryWrapper.wrap(entity, joins);
         });
