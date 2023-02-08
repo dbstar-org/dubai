@@ -6,5 +6,7 @@ public interface Implemental extends Base {
      * perform initialization only possible when all bean properties have been set and to throw an
      * exception in the event of misconfiguration.
      */
-    void afterPropertiesSet();
+    default void afterPropertiesSet() {
+        // do nothing
+    }
 }

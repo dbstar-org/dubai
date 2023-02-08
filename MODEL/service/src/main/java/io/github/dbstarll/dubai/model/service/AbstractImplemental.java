@@ -56,11 +56,6 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         this.entityClass = collection.getEntityClass();
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        // do nothing
-    }
-
     protected final Collection<E> getCollection() {
         return collection;
     }
@@ -197,9 +192,11 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected void onEntitySaved(final E entity, final Validate validate, final NotifyType notifyType) {
+        // Override it to do more action
     }
 
     protected void onEntityDeleted(final E entity, final Validate validate) {
+        // Override it to do more action
     }
 
     protected final Bson aggregateMatchFilter(final Bson filter) {
