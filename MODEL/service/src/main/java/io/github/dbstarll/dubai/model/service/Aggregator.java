@@ -119,7 +119,7 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          */
         public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(final S1 joinService,
                                                                               final String localField) {
-            aggregator.asMap.computeIfAbsent(DigestUtils.md5Hex(joinService.getEntityClass().getName()), as -> {
+            aggregator.asMap.computeIfAbsent(DigestUtils.sha256Hex(joinService.getEntityClass().getName()), as -> {
                 aggregator.pipelines.add(helper(joinService).lookup(localField, as));
                 return joinService;
             });
