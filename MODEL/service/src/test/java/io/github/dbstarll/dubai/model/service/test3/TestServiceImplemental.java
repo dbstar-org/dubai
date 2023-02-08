@@ -36,7 +36,7 @@ public final class TestServiceImplemental extends TestImplementals<TestEntity, T
         }
     }
 
-    private class FailedValidation implements Validation<TestEntity> {
+    private static class FailedValidation implements Validation<TestEntity> {
         @Override
         public void validate(TestEntity entity, TestEntity original, Validate validate) {
             validate.addActionError("SaveFailed");

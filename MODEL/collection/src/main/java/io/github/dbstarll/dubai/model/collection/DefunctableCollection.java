@@ -95,6 +95,7 @@ public class DefunctableCollection<E extends Entity> extends CollectionWrapper<E
                 updateMany(filter, DEFUNCT, new UpdateOptions().collation(options.getCollation())).getModifiedCount());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public E findOneAndDelete(final Bson filter, final FindOneAndDeleteOptions options) {
         final FindOneAndUpdateOptions updateOptions = new FindOneAndUpdateOptions()

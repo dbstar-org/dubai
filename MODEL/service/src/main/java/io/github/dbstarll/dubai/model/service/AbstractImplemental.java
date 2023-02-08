@@ -18,6 +18,8 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
+import io.github.dbstarll.utils.lang.digest.Digestor;
+import io.github.dbstarll.utils.lang.digest.Md5Digestor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.codecs.DecoderContext;
@@ -25,6 +27,8 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.NoSuchAlgorithmException;
 
 import static org.apache.commons.lang3.Validate.isAssignableFrom;
 import static org.apache.commons.lang3.Validate.isTrue;
@@ -44,6 +48,8 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     protected final Class<E> entityClass;
     private final Collection<E> collection;
 
+    protected final Digestor digestor;
+
     /**
      * 构建AbstractImplemental.
      *
@@ -54,6 +60,11 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         this.service = notNull(service, "service is null");
         this.collection = notNull(collection, "collection is null");
         this.entityClass = collection.getEntityClass();
+        try {
+            this.digestor = new Md5Digestor();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
