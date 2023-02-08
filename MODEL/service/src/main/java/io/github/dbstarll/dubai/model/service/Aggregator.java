@@ -38,11 +38,11 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
      * @param decoderContext the decoder context
      * @return an iterable containing the result of the aggregation operation
      */
-    public MongoIterable<Entry<E, Map<Class<? extends Entity>, ? extends Entity>>> aggregateOne(
+    public MongoIterable<Entry<E, Map<Class<? extends Entity>, Entity>>> aggregateOne(
             final DecoderContext decoderContext) {
         return collection.aggregate(pipelines, BsonDocument.class).map(t -> {
             final E entity = helper(service).decode(t.asBsonReader(), decoderContext);
-            final Map<Class<? extends Entity>, ? extends Entity> joins = asMap.entrySet().stream().map(e -> {
+            final Map<Class<? extends Entity>, Entity> joins = asMap.entrySet().stream().map(e -> {
                 final Service<? extends Entity> joinService = e.getValue();
                 return EntryWrapper.wrap(joinService.getEntityClass(),
                         helper(joinService).decodeOne(t.getArray(e.getKey()), decoderContext));
