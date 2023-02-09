@@ -187,6 +187,9 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
         assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
+        final BeanDefinition db = beanDefinitionRegistry.getBeanDefinition("mongoDatabase");
+        assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(db, SimpleEntity.class));
+
         final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition(getCollectionBeanName(SimpleEntity.class));
         assertNotNull(df);
         assertTrue(CollectionBeanInitializer.isCollectionBeanDefinition(df, SimpleEntity.class));
