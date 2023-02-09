@@ -11,6 +11,8 @@ import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableEntity;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableService;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
 import org.bson.codecs.DecoderContext;
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,6 +22,7 @@ import java.util.Map.Entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 public class AggregatorTest extends ServiceTestCase {
     private static final DecoderContext DEFAULT_CONTEXT = DecoderContext.builder().checkedDiscriminator(true).build();
@@ -114,6 +117,15 @@ public class AggregatorTest extends ServiceTestCase {
             assertNotNull(match2.getValue());
             assertEquals(1, match2.getValue().size());
             assertEquals(company, match2.getValue().get(0));
+        });
+    }
+
+    @Test
+    public void testAggregateMatchFilter() {
+        useService(TestNamableService.class, s -> {
+            assertNull(s.filter(null));
+            final Bson f = Filters.eq(new ObjectId());
+            assertSame(f, s.filter(f));
         });
     }
 }

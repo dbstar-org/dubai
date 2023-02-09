@@ -53,12 +53,12 @@ public class TestDescriptionValidation extends ServiceTestCase {
     public void testInsertSetDescriptionLong() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
-            entity.setDescription(StringUtils.repeat("0123456789", 6));
+            entity.setDescription(StringUtils.repeat("0123456789", 7));
             final DefaultValidate validate = new DefaultValidate();
             assertNull(s.save(entity, validate));
             assertTrue(validate.hasFieldErrors());
             assertEquals(1, validate.getFieldErrors().size());
-            assertEquals(Collections.singletonList("备注不能超过 50 字符"),
+            assertEquals(Collections.singletonList("备注不能超过 60 字符"),
                     validate.getFieldErrors().get(Describable.FIELD_NAME_DESCRIPTION));
         });
     }

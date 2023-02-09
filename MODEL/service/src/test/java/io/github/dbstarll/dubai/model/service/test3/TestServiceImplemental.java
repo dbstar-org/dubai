@@ -1,6 +1,7 @@
 package io.github.dbstarll.dubai.model.service.test3;
 
 import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.entity.info.Describable;
 import io.github.dbstarll.dubai.model.service.test.TestImplementals;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
 import io.github.dbstarll.dubai.model.service.validate.ValidateException;
@@ -21,13 +22,28 @@ public final class TestServiceImplemental extends TestImplementals<TestEntity, T
     }
 
     @Override
+    public TestEntity saveFailed(TestEntity entity, Validate validate) throws ValidateException {
+        return validateAndSave(entity, null, validate, new FailedValidation());
+    }
+
+    @Override
+    public TestEntity saveException(TestEntity entity, Validate validate) throws ValidateException {
+        return validateAndSave(entity, null, validate, new ExceptionValidation());
+    }
+
+    @Override
     public TestEntity deleteById(ObjectId id, Validate validate) throws ValidateException {
         return validateAndDelete(id, validate);
     }
 
     @Override
-    public TestEntity saveFailed(TestEntity entity, Validate validate) throws ValidateException {
-        return validateAndSave(entity, null, validate, new FailedValidation());
+    public TestEntity deleteByIdFailed(ObjectId id, Validate validate) throws ValidateException {
+        return validateAndDelete(id, validate, new FailedValidation());
+    }
+
+    @Override
+    public TestEntity deleteByIdException(ObjectId id, Validate validate) throws ValidateException {
+        return validateAndDelete(id, validate, new ExceptionValidation());
     }
 
     private class MyDescriptionValidation extends DescriptionValidation {
@@ -43,8 +59,25 @@ public final class TestServiceImplemental extends TestImplementals<TestEntity, T
         }
     }
 
+    private static class ExceptionValidation implements Validation<TestEntity> {
+        @Override
+        public void validate(TestEntity entity, TestEntity original, Validate validate) {
+            throw new IllegalStateException("SaveException");
+        }
+    }
+
     @GeneralValidation
     public Validation<TestEntity> emptyValidation() {
         return EmptyValidation.warp(entityClass);
+    }
+
+    /**
+     * 覆盖默认的描述校验.
+     *
+     * @return DescriptionValidation
+     */
+    @GeneralValidation(Describable.class)
+    public Validation<TestEntity> myDescriptionValidation() {
+        return new DescriptionValidation(60);
     }
 }
