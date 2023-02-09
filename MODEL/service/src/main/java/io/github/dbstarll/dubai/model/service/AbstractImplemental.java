@@ -19,6 +19,7 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Posit
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.codecs.DecoderContext;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -301,6 +302,20 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                 validate.addFieldError(Namable.FIELD_NAME_NAME, "名称不能超过 " + maxLength + " 字符");
             }
         }
+
+        @Override
+        public boolean equals(final Object o) {
+            return super.equals(o);
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(minLength)
+                    .append(maxLength)
+                    .toHashCode();
+        }
     }
 
     protected class DescriptionValidation extends AbstractBaseEntityValidation<Describable> {
@@ -321,6 +336,19 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
                     validate.addFieldError(Describable.FIELD_NAME_DESCRIPTION, "备注不能超过 " + maxLength + " 字符");
                 }
             }
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            return super.equals(o);
+        }
+
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .appendSuper(super.hashCode())
+                    .append(maxLength)
+                    .toHashCode();
         }
     }
 }
