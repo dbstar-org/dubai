@@ -26,6 +26,9 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
 import static org.apache.commons.lang3.Validate.isAssignableFrom;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.noNullElements;
@@ -61,30 +64,23 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     @SafeVarargs
-    protected final E validateAndDelete(final ObjectId id, final Validate validate, final Validation<E>... validations)
-            throws ValidateException {
+    private final E validateAndDo(final String action, final Validate validate,
+                                  final BiPredicate<Validate, Validation<E>[]> checker, final Supplier<E> supplier,
+                                  final Validation<E>... validations) {
         noNullElements(validations, "validations contains null element at index: %d");
         final Validate v = ValidateWrapper.wrap(validate);
 
         try {
-            if (validations.length > 0) {
-                final E entity = collection.findById(id);
-                if (entity == null) {
-                    return null;
-                }
-                new MultiValidation<>(entityClass, validations).validate(entity, null, v);
-            }
+            final boolean doing = checker.test(v, validations);
             if (!v.hasErrors()) {
-                final E deleted = collection.deleteById(id);
-                onEntityDeleted(deleted, validate);
-                return deleted;
+                return doing ? supplier.get() : null;
             } else {
-                LOGGER.debug("validateAndDelete with ActionErrors: {}, FieldErrors: {}", v.hasActionErrors(),
+                LOGGER.debug("{} with ActionErrors: {}, FieldErrors: {}", action, v.hasActionErrors(),
                         v.hasFieldErrors());
             }
         } catch (Exception ex) {
             v.addActionError(ex.getMessage());
-            LOGGER.error("validateAndDelete failed!", ex);
+            LOGGER.error(action + " failed!", ex);
         }
 
         if (validate == null) {
@@ -92,6 +88,16 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         } else {
             return null;
         }
+    }
+
+    @SafeVarargs
+    protected final E validateAndDelete(final ObjectId id, final Validate validate, final Validation<E>... validations)
+            throws ValidateException {
+        return validateAndDo("validateAndDelete", validate, (v, vs) -> checkDelete(id, v, vs), () -> {
+            final E deleted = collection.deleteById(id);
+            onEntityDeleted(deleted, validate);
+            return deleted;
+        }, validations);
     }
 
     /**
@@ -113,36 +119,24 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     @SafeVarargs
     protected final E validateAndSave(final E entity, final ObjectId newEntityId, final Validate validate,
                                       final Validation<E>... validations) throws ValidateException {
-        noNullElements(validations, "validations contains null element at index: %d");
-        final Validate v = ValidateWrapper.wrap(validate);
+        return validateAndDo("validateAndSave", validate, (v, vs) -> checkSave(entity, v, vs), () -> {
+            final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
+            final E saved = collection.save(entity, newEntityId);
+            onEntitySaved(saved, validate, notifyType);
+            return saved;
+        }, validations);
+    }
 
-        try {
-            final boolean save = checkSave(entity, v, validations);
-            if (!v.hasErrors()) {
-                LOGGER.debug("validateAndSave with change: {}", save);
-                if (save) {
-                    final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
-                    final E saved = collection.save(entity, newEntityId);
-                    onEntitySaved(saved, validate, notifyType);
-                    return saved;
-                } else {
-                    return null;
-                }
-            } else {
-                LOGGER.debug("validateAndSave with ActionErrors: {}, FieldErrors: {}",
-                        v.hasActionErrors(),
-                        v.hasFieldErrors());
+    @SafeVarargs
+    private final boolean checkDelete(final ObjectId id, final Validate v, final Validation<E>... validations) {
+        if (validations.length > 0) {
+            final E original = collection.findById(id);
+            if (original == null) {
+                return false;
             }
-        } catch (Exception ex) {
-            v.addActionError(ex.getMessage());
-            LOGGER.error("validateAndSave failed!", ex);
+            new MultiValidation<>(entityClass, validations).validate(null, original, v);
         }
-
-        if (validate == null) {
-            throw new ValidateException(v);
-        } else {
-            return null;
-        }
+        return true;
     }
 
     @SafeVarargs
