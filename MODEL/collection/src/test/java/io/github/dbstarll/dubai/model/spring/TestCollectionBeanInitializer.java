@@ -187,6 +187,9 @@ public class TestCollectionBeanInitializer {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
         assertEquals(7, beanDefinitionRegistry.getBeanDefinitionCount());
+        final BeanDefinition db = beanDefinitionRegistry.getBeanDefinition("mongoDatabase");
+        assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(db, SimpleEntity.class));
+
         final BeanDefinition df = beanDefinitionRegistry.getBeanDefinition(getCollectionBeanName(SimpleEntity.class));
         assertNotNull(df);
         assertTrue(CollectionBeanInitializer.isCollectionBeanDefinition(df, SimpleEntity.class));
@@ -196,7 +199,7 @@ public class TestCollectionBeanInitializer {
         final BeanDefinition df2 = BeanDefinitionBuilder.genericBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", "collectionFactory")
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
-                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
                 .getBeanDefinition();
         assertFalse(CollectionBeanInitializer.isCollectionBeanDefinition(df2, SimpleEntity.class));
     }

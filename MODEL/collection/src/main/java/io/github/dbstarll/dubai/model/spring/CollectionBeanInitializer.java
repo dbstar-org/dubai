@@ -77,7 +77,7 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
             final BeanDefinition definition = BeanDefinitionBuilder
                     .genericBeanDefinition(CollectionFactory.class)
                     .setScope(BeanDefinition.SCOPE_SINGLETON)
-                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
+                    .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
                     .addConstructorArgReference(validateMongoDatabaseBeanName(registry))
                     .getBeanDefinition();
             LOGGER.info("registerBeanDefinition: [{}] with: {}", COLLECTION_FACTORY_BEAN_NAME, definition);
@@ -141,7 +141,6 @@ public final class CollectionBeanInitializer implements BeanDefinitionRegistryPo
         final AbstractBeanDefinition bd = BeanDefinitionBuilder.rootBeanDefinition(Collection.class)
                 .setFactoryMethodOnBean("newInstance", COLLECTION_FACTORY_BEAN_NAME)
                 .setScope(BeanDefinition.SCOPE_SINGLETON)
-                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME)
                 .addConstructorArgValue(entityClass)
                 .getBeanDefinition();
         ((RootBeanDefinition) bd).setTargetType(targetType);

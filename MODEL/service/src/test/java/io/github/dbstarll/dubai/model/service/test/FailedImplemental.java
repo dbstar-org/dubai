@@ -24,8 +24,12 @@ public final class FailedImplemental extends TestImplementals<InterfaceEntity, I
     public void failed() {
     }
 
-    @GeneralValidation
     public Validation<InterfaceEntity> failedValidation() {
+        return EmptyValidation.warp(entityClass);
+    }
+
+    @GeneralValidation
+    public Validation<InterfaceEntity> otherValidation() {
         return EmptyValidation.warp(entityClass);
     }
 }

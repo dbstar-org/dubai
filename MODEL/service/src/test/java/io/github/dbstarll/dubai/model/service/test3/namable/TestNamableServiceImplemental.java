@@ -3,6 +3,7 @@ package io.github.dbstarll.dubai.model.service.test3.namable;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.service.test.TestImplementals;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 public final class TestNamableServiceImplemental extends TestImplementals<TestNamableEntity, TestNamableService>
@@ -25,5 +26,10 @@ public final class TestNamableServiceImplemental extends TestImplementals<TestNa
     @Override
     public void name(int minLength, int maxLength) {
         new NameValidation(minLength, maxLength);
+    }
+
+    @Override
+    public Bson filter(final Bson filter) {
+        return aggregateMatchFilter(filter);
     }
 }

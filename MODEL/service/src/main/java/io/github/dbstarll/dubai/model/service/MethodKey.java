@@ -38,7 +38,7 @@ class MethodKey {
             }
             if (method.isVarArgs() && j == length - 1) {
                 // replace T[] with T...
-                param = param.replaceFirst("\\[\\]$", "...");
+                param = param.replaceFirst("\\[]$", "...");
             }
             sb.append(param);
             if (j < (length - 1)) {

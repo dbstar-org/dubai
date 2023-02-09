@@ -45,9 +45,8 @@ public final class MultiValidation<E extends Entity> extends AbstractValidation<
                     addValidation(sub);
                 }
             } else {
-                if (!this.validations.contains(validation)) {
-                    this.validations.add(validation);
-                }
+                this.validations.remove(validation);
+                this.validations.add(validation);
             }
         }
     }

@@ -15,8 +15,11 @@ import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Proxy;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 public class TestCollectionFactory extends MongodTestCase {
@@ -29,6 +32,7 @@ public class TestCollectionFactory extends MongodTestCase {
         final Collection<E> collection = cf.newInstance(entityClass);
         assertNotNull(collection);
         assertEquals(entityClass, collection.getEntityClass());
+        assertNotNull(CollectionFactory.getBaseCollection(collection));
     }
 
     @Test
@@ -99,5 +103,13 @@ public class TestCollectionFactory extends MongodTestCase {
                 assertEquals(ex.getMessage(), "Invalid EntityClass: " + ClassNoTableEntity.class);
             }
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testGetBaseCollectionNull() {
+        final Collection<InterfaceEntity> collection = (Collection<InterfaceEntity>) Proxy.newProxyInstance(
+                this.getClass().getClassLoader(), new Class[]{Collection.class}, (proxy, method, args) -> null);
+        assertNull(CollectionFactory.getBaseCollection(collection));
     }
 }

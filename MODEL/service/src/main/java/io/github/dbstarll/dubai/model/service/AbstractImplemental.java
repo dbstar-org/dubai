@@ -20,10 +20,14 @@ import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.bson.codecs.DecoderContext;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.Validate.isAssignableFrom;
 import static org.apache.commons.lang3.Validate.isTrue;
@@ -36,6 +40,8 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     private static final int NAME_MIN_LENGTH = 2;
     private static final int NAME_MAX_LENGTH = 16;
     private static final int DESCRIPTION_MAX_LENGTH = 50;
+
+    protected static final DecoderContext DEFAULT_CONTEXT = DecoderContext.builder().checkedDiscriminator(true).build();
 
     protected final S service;
     protected final Class<E> entityClass;
@@ -53,41 +59,28 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         this.entityClass = collection.getEntityClass();
     }
 
-    @Override
-    public void afterPropertiesSet() {
-        // do nothing
-    }
-
     protected final Collection<E> getCollection() {
         return collection;
     }
 
     @SafeVarargs
-    protected final E validateAndDelete(final ObjectId id, final Validate validate, final Validation<E>... validations)
-            throws ValidateException {
+    private final E validateAndDo(final String action, final Validate validate,
+                                  final BiPredicate<Validate, Validation<E>[]> checker, final Supplier<E> supplier,
+                                  final Validation<E>... validations) {
         noNullElements(validations, "validations contains null element at index: %d");
         final Validate v = ValidateWrapper.wrap(validate);
 
         try {
-            if (validations.length > 0) {
-                final E entity = collection.findById(id);
-                if (entity == null) {
-                    return null;
-                }
-                new MultiValidation<>(entityClass, validations).validate(entity, null, v);
-            }
+            final boolean doing = checker.test(v, validations);
             if (!v.hasErrors()) {
-                LOGGER.debug("validateAndDelete");
-                final E deleted = collection.deleteById(id);
-                onEntityDeleted(deleted, validate);
-                return deleted;
+                return doing ? supplier.get() : null;
             } else {
-                LOGGER.debug("validateAndDelete with ActionErrors: {}, FieldErrors: {}", v.hasActionErrors(),
+                LOGGER.debug("{} with ActionErrors: {}, FieldErrors: {}", action, v.hasActionErrors(),
                         v.hasFieldErrors());
             }
         } catch (Exception ex) {
             v.addActionError(ex.getMessage());
-            LOGGER.error("validateAndDelete failed!", ex);
+            LOGGER.error(action + " failed!", ex);
         }
 
         if (validate == null) {
@@ -95,6 +88,16 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         } else {
             return null;
         }
+    }
+
+    @SafeVarargs
+    protected final E validateAndDelete(final ObjectId id, final Validate validate, final Validation<E>... validations)
+            throws ValidateException {
+        return validateAndDo("validateAndDelete", validate, (v, vs) -> checkDelete(id, v, vs), () -> {
+            final E deleted = collection.deleteById(id);
+            onEntityDeleted(deleted, validate);
+            return deleted;
+        }, validations);
     }
 
     /**
@@ -116,36 +119,24 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     @SafeVarargs
     protected final E validateAndSave(final E entity, final ObjectId newEntityId, final Validate validate,
                                       final Validation<E>... validations) throws ValidateException {
-        noNullElements(validations, "validations contains null element at index: %d");
-        final Validate v = ValidateWrapper.wrap(validate);
+        return validateAndDo("validateAndSave", validate, (v, vs) -> checkSave(entity, v, vs), () -> {
+            final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
+            final E saved = collection.save(entity, newEntityId);
+            onEntitySaved(saved, validate, notifyType);
+            return saved;
+        }, validations);
+    }
 
-        try {
-            final boolean save = checkSave(entity, v, validations);
-            if (!v.hasErrors()) {
-                LOGGER.debug("validateAndSave with change: {}", save);
-                if (save) {
-                    final NotifyType notifyType = entity.getId() == null ? NotifyType.INSERT : NotifyType.UPDATE;
-                    final E saved = collection.save(entity, newEntityId);
-                    onEntitySaved(saved, validate, notifyType);
-                    return saved;
-                } else {
-                    return null;
-                }
-            } else {
-                LOGGER.debug("validateAndSave with ActionErrors: {}, FieldErrors: {}",
-                        v.hasActionErrors(),
-                        v.hasFieldErrors());
+    @SafeVarargs
+    private final boolean checkDelete(final ObjectId id, final Validate v, final Validation<E>... validations) {
+        if (validations.length > 0) {
+            final E original = collection.findById(id);
+            if (original == null) {
+                return false;
             }
-        } catch (Exception ex) {
-            v.addActionError(ex.getMessage());
-            LOGGER.error("validateAndSave failed!", ex);
+            new MultiValidation<>(entityClass, validations).validate(null, original, v);
         }
-
-        if (validate == null) {
-            throw new ValidateException(v);
-        } else {
-            return null;
-        }
+        return true;
     }
 
     @SafeVarargs
@@ -194,9 +185,11 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected void onEntitySaved(final E entity, final Validate validate, final NotifyType notifyType) {
+        // Override it to do more action
     }
 
     protected void onEntityDeleted(final E entity, final Validate validate) {
+        // Override it to do more action
     }
 
     protected final Bson aggregateMatchFilter(final Bson filter) {
@@ -304,14 +297,9 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             }
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(final Object o) {
-            if (!super.equals(o)) {
-                return false;
-            }
-            final NameValidation that = (NameValidation) o;
-            return this.minLength == that.minLength && this.maxLength == that.maxLength;
+            return super.equals(o);
         }
 
         @Override
@@ -346,11 +334,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
 
         @Override
         public boolean equals(final Object o) {
-            if (!super.equals(o)) {
-                return false;
-            }
-            @SuppressWarnings("unchecked") final DescriptionValidation that = (DescriptionValidation) o;
-            return this.maxLength == that.maxLength;
+            return super.equals(o);
         }
 
         @Override

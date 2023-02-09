@@ -1,6 +1,8 @@
 package io.github.dbstarll.dubai.model.service;
 
+import io.github.dbstarll.dubai.model.collection.BaseCollection;
 import io.github.dbstarll.dubai.model.collection.Collection;
+import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.utils.PackageUtils;
@@ -8,6 +10,8 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
+import org.bson.BsonReader;
+import org.bson.codecs.DecoderContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 public final class ServiceFactory<E extends Entity, S extends Service<E>>
-        implements InvocationHandler, ImplementalAutowirerAware {
+        implements InvocationHandler, ImplementalAutowirerAware, ServiceHelper<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
     private final Class<S> serviceClass;
@@ -65,7 +71,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
             for (Method m : typeClass.getMethods()) {
                 methods.put(new MethodKey(m, entityClass).getKey(), new MethodValue(typeClass, m));
             }
-            for (Method m : typeClass.getAnnotation(Implementation.class).value().getMethods()) {
+            for (Method m : notNull(getImplementalClass(typeClass)).getMethods()) {
                 collectPositionMethods(findPositionMethod(m, typeClass, entityClass), validations, positionMethods);
             }
         }
@@ -112,7 +118,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         final List<Type> list = new LinkedList<>();
         for (Type type : getClass(serviceType).getGenericInterfaces()) {
             list.addAll(getAllImplementationInterface(type));
-            if (getClass(type).getAnnotation(Implementation.class) != null) {
+            if (getImplementalClass(getClass(type)) != null) {
                 list.add(type);
             }
         }
@@ -130,6 +136,16 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     @Override
     public void setImplementalAutowirer(final ImplementalAutowirer implementalAutowirer) {
         this.autowirer = implementalAutowirer;
+    }
+
+    @Override
+    public BaseCollection<E> getBaseCollection() {
+        return CollectionFactory.getBaseCollection(collection);
+    }
+
+    @Override
+    public E decode(final BsonReader reader, final DecoderContext decoderContext) {
+        return getMongoCollection().getCodecRegistry().get(entityClass).decode(reader, decoderContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -156,6 +172,8 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == ImplementalAutowirerAware.class) {
+            return method.invoke(this, args);
+        } else if (method.getDeclaringClass() == ServiceHelper.class) {
             return method.invoke(this, args);
         } else if (method.getDeclaringClass() == GeneralValidateable.class) {
             try {
@@ -186,51 +204,53 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     }
 
     private Implemental findOrPutImplemental(final Object proxy, final Class<?> serviceInterface) {
-        if (!implementals.containsKey(serviceInterface)) {
-            putImplemental(proxy, serviceInterface, getImplementalClass(serviceInterface));
-        }
-        return implementals.get(serviceInterface);
+        return implementals.computeIfAbsent(serviceInterface, i -> newImplemental(proxy, i, getImplementalClass(i)));
     }
 
-    private <I extends Implemental> void putImplemental(final Object proxy, final Class<?> serviceInterface,
-                                                        final Class<I> implementalClass) {
+    private <I extends Implemental> I newImplemental(final Object proxy, final Class<?> serviceInterface,
+                                                     final Class<I> implementalClass) {
         final Constructor<I> constructor = getConstructor(implementalClass, serviceClass);
         if (constructor != null) {
             try {
                 final I implemental = constructor.newInstance(proxy, collection);
-                if (implementals.putIfAbsent(serviceInterface, implemental) == null) {
-                    LOGGER.debug("Implemental of service: {}[{}] use {}",
-                            serviceClass.getName(), serviceInterface.getName(), implementalClass.getName());
-                    if (autowirer != null) {
-                        autowirer.autowire(implemental);
-                    }
-                    implemental.afterPropertiesSet();
+                LOGGER.debug("Implemental of service: {}[{}] use {}",
+                        serviceClass.getName(), serviceInterface.getName(), implementalClass.getName());
+                if (autowirer != null) {
+                    autowirer.autowire(implemental);
                 }
+                implemental.afterPropertiesSet();
+                return implemental;
             } catch (Exception ex) {
-                implementals.remove(serviceInterface);
                 LOGGER.error("不能实例化Implemental：" + implementalClass, ex);
             }
         }
+        return null;
     }
 
     private static Class<? extends Implemental> getImplementalClass(final Class<?> serviceInterface) {
-        return serviceInterface.getAnnotation(Implementation.class).value();
+        final Implementation implementation = serviceInterface.getAnnotation(Implementation.class);
+        if (implementation != null) {
+            final Class<? extends Implemental> implementalClass = implementation.value();
+            final int modifiers = implementalClass.getModifiers();
+            if (Modifier.isPublic(modifiers) && Modifier.isFinal(modifiers)) {
+                return implementalClass;
+            } else {
+                LOGGER.error("Implemental is not public final: {}", implementalClass);
+            }
+        }
+        return null;
     }
 
     private static <I extends Implemental> Constructor<I> getConstructor(final Class<I> implementalClass,
                                                                          final Class<?> serviceClass) {
-        if (Modifier.isPublic(implementalClass.getModifiers()) && Modifier.isFinal(implementalClass.getModifiers())) {
-            final Constructor<I> constructor = findConstructor(implementalClass, serviceClass);
-            if (constructor != null) {
-                LOGGER.info("Constructor of Implemental[{}] use {}", implementalClass, constructor);
-                return constructor;
-            } else {
-                LOGGER.error("不能实例化Implemental，没有配套的构造函数：{}", implementalClass);
-            }
+        final Constructor<I> constructor = findConstructor(implementalClass, serviceClass);
+        if (constructor != null) {
+            LOGGER.info("Constructor of Implemental[{}] use {}", implementalClass, constructor);
+            return constructor;
         } else {
-            LOGGER.error("Implemental is not public final: {}", implementalClass);
+            LOGGER.error("不能实例化Implemental，没有配套的构造函数：{}", implementalClass);
+            return null;
         }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -263,7 +283,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                 final Class<?> packageInterface = PackageUtils.getPackageInterface(serviceClass, Package.class);
                 return (S) Proxy.newProxyInstance(serviceClass.getClassLoader(),
                         new Class[]{serviceClass, ServiceProxy.class, ImplementalAutowirerAware.class,
-                                GeneralValidateable.class, packageInterface},
+                                ServiceHelper.class, GeneralValidateable.class, packageInterface},
                         new ServiceFactory<>(serviceClass, collection));
             } else {
                 try {
@@ -374,13 +394,13 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
         final Type genericSuperclass = serviceClass.getGenericSuperclass();
         if (genericSuperclass != null) {
             final Class<E> entityClass = getEntityClassFromGeneric(genericSuperclass);
-            if (entityClass != null && EntityFactory.isEntityClass(entityClass)) {
+            if (entityClass != null) {
                 return entityClass;
             }
         }
         for (Type genericInterface : serviceClass.getGenericInterfaces()) {
             final Class<E> entityClass = getEntityClassFromGeneric(genericInterface);
-            if (entityClass != null && EntityFactory.isEntityClass(entityClass)) {
+            if (entityClass != null) {
                 return entityClass;
             }
         }
@@ -391,7 +411,7 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
     private static <E extends Entity> Class<E> getEntityClassFromGeneric(final Type genericType) {
         if (genericType instanceof ParameterizedType) {
             for (Type type : ((ParameterizedType) genericType).getActualTypeArguments()) {
-                if (EntityFactory.isEntityClass((Class<?>) type)) {
+                if (type instanceof Class && EntityFactory.isEntityClass((Class<?>) type)) {
                     return (Class<E>) type;
                 }
             }

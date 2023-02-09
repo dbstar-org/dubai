@@ -82,7 +82,6 @@ public class TestAbstractImplemental extends ServiceTestCase {
     @Test
     public void testSaveEntityNoChange() {
         useService(serviceClass, s -> {
-            final ObjectId id = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));
             final DefaultValidate validate = new DefaultValidate();
@@ -114,6 +113,18 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
+    public void testSaveException() {
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(s.saveException(entity, validate));
+            assertTrue(validate.hasActionErrors());
+            assertEquals(1, validate.getActionErrors().size());
+            assertEquals("[SaveException]", validate.getActionErrors().toString());
+        });
+    }
+
+    @Test
     public void testNoGeneralValidateable() {
         useService(serviceClass, s -> {
             final InvocationHandler handler = Proxy.getInvocationHandler(s);
@@ -124,6 +135,84 @@ public class TestAbstractImplemental extends ServiceTestCase {
             final DefaultValidate validate = new DefaultValidate();
             assertNotNull(service.save(entity, validate));
             assertFalse(validate.hasErrors());
+        });
+    }
+
+    @Test
+    public void testDeleteByIdNotExist() {
+        useService(serviceClass, s -> {
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(s.deleteById(new ObjectId(), validate));
+            assertFalse(validate.hasErrors());
+        });
+    }
+
+    @Test
+    public void testDeleteByIdOk() {
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            assertSame(entity, s.save(entity, null));
+
+            final DefaultValidate validate = new DefaultValidate();
+            entity.setDefunct(true);
+            assertEquals(entity, s.deleteById(entity.getId(), validate));
+            assertFalse(validate.hasErrors());
+        });
+    }
+
+    @Test
+    public void testDeleteByIdFailed() {
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            assertSame(entity, s.save(entity, null));
+
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(s.deleteByIdFailed(new ObjectId(), validate));
+            assertFalse(validate.hasErrors());
+
+            assertNull(s.deleteByIdFailed(entity.getId(), validate));
+            assertTrue(validate.hasActionErrors());
+            assertEquals(1, validate.getActionErrors().size());
+            assertEquals("[SaveFailed]", validate.getActionErrors().toString());
+        });
+    }
+
+    @Test
+    public void testDeleteByIdException() {
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            assertSame(entity, s.save(entity, null));
+
+            final DefaultValidate validate = new DefaultValidate();
+            assertNull(s.deleteByIdException(new ObjectId(), validate));
+            assertFalse(validate.hasErrors());
+
+            assertNull(s.deleteByIdException(entity.getId(), validate));
+            assertTrue(validate.hasActionErrors());
+            assertEquals(1, validate.getActionErrors().size());
+            assertEquals("[SaveException]", validate.getActionErrors().toString());
+        });
+    }
+
+    @Test
+    public void testDeleteByIdValidateNull() {
+        useService(serviceClass, s -> {
+            final TestEntity entity = EntityFactory.newInstance(entityClass);
+            assertSame(entity, s.save(entity, null));
+
+            try {
+                s.deleteByIdException(entity.getId(), null);
+                fail("throw ValidateException");
+            } catch (Throwable ex) {
+                assertEquals(ValidateException.class, ex.getClass());
+                final Validate validate = ((ValidateException) ex).getValidate();
+                assertNotNull(validate);
+                assertTrue(validate.hasErrors());
+                assertFalse(validate.hasFieldErrors());
+                assertTrue(validate.hasActionErrors());
+                assertEquals(1, validate.getActionErrors().size());
+                assertEquals("[SaveException]", validate.getActionErrors().toString());
+            }
         });
     }
 }
