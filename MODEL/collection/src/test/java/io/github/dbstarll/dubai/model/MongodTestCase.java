@@ -27,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public abstract class MongodTestCase {
     private static ReachedState<RunningMongodProcess> globalRunning;
@@ -124,10 +123,6 @@ public abstract class MongodTestCase {
                 codecCustomizer(settings),
                 serverCustomizer
         )).createMongoClient(settings);
-    }
-
-    private <T> T global(final T global, final Supplier<T> supplier) {
-        return global != null ? global : supplier.get();
     }
 
     protected final void useMongod(final Consumer<ReachedState<RunningMongodProcess>> consumer) {
