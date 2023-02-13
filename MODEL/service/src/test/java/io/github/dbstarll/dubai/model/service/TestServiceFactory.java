@@ -18,6 +18,9 @@ import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test.ThrowClassService;
 import io.github.dbstarll.dubai.model.service.test4.TestValidEntity;
 import io.github.dbstarll.dubai.model.service.test4.TestValidService;
+import io.github.dbstarll.dubai.model.service.test5.ImplFailedEntity;
+import io.github.dbstarll.dubai.model.service.test5.ImplFailedImplemental;
+import io.github.dbstarll.dubai.model.service.test5.ImplFailedService;
 import org.bson.types.ObjectId;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -270,6 +273,24 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @Test
     public void testCreateImplementationWithException() {
+        useCollection(ImplFailedEntity.class, c -> {
+            final ImplFailedService service = ServiceFactory.newInstance(ImplFailedService.class, c);
+            try {
+                service.done();
+                fail("throw AutowireException");
+            } catch (Exception e) {
+                e.printStackTrace();
+                assertEquals(ImplementalInstanceException.class, e.getClass());
+                assertEquals("不能实例化Implemental：" + ImplFailedImplemental.class.getName(), e.getMessage());
+                assertNotNull(e.getCause());
+                assertEquals(RuntimeException.class, e.getCause().getClass());
+                assertEquals("ImplFailed", e.getCause().getMessage());
+            }
+        });
+    }
+
+    @Test
+    public void testAutowireException() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             ((ImplementalAutowirerAware) service).setImplementalAutowirer(new ImplementalAutowirer() {
@@ -280,16 +301,10 @@ public class TestServiceFactory extends ServiceTestCase {
             });
             try {
                 service.contains(new ObjectId());
-                fail("throw UnsupportedOperationException");
+                fail("throw AutowireException");
             } catch (Exception e) {
-                assertEquals(UnsupportedOperationException.class, e.getClass());
-                final Method method;
-                try {
-                    method = InterfaceService.class.getMethod("contains", ObjectId.class);
-                } catch (NoSuchMethodException ex) {
-                    throw new IllegalStateException(ex);
-                }
-                assertEquals(method.toString(), e.getMessage());
+                assertEquals(AutowireException.class, e.getClass());
+                assertEquals("autowireBeanProperties", e.getMessage());
             }
         });
     }
@@ -370,6 +385,7 @@ public class TestServiceFactory extends ServiceTestCase {
         });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetEntityClass() {
         assertSame(InterfaceEntity.class, ServiceFactory.getEntityClass(InterfaceService.class));

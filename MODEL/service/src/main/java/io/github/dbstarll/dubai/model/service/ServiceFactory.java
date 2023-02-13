@@ -211,18 +211,19 @@ public final class ServiceFactory<E extends Entity, S extends Service<E>>
                                                      final Class<I> implementalClass) {
         final Constructor<I> constructor = getConstructor(implementalClass, serviceClass);
         if (constructor != null) {
+            final I implemental;
             try {
-                final I implemental = constructor.newInstance(proxy, collection);
-                LOGGER.debug("Implemental of service: {}[{}] use {}",
-                        serviceClass.getName(), serviceInterface.getName(), implementalClass.getName());
-                if (autowirer != null) {
-                    autowirer.autowire(implemental);
-                }
-                implemental.afterPropertiesSet();
-                return implemental;
+                implemental = constructor.newInstance(proxy, collection);
             } catch (Exception ex) {
-                LOGGER.error("不能实例化Implemental：" + implementalClass, ex);
+                throw new ImplementalInstanceException(implementalClass, ex);
             }
+            LOGGER.debug("Implemental of service: {}[{}] use {}",
+                    serviceClass.getName(), serviceInterface.getName(), implementalClass.getName());
+            if (autowirer != null) {
+                autowirer.autowire(implemental);
+            }
+            implemental.afterPropertiesSet();
+            return implemental;
         }
         return null;
     }
