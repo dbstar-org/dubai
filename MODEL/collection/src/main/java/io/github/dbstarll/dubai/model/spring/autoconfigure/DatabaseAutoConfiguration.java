@@ -34,7 +34,8 @@ public class DatabaseAutoConfiguration {
     @Bean
     @ConditionalOnBean(MongoClientSettings.class)
     MongoClientSettingsBuilderCustomizer mongoCodecRegistryCustomizer(
-            final MongoClientSettings settings, @Value("${dubai.mongodb.encryptedKey:}") final String encryptedKey)
+            final MongoClientSettings settings,
+            @Value("${dubai.model.collection.encryptedKey:}") final String encryptedKey)
             throws NoSuchAlgorithmException {
         final Bytes encryptedBytes = StringUtils.isBlank(encryptedKey) ? null : new Bytes(
                 new Sha256Digestor().digest(encryptedKey.getBytes(StandardCharsets.UTF_8)));

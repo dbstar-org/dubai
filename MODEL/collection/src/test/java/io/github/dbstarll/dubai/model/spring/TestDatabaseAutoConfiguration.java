@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
                 DatabaseAutoConfiguration.class,
         },
         properties = {
-                "dubai.mongodb.encryptedKey=test",
+                "dubai.model.collection.encryptedKey=test",
                 "spring.data.mongodb.host=127.0.0.1",
                 "spring.data.mongodb.username=username",
                 "spring.data.mongodb.password=password",
