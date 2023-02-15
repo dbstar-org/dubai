@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
                 CollectionAutoConfiguration.class,
                 ServiceAutoConfiguration.class
         })
-public class ServiceAutoConfigurationTest implements ApplicationContextAware {
+class ServiceAutoConfigurationTest implements ApplicationContextAware {
     private ApplicationContext ctx;
 
     @Autowired(required = false)
@@ -40,12 +40,12 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     }
 
     @Test
-    public void serviceBeanInitializer() {
+    void serviceBeanInitializer() {
         assertNotNull(ctx.getBean("serviceBeanInitializer", ServiceBeanInitializer.class));
     }
 
     @Test
-    public void implementalAutowirer() {
+    void implementalAutowirer() {
         assertNotNull(ctx.getBean("implementalAutowirer", ImplementalAutowirer.class));
         for (String name : ctx.getBeanDefinitionNames()) {
             System.out.println(name);
@@ -53,13 +53,13 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     }
 
     @Test
-    public void interfaceService() {
+    void interfaceService() {
         assertNotNull(service1);
         assertSame(InterfaceEntity.class, service1.getEntityClass());
     }
 
     @Test
-    public void interfaceService2() {
+    void interfaceService2() {
         assertNull(service2);
     }
 }

@@ -197,7 +197,7 @@ class TestEntityFactory {
         assertNotEquals(entity1, entity4);
         assertNotEquals(entity2, entity4);
 
-        assertNotEquals(entity1, null);
+        assertFalse(entity1.equals(null));
         assertNotEquals(entity1, new Object());
         assertEquals(entity1, entity1);
         assertNotEquals(entity1, Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),

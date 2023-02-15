@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class TestMethodValue {
@@ -22,7 +23,7 @@ class TestMethodValue {
         final MethodValue mv = new MethodValue(serviceInterface, method);
 
         assertEquals(mv, mv);
-        assertNotEquals(mv, null);
+        assertFalse(mv.equals(null));
         assertNotEquals(mv, new Object());
     }
 }

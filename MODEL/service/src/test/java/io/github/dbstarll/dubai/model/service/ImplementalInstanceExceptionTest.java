@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ImplementalInstanceExceptionTest {
+class ImplementalInstanceExceptionTest {
     @Test
     void testCause() {
         final Exception e = new ImplementalInstanceException(ImplFailedImplemental.class,
