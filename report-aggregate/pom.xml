@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.github.dbstarll.dubai</groupId>
     <artifactId>dubai</artifactId>
-    <version>1.1.2-SNAPSHOT</version>
+    <version>1.1.2</version>
   </parent>
   <artifactId>dubai-report-aggregate</artifactId>
   <packaging>pom</packaging>
