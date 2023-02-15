@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class TestCollection extends MongodTestCase {
+class TestCollection extends MongodTestCase {
     @Test
-    public void testRun() {
+    void testRun() {
         useCollectionFactory(cf -> {
             final Collection<SimpleEntity> collection = cf.newInstance(SimpleEntity.class);
             final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);

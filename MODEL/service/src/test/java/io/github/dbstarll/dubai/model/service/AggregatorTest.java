@@ -121,7 +121,7 @@ public class AggregatorTest extends ServiceTestCase {
     }
 
     @Test
-    public void testAggregateMatchFilter() {
+    void testAggregateMatchFilter() {
         useService(TestNamableService.class, s -> {
             assertNull(s.filter(null));
             final Bson f = Filters.eq(new ObjectId());

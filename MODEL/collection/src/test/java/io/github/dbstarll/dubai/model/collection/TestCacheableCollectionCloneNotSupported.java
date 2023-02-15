@@ -12,16 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestCacheableCollectionCloneNotSupported extends MongodTestCase {
+class TestCacheableCollectionCloneNotSupported extends MongodTestCase {
     private final Class<NoCloneEntity> entityClass = NoCloneEntity.class;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
         useCollection(entityClass, c -> {
             final NoCloneEntity entity = EntityFactory.newInstance(entityClass);
 
@@ -41,7 +41,7 @@ public class TestCacheableCollectionCloneNotSupported extends MongodTestCase {
     }
 
     @Test
-    public void testFindByIdNull() {
+    void testFindByIdNull() {
         useCollection(entityClass, c -> assertNull(c.findById(new ObjectId())));
     }
 }

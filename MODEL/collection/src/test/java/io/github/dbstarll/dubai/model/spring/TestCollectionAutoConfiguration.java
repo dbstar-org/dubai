@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
                 DatabaseAutoConfiguration.class,
                 CollectionAutoConfiguration.class
         })
-public class TestCollectionAutoConfiguration implements ApplicationContextAware {
+class TestCollectionAutoConfiguration implements ApplicationContextAware {
     private ApplicationContext ctx;
 
     @Autowired(required = false)
@@ -45,29 +45,29 @@ public class TestCollectionAutoConfiguration implements ApplicationContextAware 
     }
 
     @Test
-    public void testGetCollectionNameGenerator() {
+    void testGetCollectionNameGenerator() {
         assertNotNull(ctx.getBean("collectionNameGenerator", CollectionNameGenerator.class));
     }
 
     @Test
-    public void testGetSimpleEntityCollection() {
+    void testGetSimpleEntityCollection() {
         assertNotNull(collection1);
         assertSame(SimpleEntity.class, collection1.getEntityClass());
     }
 
     @Test
-    public void testGetSimpleEntityCollection2() {
+    void testGetSimpleEntityCollection2() {
         assertNull(collection2);
     }
 
     @Test
-    public void testGetSimpleEntityCollectionByType() {
+    void testGetSimpleEntityCollectionByType() {
         final ResolvableType beanType = ResolvableType.forClassWithGenerics(Collection.class, SimpleEntity.class);
         assertArrayEquals(Arrays.array(beanType.toString()), ctx.getBeanNamesForType(beanType));
     }
 
     @Test
-    public void testGetSimpleEntityCollectionByType2() {
+    void testGetSimpleEntityCollectionByType2() {
         assertEquals(0,
                 ctx.getBeanNamesForType(ResolvableType.forClassWithGenerics(Collection.class,
                         io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity.class)).length);

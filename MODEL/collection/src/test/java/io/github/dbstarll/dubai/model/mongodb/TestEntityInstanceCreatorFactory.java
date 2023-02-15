@@ -16,16 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class TestEntityInstanceCreatorFactory {
+class TestEntityInstanceCreatorFactory {
     private InstanceCreatorFactory<SimpleGenericEntity> instanceCreatorFactory;
 
     @BeforeEach
-    public void initialize() {
+    void initialize() {
         this.instanceCreatorFactory = new EntityInstanceCreatorFactory<>(SimpleGenericEntity.class);
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         assertNotNull(instanceCreatorFactory.create());
         assertNotSame(instanceCreatorFactory.create(), instanceCreatorFactory.create());
     }
@@ -34,7 +34,7 @@ public class TestEntityInstanceCreatorFactory {
      * 测试getInstance.
      */
     @Test
-    public void testGetInstance() {
+    void testGetInstance() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         assertNotNull(instanceCreator.getInstance());
         assertSame(instanceCreator.getInstance(), instanceCreator.getInstance());
@@ -45,7 +45,7 @@ public class TestEntityInstanceCreatorFactory {
      * 测试set方法.
      */
     @Test
-    public void testSet() {
+    void testSet() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         final Integer value = 100;
 

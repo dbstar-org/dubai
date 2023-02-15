@@ -4,6 +4,7 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o2.PublicPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,11 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestMultiValidation {
+class TestMultiValidation {
     /**
      * 测试构造函数中传入null的validations.
      */
-    public void testCreateWithNullValidations() {
+    @Test
+    void testCreateWithNullValidations() {
         try {
             new MultiValidation<>(InterfaceEntity.class, (Validation<InterfaceEntity>[]) null);
             fail("throw NullPointerException");
@@ -30,7 +32,8 @@ public class TestMultiValidation {
     /**
      * 测试构造函数中传入null的validation.
      */
-    public void testCreateWithNullValidation() {
+    @Test
+    void testCreateWithNullValidation() {
         try {
             new MultiValidation<>(InterfaceEntity.class, (Validation<InterfaceEntity>) null);
             fail("throw NullPointerException");
@@ -43,7 +46,8 @@ public class TestMultiValidation {
     /**
      * 测试构造函数中传入null的validation.
      */
-    public void testCreateWithNullEntityClass() {
+    @Test
+    void testCreateWithNullEntityClass() {
         try {
             new MultiValidation<>(null);
             fail("throw NullPointerException");
@@ -56,7 +60,8 @@ public class TestMultiValidation {
     /**
      * 测试hashCode.
      */
-    public void testHashCode() {
+    @Test
+    void testHashCode() {
         final MultiValidation<InterfaceEntity> mv1 = new MultiValidation<>(InterfaceEntity.class);
         final MultiValidation<InterfaceEntity> mv2 = new MultiValidation<>(InterfaceEntity.class);
         final MultiValidation<PublicPackageInterfaceEntity> mv3 = new MultiValidation<>(PublicPackageInterfaceEntity.class);
@@ -84,7 +89,8 @@ public class TestMultiValidation {
     /**
      * 测试equals方法.
      */
-    public void testEquals() {
+    @Test
+    void testEquals() {
         final MultiValidation<InterfaceEntity> mv1 = new MultiValidation<>(InterfaceEntity.class);
         assertNotEquals(mv1, null);
         assertNotEquals(mv1, new Object());
@@ -94,7 +100,8 @@ public class TestMultiValidation {
     /**
      * 测试validate方法.
      */
-    public void testValidate() {
+    @Test
+    void testValidate() {
         final MultiValidation<InterfaceEntity> mv = new MultiValidation<>(InterfaceEntity.class);
         final AtomicInteger calls = new AtomicInteger(0);
         final Validation<InterfaceEntity> falseValidation = new AbstractValidation<InterfaceEntity>(InterfaceEntity.class) {
@@ -138,7 +145,8 @@ public class TestMultiValidation {
         assertEquals(7, calls.get());
     }
 
-    public void testToString() {
+    @Test
+    void testToString() {
         assertEquals(MultiValidation.class.getName() + "<" + InterfaceEntity.class.getName() + "> [validations=0]",
                 new MultiValidation<>(InterfaceEntity.class).toString());
     }

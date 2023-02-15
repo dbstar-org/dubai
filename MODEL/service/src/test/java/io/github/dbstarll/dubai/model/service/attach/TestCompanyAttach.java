@@ -18,17 +18,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestCompanyAttach extends ServiceTestCase {
+class TestCompanyAttach extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestEntityService> serviceClass = TestEntityService.class;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testCountByCompanyId() {
+    void testCountByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -42,7 +42,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindByCompanyId() {
+    void testFindByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -56,7 +56,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByCompanyId() {
+    void testDeleteByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -70,7 +70,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindWithCompany() {
+    void testFindWithCompany() {
         useCollectionFactory(cf -> {
             final TestEntityService service = ServiceFactory.newInstance(serviceClass, cf.newInstance(entityClass));
             final TestNamableService companyService = ServiceFactory.newInstance(TestNamableService.class,

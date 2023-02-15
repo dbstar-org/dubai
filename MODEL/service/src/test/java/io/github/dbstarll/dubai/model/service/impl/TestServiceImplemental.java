@@ -19,22 +19,22 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestServiceImplemental extends ServiceTestCase {
+class TestServiceImplemental extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testGetEntityClass() {
+    void testGetEntityClass() {
         useService(serviceClass, s -> assertEquals(entityClass, s.getEntityClass()));
     }
 
     @Test
-    public void testCount() {
+    void testCount() {
         useService(serviceClass, s -> {
             assertEquals(0, s.count(null));
             assertEquals(0, s.count(Filters.eq(new ObjectId())));
@@ -48,7 +48,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testContains() {
+    void testContains() {
         useService(serviceClass, s -> {
             final TestEntity saved = s.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(saved);
@@ -59,7 +59,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testFind() {
+    void testFind() {
         useService(serviceClass, s -> {
             final TestEntity saved = s.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(saved);
@@ -70,7 +70,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testFindOne() {
+    void testFindOne() {
         useService(serviceClass, s -> {
             final TestEntity saved = s.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(saved);
@@ -81,7 +81,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
         useService(serviceClass, s -> {
             final TestEntity saved = s.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(saved);
@@ -92,7 +92,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteById() {
+    void testDeleteById() {
         useService(serviceClass, s -> {
             final TestEntity saved = s.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(saved);
@@ -104,7 +104,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveWithValidate() {
+    void testSaveWithValidate() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             final DefaultValidate validate = new DefaultValidate();
@@ -114,7 +114,7 @@ public class TestServiceImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDelay() {
+    void testDelay() {
         useService(serviceClass, s -> {
             final AtomicReference<Object> lock1 = new AtomicReference<>();
             final AtomicReference<Object> lock2 = new AtomicReference<>();

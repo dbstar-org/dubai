@@ -14,12 +14,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestIntrospectionContextWrapper {
+class TestIntrospectionContextWrapper {
     private AtomicReference<String> result = new AtomicReference<>();
     private IntrospectionContext context;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         context = new IntrospectionContextWrapper(new IntrospectionContext() {
             @Override
             public void removePropertyDescriptor(String name) {
@@ -63,52 +63,52 @@ public class TestIntrospectionContextWrapper {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         this.context = null;
         this.result = null;
     }
 
     @Test
-    public void testRemovePropertyDescriptor() {
+    void testRemovePropertyDescriptor() {
         final String random = RandomStringUtils.random(10);
         context.removePropertyDescriptor(random);
         assertEquals("removePropertyDescriptor: " + random, result.get());
     }
 
     @Test
-    public void testPropertyNames() {
+    void testPropertyNames() {
         context.propertyNames();
         assertEquals("propertyNames", result.get());
     }
 
     @Test
-    public void testHasProperty() {
+    void testHasProperty() {
         final String random = RandomStringUtils.random(10);
         context.hasProperty(random);
         assertEquals("hasProperty: " + random, result.get());
     }
 
     @Test
-    public void testGetTargetClass() {
+    void testGetTargetClass() {
         assertEquals(InterfaceEntity.class, context.getTargetClass());
         assertNull(result.get());
     }
 
     @Test
-    public void testGetPropertyDescriptor() {
+    void testGetPropertyDescriptor() {
         final String random = RandomStringUtils.random(10);
         context.getPropertyDescriptor(random);
         assertEquals("getPropertyDescriptor: " + random, result.get());
     }
 
     @Test
-    public void testAddPropertyDescriptors() {
+    void testAddPropertyDescriptors() {
         context.addPropertyDescriptors(null);
         assertEquals("addPropertyDescriptors", result.get());
     }
 
     @Test
-    public void testAddPropertyDescriptor() {
+    void testAddPropertyDescriptor() {
         context.addPropertyDescriptor(null);
         assertEquals("addPropertyDescriptor", result.get());
     }

@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestPackageUtils {
+class TestPackageUtils {
     /**
      * 测试创建实例.
      */
     @Test
-    public void testNewInstance() {
+    void testNewInstance() {
         assertThrows(IllegalAccessException.class, PackageUtils.class::newInstance);
     }
 
@@ -23,7 +23,7 @@ public class TestPackageUtils {
      * 测试getPackageInterface方法.
      */
     @Test
-    public void testGetPackageInterface() {
+    void testGetPackageInterface() {
         assertEquals("io.github.dbstarll.dubai.model.entity.test.Package",
                 PackageUtils.getPackageInterface(InterfaceEntity.class, null).getName());
         assertEquals("io.github.dbstarll.dubai.model.entity.test.o2.Package",

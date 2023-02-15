@@ -13,14 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestEntityUtils {
+class TestEntityUtils {
     @Test
-    public void testNewInstance() {
+    void testNewInstance() {
         assertThrows(IllegalAccessException.class, EntityUtils.class::newInstance);
     }
 
     @Test
-    public void testPropertyDescriptors() {
+    void testPropertyDescriptors() {
         final Set<String> keys = new TreeSet<>();
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(InterfaceEntity.class)) {
             keys.add(pd.getName());
@@ -30,7 +30,7 @@ public class TestEntityUtils {
     }
 
     @Test
-    public void testPropertyDescriptor() {
+    void testPropertyDescriptor() {
         final PropertyDescriptor id = EntityUtils.propertyDescriptor(InterfaceEntity.class, "id");
         assertNotNull(id);
         assertNotNull(id.getReadMethod());
@@ -43,7 +43,7 @@ public class TestEntityUtils {
     }
 
     @Test
-    public void testClassEntity() {
+    void testClassEntity() {
         final Set<String> keys = new TreeSet<>();
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(ClassEntity.class)) {
             keys.add(pd.getName());

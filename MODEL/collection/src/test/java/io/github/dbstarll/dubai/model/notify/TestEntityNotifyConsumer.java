@@ -4,6 +4,7 @@ import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.join.CompanyBase;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,11 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestEntityNotifyConsumer {
+class TestEntityNotifyConsumer {
     /**
      * 测试缺省的NotifyConsumer.
      */
-    public void testDefaultNotifyConsumer() {
+    @Test
+    void testDefaultNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         assertNotNull(consumer);
         consumer.start();
@@ -28,7 +30,8 @@ public class TestEntityNotifyConsumer {
     /**
      * 测试自定义的NotifyConsumer.
      */
-    public void testNotifyConsumer() {
+    @Test
+    void testNotifyConsumer() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         final AtomicBoolean regist = new AtomicBoolean(false);
         final AtomicBoolean unRegist = new AtomicBoolean(false);
@@ -58,7 +61,8 @@ public class TestEntityNotifyConsumer {
     /**
      * 测试onNotify方法.
      */
-    public void testOnNotify() {
+    @Test
+    void testOnNotify() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         assertNotNull(consumer);
         consumer.onNotify(SimpleEntity.class.getName(), "value1", new NotifyParser() {
@@ -111,7 +115,8 @@ public class TestEntityNotifyConsumer {
     /**
      * 测试设置listener.
      */
-    public void testListener() {
+    @Test
+    void testListener() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
 
         final AtomicInteger calls = new AtomicInteger(0);
@@ -168,7 +173,8 @@ public class TestEntityNotifyConsumer {
     /**
      * 测试设置listener抛出异常.
      */
-    public void testListenerException() {
+    @Test
+    void testListenerException() {
         final EntityNotifyConsumer consumer = new EntityNotifyConsumer();
         assertNotNull(consumer);
 

@@ -17,17 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestDefunctValidation extends ServiceTestCase {
+class TestDefunctValidation extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testInsertSetDefunct() {
+    void testInsertSetDefunct() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDefunct(true);
@@ -41,7 +41,7 @@ public class TestDefunctValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetDefunct() {
+    void testUpdateSetDefunct() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
 

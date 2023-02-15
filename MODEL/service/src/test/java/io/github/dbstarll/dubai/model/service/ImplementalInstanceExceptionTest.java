@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ImplementalInstanceExceptionTest {
     @Test
-    public void testCause() {
+    void testCause() {
         final Exception e = new ImplementalInstanceException(ImplFailedImplemental.class,
                 new IllegalArgumentException());
         assertNotNull(e.getCause());
@@ -18,7 +18,7 @@ public class ImplementalInstanceExceptionTest {
     }
 
     @Test
-    public void testInvocationTargetExceptionCause() {
+    void testInvocationTargetExceptionCause() {
         final Exception e = new ImplementalInstanceException(ImplFailedImplemental.class,
                 new InvocationTargetException(new IllegalAccessException()));
         assertNotNull(e.getCause());

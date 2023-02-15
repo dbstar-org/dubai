@@ -57,9 +57,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestCodecProvider extends MongodTestCase {
+class TestCodecProvider extends MongodTestCase {
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         globalCollectionFactory();
     }
 
@@ -67,7 +67,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试基于接口的Entity.
      */
     @Test
-    public void testInterfaceEntity() {
+    void testInterfaceEntity() {
         useCollection(SimpleEntity.class, c -> {
             final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);
             entity.setType(Type.t1);
@@ -80,7 +80,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试基于Class的Entity.
      */
     @Test
-    public void testClassEntity() {
+    void testClassEntity() {
         useCollection(SimpleClassEntity.class, c -> {
             final SimpleClassEntity entity = EntityFactory.newInstance(SimpleClassEntity.class);
             assertSame(entity, c.save(entity));
@@ -91,7 +91,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试未实现PojoFields的Proxy.
      */
     @Test
-    public void testProxyNoPojoFields() {
+    void testProxyNoPojoFields() {
         useCollection(SimpleEntity.class, c -> {
             final SimpleEntity entity = (SimpleEntity) Proxy.newProxyInstance(SimpleEntity.class.getClassLoader(),
                     new Class[]{SimpleEntity.class, EntityModifier.class}, (proxy, method, args) -> null);
@@ -109,7 +109,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试保存一个非Entity的对象.
      */
     @Test
-    public void testNoEntity() {
+    void testNoEntity() {
         useDatabase(db -> {
             final MongoCollection<NotEntity> collection = db.getCollection("oid", NotEntity.class);
 
@@ -126,7 +126,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试ImageCodec.
      */
     @Test
-    public void testImageCodecEncode() {
+    void testImageCodecEncode() {
         useClient(c -> {
             final CodecRegistry registry = ((MongoClientImpl) c).getCodecRegistry();
             final Codec<byte[]> codec = registry.get(byte[].class);
@@ -144,7 +144,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试ImageCodec.
      */
     @Test
-    public void testImageCodecNotEncode() {
+    void testImageCodecNotEncode() {
         useMongod(d -> {
             final ServerAddress serverAddress = d.current().getServerAddress();
             final MongoClientSettings settings = mongoClientSettings();
@@ -226,7 +226,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试基于范型接口的Entity.
      */
     @Test
-    public void testGenericEntity() {
+    void testGenericEntity() {
         useCollection(SimpleGenericEntity.class, c -> {
             final SimpleGenericEntity entity = EntityFactory.newInstance(SimpleGenericEntity.class);
             entity.setKey("key");
@@ -239,7 +239,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试基于多个同名属性的Entity.
      */
     @Test
-    public void testMultiSetterEntity() {
+    void testMultiSetterEntity() {
         useCollection(MultiSetterEntity.class, c -> {
             final MultiSetterEntity entity = EntityFactory.newInstance(MultiSetterEntity.class);
             entity.setData(true);
@@ -258,7 +258,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试属性的getter和setter类型不一致的Entity.
      */
     @Test
-    public void testDiffGetterSetterEntity() {
+    void testDiffGetterSetterEntity() {
         useCollection(DiffGetterSetterEntity.class, c -> {
             final DiffGetterSetterEntity entity = EntityFactory.newInstance(DiffGetterSetterEntity.class);
 
@@ -275,7 +275,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试只有setter的Entity.
      */
     @Test
-    public void testOnlySetterEntity() {
+    void testOnlySetterEntity() {
         useCollection(OnlySetterEntity.class, c -> {
             final OnlySetterEntity entity = EntityFactory.newInstance(OnlySetterEntity.class);
 
@@ -292,7 +292,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试只有getter的Entity.
      */
     @Test
-    public void testOnlyGetterEntity() {
+    void testOnlyGetterEntity() {
         useCollection(OnlyGetterEntity.class, c -> {
             final OnlyGetterEntity entity = EntityFactory.newInstance(OnlyGetterEntity.class);
 
@@ -309,7 +309,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试直接实现的方法级范型的Entity.
      */
     @Test
-    public void testDirectMethodGenericEntity() {
+    void testDirectMethodGenericEntity() {
         useCollection(DirectMethodGenericEntity.class, c -> {
             final DirectMethodGenericEntity entity = EntityFactory.newInstance(DirectMethodGenericEntity.class);
 
@@ -326,7 +326,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试继承实现的方法级范型的Entity.
      */
     @Test
-    public void testInheritMethodGenericEntity() {
+    void testInheritMethodGenericEntity() {
         useCollection(InheritMethodGenericEntity.class, c -> {
             final InheritMethodGenericEntity entity = EntityFactory.newInstance(InheritMethodGenericEntity.class);
 
@@ -343,7 +343,7 @@ public class TestCodecProvider extends MongodTestCase {
      * 测试继承实现的方法级范型的Entity.
      */
     @Test
-    public void testInheritMethodGenericHidingEntity() {
+    void testInheritMethodGenericHidingEntity() {
         useCollection(InheritMethodGenericHidingEntity.class, c -> {
             final InheritMethodGenericHidingEntity entity = EntityFactory.newInstance(InheritMethodGenericHidingEntity.class);
 
@@ -357,7 +357,7 @@ public class TestCodecProvider extends MongodTestCase {
     }
 
     @Test
-    public void testOverrideSetWithSubClassEntity() {
+    void testOverrideSetWithSubClassEntity() {
         useCollection(OverrideSetWithSubClassEntity.class, c -> {
             final OverrideSetWithSubClassEntity entity = EntityFactory.newInstance(OverrideSetWithSubClassEntity.class);
             assertEquals(entity, c.save(entity));
@@ -365,7 +365,7 @@ public class TestCodecProvider extends MongodTestCase {
     }
 
     @Test
-    public void testOverrideSetWithSuperClassEntity() {
+    void testOverrideSetWithSuperClassEntity() {
         useCollection(OverrideSetWithSuperClassEntity.class, c -> {
             final OverrideSetWithSuperClassEntity entity = EntityFactory.newInstance(OverrideSetWithSuperClassEntity.class);
 
@@ -379,7 +379,7 @@ public class TestCodecProvider extends MongodTestCase {
     }
 
     @Test
-    public void testOverrideSetWithOtherClassEntity() {
+    void testOverrideSetWithOtherClassEntity() {
         useCollection(OverrideSetWithOtherClassEntity.class, c -> {
             final OverrideSetWithOtherClassEntity entity = EntityFactory.newInstance(OverrideSetWithOtherClassEntity.class);
 
@@ -393,7 +393,7 @@ public class TestCodecProvider extends MongodTestCase {
     }
 
     @Test
-    public void testOverrideGetWithSubClassEntity() {
+    void testOverrideGetWithSubClassEntity() {
         useCollection(OverrideGetWithSubClassEntity.class, c -> {
             final OverrideGetWithSubClassEntity entity = EntityFactory.newInstance(OverrideGetWithSubClassEntity.class);
             assertEquals(entity, c.save(entity));

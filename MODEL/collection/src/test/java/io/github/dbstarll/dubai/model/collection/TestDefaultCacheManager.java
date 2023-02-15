@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestDefaultCacheManager extends MongodTestCase {
+class TestDefaultCacheManager extends MongodTestCase {
     private final Class<SimpleEntity> entityClass = SimpleEntity.class;
 
     @Test
-    public void test() {
+    void test() {
         useCollection(entityClass, c -> {
             final EntityCacheManager entityCacheManager = new CacheableCollection<SimpleEntity>(c) {
                 public EntityCacheManager cacheManager() {

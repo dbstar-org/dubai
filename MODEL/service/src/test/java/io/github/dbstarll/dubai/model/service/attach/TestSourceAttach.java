@@ -15,17 +15,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class TestSourceAttach extends ServiceTestCase {
+class TestSourceAttach extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testMergeSource() {
+    void testMergeSource() {
         useService(serviceClass, s -> {
             final ObjectId from = new ObjectId();
             final ObjectId to = new ObjectId();
@@ -45,7 +45,7 @@ public class TestSourceAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSource() {
+    void testUpdateSource() {
         useService(serviceClass, s -> {
             final ObjectId src = new ObjectId();
             final ObjectId from = new ObjectId();
@@ -74,7 +74,7 @@ public class TestSourceAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSourceNull() {
+    void testUpdateSourceNull() {
         useService(serviceClass, s -> {
             try {
                 s.updateSource(new ObjectId(), Collections.singletonMap("source", null));
@@ -86,7 +86,7 @@ public class TestSourceAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testRemoveSource() {
+    void testRemoveSource() {
         useService(serviceClass, s -> {
             final ObjectId src = new ObjectId();
             final ObjectId from = new ObjectId();
@@ -111,7 +111,7 @@ public class TestSourceAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testRemoveSourceNull() {
+    void testRemoveSourceNull() {
         useService(serviceClass, s -> {
             try {
                 s.removeSource(new ObjectId(), Collections.singletonMap("source", null));

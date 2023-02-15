@@ -23,12 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestEntityFactory {
+class TestEntityFactory {
     /**
      * 测试newInstance一个类.
      */
     @Test
-    public void testNewInstanceWithClass() {
+    void testNewInstanceWithClass() {
         final ClassEntity entity = EntityFactory.newInstance(ClassEntity.class);
         assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity));
         assertEquals(ClassEntity.class, EntityFactory.getEntityClass(entity.getClass()));
@@ -39,7 +39,7 @@ public class TestEntityFactory {
      * 测试newInstance一个没有@Table的类.
      */
     @Test
-    public void testNewInstanceWithClassNoTable() {
+    void testNewInstanceWithClassNoTable() {
         try {
             EntityFactory.newInstance(ClassNoTableEntity.class);
             fail("throw UnsupportedOperationException");
@@ -52,7 +52,7 @@ public class TestEntityFactory {
      * 测试在newInstance一个抽象类时抛出UnsupportedOperationException异常.
      */
     @Test
-    public void testNewInstanceWithAbstractClass() {
+    void testNewInstanceWithAbstractClass() {
         try {
             EntityFactory.newInstance(AbstractEntity.class);
             fail("throw UnsupportedOperationException");
@@ -65,7 +65,7 @@ public class TestEntityFactory {
      * 测试在newInstance一个无公开构造函数的类时抛出UnsupportedOperationException异常.
      */
     @Test
-    public void testNewInstanceWithNoPublicClass() {
+    void testNewInstanceWithNoPublicClass() {
         try {
             EntityFactory.newInstance(NoPublicClassEntity.class);
             fail("throw UnsupportedOperationException");
@@ -78,7 +78,7 @@ public class TestEntityFactory {
      * 测试在newInstance一个会抛出异常的构造函数的类时抛出UnsupportedOperationException异常.
      */
     @Test
-    public void testNewInstanceWithThrowClass() {
+    void testNewInstanceWithThrowClass() {
         try {
             EntityFactory.newInstance(ThrowClassEntity.class);
             fail("throw UnsupportedOperationException");
@@ -94,7 +94,7 @@ public class TestEntityFactory {
      * 测试在newInstance一个包内可见的类时抛出UnsupportedOperationException异常.
      */
     @Test
-    public void testNewInstanceWithPackageClass() {
+    void testNewInstanceWithPackageClass() {
         try {
             EntityFactory.newInstance(PackageClassEntity.class);
             fail("throw UnsupportedOperationException");
@@ -109,7 +109,7 @@ public class TestEntityFactory {
      * 测试newInstance一个接口.
      */
     @Test
-    public void testNewInstanceWithInterface() {
+    void testNewInstanceWithInterface() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
         assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity));
         assertEquals(InterfaceEntity.class, EntityFactory.getEntityClass(entity.getClass()));
@@ -121,7 +121,7 @@ public class TestEntityFactory {
      * 测试在newInstance无Table注解的接口时抛出UnsupportedOperationException异常.
      */
     @Test
-    public void testNewInstanceWithInterfaceNoTable() {
+    void testNewInstanceWithInterfaceNoTable() {
         try {
             EntityFactory.newInstance(NoTableEntity.class);
             fail("throw UnsupportedOperationException");
@@ -134,7 +134,7 @@ public class TestEntityFactory {
      * 测试在newInstance时设置初始参数.
      */
     @Test
-    public void testNewInstanceWithFields() {
+    void testNewInstanceWithFields() {
         final ObjectId id = new ObjectId();
         final Map<String, Serializable> fields = Collections.singletonMap(Entity.FIELD_NAME_ID, id);
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class, fields);
@@ -146,7 +146,7 @@ public class TestEntityFactory {
      * 测试非EntityFactory的代理类调用getEntityClass.
      */
     @Test
-    public void testGetEntityClassNoEntityFactory() {
+    void testGetEntityClassNoEntityFactory() {
         final InterfaceEntity entity = (InterfaceEntity) Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
                 new Class[]{EntityModifier.class, PojoFields.class, InterfaceEntity.class},
                 (proxy, method, args) -> null);
@@ -160,7 +160,7 @@ public class TestEntityFactory {
      * 测试hashCode.
      */
     @Test
-    public void testHashCode() {
+    void testHashCode() {
         final ObjectId id1 = new ObjectId();
         final ObjectId id2 = new ObjectId();
         final InterfaceEntity entity1 = EntityFactory.newInstance(InterfaceEntity.class);
@@ -181,7 +181,7 @@ public class TestEntityFactory {
      * 测试equals.
      */
     @Test
-    public void testEquals() {
+    void testEquals() {
         final ObjectId id1 = new ObjectId();
         final ObjectId id2 = new ObjectId();
         final InterfaceEntity entity1 = EntityFactory.newInstance(InterfaceEntity.class);
@@ -209,7 +209,7 @@ public class TestEntityFactory {
      * 测试简单类型属性的缺省值.
      */
     @Test
-    public void testDefaultPrimitiveFields() {
+    void testDefaultPrimitiveFields() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap("booleanFromNoTableEntity", true));
         final Map<String, Object> fields = ((PojoFields) entity).fields();
@@ -222,7 +222,7 @@ public class TestEntityFactory {
      * 测试设置与获取属性.
      */
     @Test
-    public void testGetAndSet() {
+    void testGetAndSet() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
         assertNull(entity.getId());
         assertEquals(0, entity.getIntFromInterfaceEntity());
@@ -246,7 +246,7 @@ public class TestEntityFactory {
      * 测试一些不正常的get方法.
      */
     @Test
-    public void testGetInvalid() {
+    void testGetInvalid() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
         try {
             entity.getNoReturn();
@@ -272,7 +272,7 @@ public class TestEntityFactory {
      * 测试一些不正常的set方法.
      */
     @Test
-    public void testSetInvalid() {
+    void testSetInvalid() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class);
         try {
             entity.setIntWithReturn(100);
@@ -310,7 +310,7 @@ public class TestEntityFactory {
      * 测试clone方法.
      */
     @Test
-    public void testClone() {
+    void testClone() {
         final InterfaceEntity entity1 = EntityFactory.newInstance(InterfaceEntity.class);
         final String stringValue = new ObjectId().toHexString();
         entity1.setIntFromInterfaceEntity(100);
@@ -329,18 +329,18 @@ public class TestEntityFactory {
     }
 
     @Test
-    public void testCloneNone() {
+    void testCloneNone() {
         assertNull(EntityFactory.clone(null));
     }
 
     @Test
-    public void testCloneNoEntityModifier() {
+    void testCloneNoEntityModifier() {
         final NoModifierEntity entity = new NoModifierEntity();
         assertNotSame(entity, EntityFactory.clone(entity));
     }
 
     @Test
-    public void testCloneException() {
+    void testCloneException() {
         try {
             EntityFactory.clone(new NoCloneEntity());
             fail("throw UnsupportedOperationException");
@@ -353,7 +353,7 @@ public class TestEntityFactory {
     }
 
     @Test
-    public void testCloneNoEntityModifierException() {
+    void testCloneNoEntityModifierException() {
         try {
             EntityFactory.clone(new NoModifierCloneEntity());
             fail("throw UnsupportedOperationException");
@@ -367,7 +367,7 @@ public class TestEntityFactory {
     }
 
     @Test
-    public void testIsEntityProxy() {
+    void testIsEntityProxy() {
         assertFalse(EntityFactory.isEntityProxy(InterfaceEntity.class));
         assertTrue(EntityFactory.isEntityProxy(EntityFactory.newInstance(InterfaceEntity.class).getClass()));
 
@@ -383,7 +383,7 @@ public class TestEntityFactory {
     }
 
     @Test
-    public void testIsEntityInterface() {
+    void testIsEntityInterface() {
         assertTrue(EntityFactory.isEntityInterface(InterfaceEntity.class));
         assertFalse(EntityFactory.isEntityInterface(ClassEntity.class));
         assertFalse(EntityFactory.isEntityInterface(NoTableEntity.class));

@@ -6,6 +6,7 @@ import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test2.InterfaceService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -21,20 +22,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestServiceBeanInitializer {
+class TestServiceBeanInitializer {
     private BeanDefinitionRegistry registry;
 
     @BeforeEach
-    protected void setUp() {
+    void setUp() {
         this.registry = new StaticApplicationContext();
     }
 
     @AfterEach
-    protected void tearDown() {
+    void tearDown() {
         this.registry = null;
     }
 
-    public void testNew() {
+    @Test
+    void testNew() {
         try {
             new ServiceBeanInitializer();
         } catch (Exception ex) {
@@ -42,7 +44,8 @@ public class TestServiceBeanInitializer {
         }
     }
 
-    public void testPostProcessBeanFactory() {
+    @Test
+    void testPostProcessBeanFactory() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         try {
             initializer.postProcessBeanFactory(new DefaultListableBeanFactory());
@@ -54,7 +57,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试未设置basePackages.
      */
-    public void testNullBasePackages() {
+    @Test
+    void testNullBasePackages() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.postProcessBeanDefinitionRegistry(registry);
         assertEquals(0, registry.getBeanDefinitionCount());
@@ -63,7 +67,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试未设置basePackages.
      */
-    public void testEmptyBasePackages() {
+    @Test
+    void testEmptyBasePackages() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackages();
         initializer.postProcessBeanDefinitionRegistry(registry);
@@ -73,7 +78,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试部分为null的basePackages.
      */
-    public void testNullBasePackage() {
+    @Test
+    void testNullBasePackage() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackages("", "abc", null);
         try {
@@ -89,7 +95,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试通过class方式来设置basePackages.
      */
-    public void testBasePackageClasses() {
+    @Test
+    void testBasePackageClasses() {
         registry.registerBeanDefinition("mongoDatabase",
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
         final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
@@ -105,7 +112,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试递归.
      */
-    public void testRecursion() {
+    @Test
+    void testRecursion() {
         registry.registerBeanDefinition("mongoDatabase",
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
         final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
@@ -122,7 +130,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试有重名的Service.
      */
-    public void testSameNameService() {
+    @Test
+    void testSameNameService() {
         registry.registerBeanDefinition("mongoDatabase",
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
         final CollectionBeanInitializer collectionBeanInitializer = new CollectionBeanInitializer();
@@ -138,7 +147,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试有重复的Service.
      */
-    public void testDuplicateService() {
+    @Test
+    void testDuplicateService() {
         registry.registerBeanDefinition("mongoDatabase",
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
 
@@ -164,7 +174,8 @@ public class TestServiceBeanInitializer {
     /**
      * 测试有抛出BeansException.
      */
-    public void testBeansException() {
+    @Test
+    void testBeansException() {
         final BeanDefinitionRegistry testRegistry = new SimpleBeanDefinitionRegistry() {
             @Override
             public boolean containsBeanDefinition(String beanName) {

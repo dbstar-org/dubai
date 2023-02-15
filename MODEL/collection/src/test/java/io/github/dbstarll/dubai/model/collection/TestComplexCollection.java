@@ -38,21 +38,21 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestComplexCollection extends MongodTestCase {
+class TestComplexCollection extends MongodTestCase {
     private final Class<CacheableEntity> entityClass = CacheableEntity.class;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testGetEntityClass() {
+    void testGetEntityClass() {
         useCollection(entityClass, c -> assertEquals(entityClass, c.getEntityClass()));
     }
 
     @Test
-    public void testCount() {
+    void testCount() {
         useCollection(entityClass, c -> {
             assertEquals(0, c.count());
             assertEquals(0, c.count(null));
@@ -68,7 +68,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testContains() {
+    void testContains() {
         useCollection(entityClass, c -> {
             assertFalse(c.contains(new ObjectId()));
             assertTrue(c.contains(c.save(EntityFactory.newInstance(entityClass)).getId()));
@@ -76,7 +76,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testSaveWithId() {
+    void testSaveWithId() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
             assertNull(entity.getId());
@@ -95,7 +95,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testSave() {
+    void testSave() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
             assertNull(entity.getId());
@@ -127,12 +127,12 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testSaveNull() {
+    void testSaveNull() {
         useCollection(entityClass, c -> assertNull(c.save(null)));
     }
 
     @Test
-    public void testSaveNoEntityModifier() {
+    void testSaveNoEntityModifier() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = (CacheableEntity) Proxy.newProxyInstance(entityClass.getClassLoader(),
                     new Class[]{entityClass}, (proxy, method, args) -> null);
@@ -147,7 +147,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testDeleteById() {
+    void testDeleteById() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
 
@@ -161,7 +161,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
 
@@ -174,7 +174,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindOne() {
+    void testFindOne() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
             assertNotNull(c.save(entity));
@@ -183,7 +183,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindByIds() {
+    void testFindByIds() {
         useCollection(entityClass, c -> {
             assertNull(c.findByIds(Collections.singleton(new ObjectId())).first());
 
@@ -201,7 +201,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFind() {
+    void testFind() {
         useCollection(entityClass, c -> {
             assertNull(c.find().first());
             assertNull(c.find(entityClass).first());
@@ -214,7 +214,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindQuery() {
+    void testFindQuery() {
         useCollection(entityClass, c -> {
             assertNull(c.find(Filters.eq("type", CacheableEntity.Type.t1)).first());
             assertNull(c.find(Filters.eq("bytes", new byte[0])).first());
@@ -242,7 +242,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testDistinct() {
+    void testDistinct() {
         useCollection(entityClass, c -> {
             assertNull(c.distinct(Namable.FIELD_NAME_NAME, String.class).first());
 
@@ -265,7 +265,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testInsertMany() {
+    void testInsertMany() {
         useCollection(entityClass, c -> {
             assertEquals(0, c.count());
             c.insertMany(Arrays.asList(EntityFactory.newInstance(entityClass), EntityFactory.newInstance(entityClass)));
@@ -274,7 +274,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testDeleteOne() {
+    void testDeleteOne() {
         useCollection(entityClass, c -> {
             assertEquals(0, c.deleteOne(Filters.eq(new ObjectId())).getDeletedCount());
 
@@ -287,7 +287,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testDeleteMany() {
+    void testDeleteMany() {
         useCollection(entityClass, c -> {
             assertEquals(0, c.deleteMany(Filters.eq(new ObjectId())).getDeletedCount());
 
@@ -304,7 +304,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testUpdateById() {
+    void testUpdateById() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setType(Type.t1);
@@ -319,7 +319,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testUpdateOne() {
+    void testUpdateOne() {
         useCollection(entityClass, c -> {
 
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
@@ -338,7 +338,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testUpdateMany() {
+    void testUpdateMany() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
@@ -364,7 +364,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindOneAndDelete() {
+    void testFindOneAndDelete() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
@@ -384,7 +384,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindOneAndReplace() {
+    void testFindOneAndReplace() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity1 = EntityFactory.newInstance(entityClass);
             entity1.setType(Type.t1);
@@ -403,7 +403,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testFindOneAndUpdate() {
+    void testFindOneAndUpdate() {
         useCollection(entityClass, c -> {
             final CacheableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setType(Type.t1);
@@ -418,7 +418,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testAggregate() {
+    void testAggregate() {
         useCollection(entityClass, c -> {
             final List<Bson> pipelines = new ArrayList<>();
             pipelines.add(Aggregates.group("$type", Accumulators.sum("num", 1)));
@@ -440,7 +440,7 @@ public class TestComplexCollection extends MongodTestCase {
     }
 
     @Test
-    public void testOriginal() {
+    void testOriginal() {
         useCollection(entityClass, c -> {
             assertEquals(DefunctableCollection.class, c.getClass());
             assertEquals(CacheableCollection.class, c.original().getClass());

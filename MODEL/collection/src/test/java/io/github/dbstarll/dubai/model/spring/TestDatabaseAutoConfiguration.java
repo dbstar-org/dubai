@@ -34,18 +34,18 @@ import static org.junit.jupiter.api.Assertions.assertSame;
                 "spring.data.mongodb.password=password",
                 "spring.data.mongodb.authenticationDatabase=pumpkin"
         })
-public class TestDatabaseAutoConfiguration extends MongodTestCase {
+class TestDatabaseAutoConfiguration extends MongodTestCase {
     private static ReachedState<RunningMongodProcess> state;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         state = mongodBuilder()
                 .net(Start.to(Net.class).initializedWith(Net.of("localhost", 27017, false)))
                 .build().start(Main.V4_4);
     }
 
     @AfterAll
-    public static void clean() {
+    static void clean() {
         if (state != null) {
             state.close();
             state = null;
@@ -56,12 +56,12 @@ public class TestDatabaseAutoConfiguration extends MongodTestCase {
     private MongoDatabase db;
 
     @Test
-    public void testMongoDatabase() {
+    void testMongoDatabase() {
         assertEquals("test", db.getName());
     }
 
     @Test
-    public void testCodecRegistry() {
+    void testCodecRegistry() {
         final CodecRegistry registry = db.getCodecRegistry();
         assertSame(EncryptedByteArrayCodec.class, registry.get(byte[].class).getClass());
     }

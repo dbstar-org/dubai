@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestNameValidation extends ServiceTestCase {
+class TestNameValidation extends ServiceTestCase {
     private final Class<TestNamableEntity> entityClass = TestNamableEntity.class;
     private final Class<TestNamableService> serviceClass = TestNamableService.class;
 
@@ -29,7 +29,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertSetName() {
+    void testInsertSetName() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -40,7 +40,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertSetNameError() {
+    void testInsertSetNameError() {
         useService(serviceClass, s -> new HashMap<String, String>() {{
             put(null, "名称未设置");
             put("", "名称未设置");
@@ -61,7 +61,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetName() {
+    void testUpdateSetName() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -77,7 +77,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetNameSame() {
+    void testUpdateSetNameSame() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -93,7 +93,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testNameValidation() {
+    void testNameValidation() {
         useService(serviceClass, s -> {
             try {
                 s.name(5, 4);

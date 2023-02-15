@@ -3,6 +3,7 @@ package io.github.dbstarll.dubai.model.spring;
 import io.github.dbstarll.dubai.model.service.AutowireException;
 import io.github.dbstarll.dubai.model.service.Implemental;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyBatchUpdateException;
@@ -16,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestSpringImplementalAutowirer {
-
+class TestSpringImplementalAutowirer {
     /**
      * 测试未设置ApplicationContext.
      */
-    public void testNoApplicationContext() {
+    @Test
+    void testNoApplicationContext() {
         try {
             new SpringImplementalAutowirer().autowire(new Implemental() {
             });
@@ -36,7 +37,8 @@ public class TestSpringImplementalAutowirer {
     /**
      * 测试设置ApplicationContext.
      */
-    public void testApplicationContext() {
+    @Test
+    void testApplicationContext() {
         final StaticApplicationContext context = new StaticApplicationContext();
         context.registerPrototype("objectId", ObjectId.class);
         final SpringImplementalAutowirer autowirer = new SpringImplementalAutowirer();
@@ -55,7 +57,8 @@ public class TestSpringImplementalAutowirer {
     /**
      * 测试抛出BeansException.
      */
-    public void testBeansException() {
+    @Test
+    void testBeansException() {
         final StaticApplicationContext context = new StaticApplicationContext();
         context.registerPrototype("objectId", ObjectId.class);
         final SpringImplementalAutowirer autowirer = new SpringImplementalAutowirer();

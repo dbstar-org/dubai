@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestSourceValidation extends ServiceTestCase {
+class TestSourceValidation extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
@@ -27,7 +27,7 @@ public class TestSourceValidation extends ServiceTestCase {
 
 
     @Test
-    public void testInsertOk() {
+    void testInsertOk() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setSources(Collections.singletonMap("abc", new ObjectId()));
@@ -39,7 +39,7 @@ public class TestSourceValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertWithEmptyKey() {
+    void testInsertWithEmptyKey() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setSources(Collections.singletonMap("", new ObjectId()));
@@ -51,7 +51,7 @@ public class TestSourceValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertWithEmptyValue() {
+    void testInsertWithEmptyValue() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setSources(Collections.singletonMap("key", null));
