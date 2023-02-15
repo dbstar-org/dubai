@@ -17,8 +17,8 @@ import io.github.dbstarll.dubai.model.entity.info.Namable;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -30,18 +30,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestSimpleNotifiableCollection extends MongodTestCase {
     private final Class<SimpleNotifiableEntity> entityClass = SimpleNotifiableEntity.class;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         globalCollectionFactory();
     }
@@ -184,7 +184,7 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
     @Test
     public void testFindByIds() {
         useCollection(entityClass, c -> {
-            assertNull(null, c.findByIds(Collections.singleton(new ObjectId())).first());
+            assertNull(c.findByIds(Collections.singleton(new ObjectId())).first());
 
             final SimpleNotifiableEntity entity1 = c.save(EntityFactory.newInstance(entityClass));
             final SimpleNotifiableEntity entity2 = c.save(EntityFactory.newInstance(entityClass));
@@ -202,8 +202,8 @@ public class TestSimpleNotifiableCollection extends MongodTestCase {
     @Test
     public void testFind() {
         useCollection(entityClass, c -> {
-            assertNull(null, c.find().first());
-            assertNull(null, c.find(entityClass).first());
+            assertNull(c.find().first());
+            assertNull(c.find(entityClass).first());
 
             final SimpleNotifiableEntity entity = c.save(EntityFactory.newInstance(entityClass));
 

@@ -12,18 +12,18 @@ import io.github.dbstarll.dubai.model.entity.test.NoTableEntity;
 import io.github.dbstarll.dubai.model.notify.NotifyProvider;
 import io.github.dbstarll.dubai.model.notify.NotifyType;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestCollectionFactory extends MongodTestCase {
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         globalCollectionFactory();
     }

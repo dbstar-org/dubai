@@ -4,13 +4,16 @@ import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o2.PublicPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
-import junit.framework.TestCase;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestMultiValidation extends TestCase {
+public class TestMultiValidation {
     /**
      * 测试构造函数中传入null的validations.
      */

@@ -3,14 +3,18 @@ package io.github.dbstarll.dubai.model.notify;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.join.CompanyBase;
-import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TestEntityNotifyConsumer extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestEntityNotifyConsumer {
     /**
      * 测试缺省的NotifyConsumer.
      */

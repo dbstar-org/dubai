@@ -35,18 +35,11 @@
         </file>
       </activation>
       <properties>
-        <version.junit>4.13.2</version.junit>
-        <version.surefire-junit47>3.0.0-M8</version.surefire-junit47>
         <version.de.flapdoodle.embed.mongo>4.4.0</version.de.flapdoodle.embed.mongo>
         <version.log4j2>2.19.0</version.log4j2>
       </properties>
       <dependencyManagement>
         <dependencies>
-          <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${version.junit}</version>
-          </dependency>
           <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -77,11 +70,6 @@
       </dependencyManagement>
       <dependencies>
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-test</artifactId>
           <scope>test</scope>
@@ -102,23 +90,6 @@
           <scope>test</scope>
         </dependency>
       </dependencies>
-      <build>
-        <pluginManagement>
-          <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-              <dependencies>
-                <dependency>
-                  <groupId>org.apache.maven.surefire</groupId>
-                  <artifactId>surefire-junit47</artifactId>
-                  <version>${version.surefire-junit47}</version>
-                </dependency>
-              </dependencies>
-            </plugin>
-          </plugins>
-        </pluginManagement>
-      </build>
     </profile>
   </profiles>
 </project>

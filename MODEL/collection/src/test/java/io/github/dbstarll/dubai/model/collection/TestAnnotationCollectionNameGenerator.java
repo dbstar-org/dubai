@@ -3,20 +3,24 @@ package io.github.dbstarll.dubai.model.collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.Namespace;
 import io.github.dbstarll.dubai.model.entity.Table;
-import junit.framework.TestCase;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Date;
 
-public class TestAnnotationCollectionNameGenerator extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestAnnotationCollectionNameGenerator {
     private CollectionNameGenerator collectionNameGenerator;
 
-    @Override
+    @BeforeEach
     protected void setUp() {
         this.collectionNameGenerator = new AnnotationCollectionNameGenerator();
     }
 
-    @Override
+    @AfterEach
     protected void tearDown() {
         this.collectionNameGenerator = null;
     }

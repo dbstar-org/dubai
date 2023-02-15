@@ -6,20 +6,20 @@ import org.bson.codecs.pojo.EntityConvention;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.InstanceCreatorFactory;
 import org.bson.codecs.pojo.PropertyModel;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class TestEntityInstanceCreatorFactory {
     private InstanceCreatorFactory<SimpleGenericEntity> instanceCreatorFactory;
 
-    @Before
+    @BeforeEach
     public void initialize() {
         this.instanceCreatorFactory = new EntityInstanceCreatorFactory<>(SimpleGenericEntity.class);
     }

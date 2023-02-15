@@ -1,8 +1,9 @@
 package io.github.dbstarll.dubai.model.mongodb;
 
-import junit.framework.TestCase;
 
-public class TestMongoClientFactory extends TestCase {
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TestMongoClientFactory {
     public void testNew() {
         try {
             new MongoClientFactory();

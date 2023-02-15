@@ -2,7 +2,6 @@ package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.service.AutowireException;
 import io.github.dbstarll.dubai.model.service.Implemental;
-import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.PropertyAccessException;
@@ -12,7 +11,12 @@ import org.springframework.context.support.StaticApplicationContext;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TestSpringImplementalAutowirer extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TestSpringImplementalAutowirer {
 
     /**
      * 测试未设置ApplicationContext.

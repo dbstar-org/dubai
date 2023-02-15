@@ -6,23 +6,23 @@ import io.github.dbstarll.dubai.model.entity.info.Contentable;
 import io.github.dbstarll.dubai.model.service.test3.contentable.TestContentableEntity;
 import io.github.dbstarll.dubai.model.service.test3.contentable.TestContentableService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestContentValidation extends ServiceTestCase {
     private final Class<TestContentableEntity> entityClass = TestContentableEntity.class;
     private final Class<TestContentableService> serviceClass = TestContentableService.class;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         MongodTestCase.globalCollectionFactory();
     }

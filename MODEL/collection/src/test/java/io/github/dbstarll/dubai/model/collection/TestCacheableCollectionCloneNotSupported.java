@@ -4,18 +4,18 @@ import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
 import io.github.dbstarll.dubai.model.entity.test.NoCloneEntity;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestCacheableCollectionCloneNotSupported extends MongodTestCase {
     private final Class<NoCloneEntity> entityClass = NoCloneEntity.class;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         globalCollectionFactory();
     }

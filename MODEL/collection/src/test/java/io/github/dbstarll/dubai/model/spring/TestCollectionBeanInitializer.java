@@ -5,9 +5,9 @@ import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -23,11 +23,11 @@ import org.springframework.lang.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestCollectionBeanInitializer {
     private static final String COLLECTION_FACTORY_BEAN_NAME = CollectionFactory.class.getName();
@@ -40,7 +40,7 @@ public class TestCollectionBeanInitializer {
     /**
      * 初始化MongoCollectionBeanInitializer.
      */
-    @Before
+    @BeforeEach
     public void setup() {
         this.initializer = new CollectionBeanInitializer();
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
@@ -49,7 +49,7 @@ public class TestCollectionBeanInitializer {
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
     }
 
-    @After
+    @AfterEach
     public void clean() {
         this.initializer = null;
         this.beanDefinitionRegistry = null;

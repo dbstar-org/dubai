@@ -1,13 +1,13 @@
 package io.github.dbstarll.dubai.model.service;
 
 import io.github.dbstarll.dubai.model.service.attach.DefunctAttach;
-import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class TestMethodValue extends TestCase {
+public class TestMethodValue {
     /**
      * 测试equals方法.
      *

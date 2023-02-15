@@ -17,8 +17,8 @@ import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.utils.lang.bytes.Bytes;
 import io.github.dbstarll.utils.lang.digest.Sha256Digestor;
-import org.junit.After;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.boot.autoconfigure.mongo.MongoClientFactory;
 import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
 
@@ -61,7 +61,7 @@ public abstract class MongodTestCase {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void cleanupGlobal() {
         if (globalFactory != null) {
             globalFactory = null;
@@ -80,7 +80,7 @@ public abstract class MongodTestCase {
         }
     }
 
-    @After
+    @AfterEach
     public void cleanupTest() {
         if (globalDatabase != null) {
             globalDatabase.drop();

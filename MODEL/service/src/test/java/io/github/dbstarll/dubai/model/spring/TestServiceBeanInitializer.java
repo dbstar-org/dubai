@@ -4,7 +4,8 @@ import com.mongodb.client.MongoDatabase;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.service.test.TestServices;
 import io.github.dbstarll.dubai.model.service.test2.InterfaceService;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -15,15 +16,20 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.context.support.StaticApplicationContext;
 
-public class TestServiceBeanInitializer extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class TestServiceBeanInitializer {
     private BeanDefinitionRegistry registry;
 
-    @Override
+    @BeforeEach
     protected void setUp() {
         this.registry = new StaticApplicationContext();
     }
 
-    @Override
+    @AfterEach
     protected void tearDown() {
         this.registry = null;
     }

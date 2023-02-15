@@ -11,20 +11,17 @@ import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.mongodb.codecs.EncryptedByteArrayCodec;
 import io.github.dbstarll.dubai.model.spring.autoconfigure.DatabaseAutoConfiguration;
 import org.bson.codecs.configuration.CodecRegistry;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE,
         classes = {
                 MongoAutoConfiguration.class,
@@ -40,14 +37,14 @@ import static org.junit.Assert.assertSame;
 public class TestDatabaseAutoConfiguration extends MongodTestCase {
     private static ReachedState<RunningMongodProcess> state;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         state = mongodBuilder()
                 .net(Start.to(Net.class).initializedWith(Net.of("localhost", 27017, false)))
                 .build().start(Main.V4_4);
     }
 
-    @AfterClass
+    @AfterAll
     public static void clean() {
         if (state != null) {
             state.close();

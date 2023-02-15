@@ -1,8 +1,11 @@
 package io.github.dbstarll.dubai.model.service.validate;
 
-import junit.framework.TestCase;
 
-public class TestValidateException extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+public class TestValidateException {
     /**
      * 测试传入validate为null.
      */
