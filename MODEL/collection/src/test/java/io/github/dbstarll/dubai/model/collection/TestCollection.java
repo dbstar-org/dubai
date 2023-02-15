@@ -4,21 +4,21 @@ import io.github.dbstarll.dubai.model.MongodTestCase;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity;
 import io.github.dbstarll.dubai.model.collection.test.SimpleEntity.Type;
 import io.github.dbstarll.dubai.model.entity.EntityFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class TestCollection extends MongodTestCase {
+class TestCollection extends MongodTestCase {
     @Test
-    public void testRun() {
+    void testRun() {
         useCollectionFactory(cf -> {
             final Collection<SimpleEntity> collection = cf.newInstance(SimpleEntity.class);
             final SimpleEntity entity = EntityFactory.newInstance(SimpleEntity.class);

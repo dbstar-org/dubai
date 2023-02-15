@@ -1,12 +1,18 @@
 package io.github.dbstarll.dubai.model.service.validate;
 
-import junit.framework.TestCase;
 
-public class TestDefaultValidate extends TestCase {
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class TestDefaultValidate {
     /**
      * 测试初始状态.
      */
-    public void testInit() {
+    @Test
+    void testInit() {
         final Validate validate = new DefaultValidate();
 
         assertFalse(validate.hasErrors());
@@ -20,7 +26,8 @@ public class TestDefaultValidate extends TestCase {
     /**
      * 测试addActionError.
      */
-    public void testAddActionError() {
+    @Test
+    void testAddActionError() {
         final Validate validate = new DefaultValidate();
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());
@@ -55,7 +62,8 @@ public class TestDefaultValidate extends TestCase {
     /**
      * 测试addFieldError.
      */
-    public void testAddFieldError() {
+    @Test
+    void testAddFieldError() {
         final Validate validate = new DefaultValidate();
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());

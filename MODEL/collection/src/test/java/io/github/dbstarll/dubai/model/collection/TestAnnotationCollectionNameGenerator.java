@@ -3,52 +3,64 @@ package io.github.dbstarll.dubai.model.collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.dubai.model.entity.Namespace;
 import io.github.dbstarll.dubai.model.entity.Table;
-import junit.framework.TestCase;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class TestAnnotationCollectionNameGenerator extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class TestAnnotationCollectionNameGenerator {
     private CollectionNameGenerator collectionNameGenerator;
 
-    @Override
-    protected void setUp() {
+    @BeforeEach
+    void setUp() {
         this.collectionNameGenerator = new AnnotationCollectionNameGenerator();
     }
 
-    @Override
-    protected void tearDown() {
+    @AfterEach
+    void tearDown() {
         this.collectionNameGenerator = null;
     }
 
-    public void testSingleWord() {
+    @Test
+    void testSingleWord() {
         assertEquals("one", collectionNameGenerator.generateCollectionName(One.class));
     }
 
-    public void testTwoWord() {
+    @Test
+    void testTwoWord() {
         assertEquals("two_two", collectionNameGenerator.generateCollectionName(TwoTwo.class));
     }
 
-    public void testInheritedSchema() {
+    @Test
+    void testInheritedSchema() {
         assertEquals("t1_abc", collectionNameGenerator.generateCollectionName(Three.class));
     }
 
-    public void testDirectSchema() {
+    @Test
+    void testDirectSchema() {
         assertEquals("t2_four", collectionNameGenerator.generateCollectionName(Four.class));
     }
 
-    public void testClassSchema() {
+    @Test
+    void testClassSchema() {
         assertEquals("t3_five", collectionNameGenerator.generateCollectionName(Five.class));
     }
 
-    public void testEmptySchema() {
+    @Test
+    void testEmptySchema() {
         assertEquals("six", collectionNameGenerator.generateCollectionName(Six.class));
     }
 
     /**
      * 测试抛出异常.
      */
-    public void testNoTable() {
+    @Test
+    void testNoTable() {
         try {
             collectionNameGenerator.generateCollectionName(NoTable.class);
         } catch (CollectionInitializeException ex) {

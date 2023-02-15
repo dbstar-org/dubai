@@ -6,26 +6,26 @@ import org.bson.codecs.pojo.EntityConvention;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.InstanceCreatorFactory;
 import org.bson.codecs.pojo.PropertyModel;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class TestEntityInstanceCreatorFactory {
+class TestEntityInstanceCreatorFactory {
     private InstanceCreatorFactory<SimpleGenericEntity> instanceCreatorFactory;
 
-    @Before
-    public void initialize() {
+    @BeforeEach
+    void initialize() {
         this.instanceCreatorFactory = new EntityInstanceCreatorFactory<>(SimpleGenericEntity.class);
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
         assertNotNull(instanceCreatorFactory.create());
         assertNotSame(instanceCreatorFactory.create(), instanceCreatorFactory.create());
     }
@@ -34,7 +34,7 @@ public class TestEntityInstanceCreatorFactory {
      * 测试getInstance.
      */
     @Test
-    public void testGetInstance() {
+    void testGetInstance() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         assertNotNull(instanceCreator.getInstance());
         assertSame(instanceCreator.getInstance(), instanceCreator.getInstance());
@@ -45,7 +45,7 @@ public class TestEntityInstanceCreatorFactory {
      * 测试set方法.
      */
     @Test
-    public void testSet() {
+    void testSet() {
         final InstanceCreator<SimpleGenericEntity> instanceCreator = instanceCreatorFactory.create();
         final Integer value = 100;
 

@@ -7,27 +7,27 @@ import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestDescriptionValidation extends ServiceTestCase {
+class TestDescriptionValidation extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testInsertSetDescription() {
+    void testInsertSetDescription() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDescription("description");
@@ -38,7 +38,7 @@ public class TestDescriptionValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertSetDescriptionEmpty() {
+    void testInsertSetDescriptionEmpty() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDescription("    ");
@@ -50,7 +50,7 @@ public class TestDescriptionValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertSetDescriptionLong() {
+    void testInsertSetDescriptionLong() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDescription(StringUtils.repeat("0123456789", 7));
@@ -64,7 +64,7 @@ public class TestDescriptionValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetDescription() {
+    void testUpdateSetDescription() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
 
@@ -79,7 +79,7 @@ public class TestDescriptionValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetDescriptionSame() {
+    void testUpdateSetDescriptionSame() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDescription("description");

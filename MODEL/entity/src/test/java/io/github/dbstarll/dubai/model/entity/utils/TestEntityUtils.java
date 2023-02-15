@@ -2,50 +2,52 @@ package io.github.dbstarll.dubai.model.entity.utils;
 
 import io.github.dbstarll.dubai.model.entity.test.ClassEntity;
 import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.beans.PropertyDescriptor;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestEntityUtils {
+class TestEntityUtils {
     @Test
-    public void testNewInstance() {
+    void testNewInstance() {
         assertThrows(IllegalAccessException.class, EntityUtils.class::newInstance);
     }
 
     @Test
-    public void testPropertyDescriptors() {
+    void testPropertyDescriptors() {
         final Set<String> keys = new TreeSet<>();
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(InterfaceEntity.class)) {
             keys.add(pd.getName());
         }
-        Assert.assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, field, id, intFromInterfaceEntity,"
+        assertEquals("[booleanFromNoTableEntity, dateCreated, defunct, field, id, intFromInterfaceEntity,"
                 + " intWithParam, lastModified, stringFromInterfaceEntity, twoParam, type]", keys.toString());
     }
 
     @Test
-    public void testPropertyDescriptor() {
+    void testPropertyDescriptor() {
         final PropertyDescriptor id = EntityUtils.propertyDescriptor(InterfaceEntity.class, "id");
-        Assert.assertNotNull(id);
-        Assert.assertNotNull(id.getReadMethod());
-        Assert.assertNull(id.getWriteMethod());
+        assertNotNull(id);
+        assertNotNull(id.getReadMethod());
+        assertNull(id.getWriteMethod());
 
-        Assert.assertNotNull(EntityUtils.getReadMethod(id));
-        Assert.assertNull(EntityUtils.getWriteMethod(id));
+        assertNotNull(EntityUtils.getReadMethod(id));
+        assertNull(EntityUtils.getWriteMethod(id));
 
-        Assert.assertNull(EntityUtils.propertyDescriptor(InterfaceEntity.class, "oid"));
+        assertNull(EntityUtils.propertyDescriptor(InterfaceEntity.class, "oid"));
     }
 
     @Test
-    public void testClassEntity() {
+    void testClassEntity() {
         final Set<String> keys = new TreeSet<>();
         for (PropertyDescriptor pd : EntityUtils.propertyDescriptors(ClassEntity.class)) {
             keys.add(pd.getName());
         }
-        Assert.assertEquals("[dateCreated, id, lastModified]", keys.toString());
+        assertEquals("[dateCreated, id, lastModified]", keys.toString());
     }
 }

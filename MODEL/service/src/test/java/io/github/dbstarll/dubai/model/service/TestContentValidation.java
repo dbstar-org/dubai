@@ -6,29 +6,29 @@ import io.github.dbstarll.dubai.model.entity.info.Contentable;
 import io.github.dbstarll.dubai.model.service.test3.contentable.TestContentableEntity;
 import io.github.dbstarll.dubai.model.service.test3.contentable.TestContentableService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestContentValidation extends ServiceTestCase {
+class TestContentValidation extends ServiceTestCase {
     private final Class<TestContentableEntity> entityClass = TestContentableEntity.class;
     private final Class<TestContentableService> serviceClass = TestContentableService.class;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testInsertOk() {
+    void testInsertOk() {
         useService(serviceClass, s -> {
             final TestContentableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setContent("content".getBytes());
@@ -41,7 +41,7 @@ public class TestContentValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertWithContentNotSet() {
+    void testInsertWithContentNotSet() {
         useService(serviceClass, s -> {
             final TestContentableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setContentType("text/plain");
@@ -54,7 +54,7 @@ public class TestContentValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertWithContentTypeError() {
+    void testInsertWithContentTypeError() {
         useService(serviceClass, s -> new HashMap<String, String>() {{
             put(null, "内容类型未设置");
             put("", "内容类型未设置");
@@ -75,7 +75,7 @@ public class TestContentValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetSameContentType() {
+    void testUpdateSetSameContentType() {
         useService(serviceClass, s -> {
             final TestContentableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setContent("content".getBytes());
@@ -91,7 +91,7 @@ public class TestContentValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetDiffContentType() {
+    void testUpdateSetDiffContentType() {
         useService(serviceClass, s -> {
             final TestContentableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setContent("content".getBytes());

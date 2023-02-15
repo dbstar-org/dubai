@@ -5,22 +5,25 @@ import io.github.dbstarll.dubai.model.entity.test.o2.Package;
 import io.github.dbstarll.dubai.model.entity.test.o2.PublicPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o3.NoPackageInterfaceEntity;
 import io.github.dbstarll.dubai.model.entity.test.o4.ClassPackageInterfaceEntity;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class TestPackageUtils extends TestCase {
+class TestPackageUtils {
     /**
      * 测试创建实例.
      */
-    public void testNewInstance() {
+    @Test
+    void testNewInstance() {
         assertThrows(IllegalAccessException.class, PackageUtils.class::newInstance);
     }
 
     /**
      * 测试getPackageInterface方法.
      */
-    public void testGetPackageInterface() {
+    @Test
+    void testGetPackageInterface() {
         assertEquals("io.github.dbstarll.dubai.model.entity.test.Package",
                 PackageUtils.getPackageInterface(InterfaceEntity.class, null).getName());
         assertEquals("io.github.dbstarll.dubai.model.entity.test.o2.Package",

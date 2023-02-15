@@ -5,9 +5,9 @@ import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.collection.test.o2.SimpleEntity;
 import io.github.dbstarll.dubai.model.entity.Entity;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -23,13 +23,13 @@ import org.springframework.lang.NonNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestCollectionBeanInitializer {
+class TestCollectionBeanInitializer {
     private static final String COLLECTION_FACTORY_BEAN_NAME = CollectionFactory.class.getName();
     private static final String MONGO_DATABASE_BEAN_NAME = "mongoDatabase";
 
@@ -40,8 +40,8 @@ public class TestCollectionBeanInitializer {
     /**
      * 初始化MongoCollectionBeanInitializer.
      */
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         this.initializer = new CollectionBeanInitializer();
         initializer.setMongoDatabaseBeanName(MONGO_DATABASE_BEAN_NAME);
         this.beanDefinitionRegistry = new SimpleBeanDefinitionRegistry();
@@ -49,8 +49,8 @@ public class TestCollectionBeanInitializer {
                 BeanDefinitionBuilder.rootBeanDefinition(MongoDatabase.class).getBeanDefinition());
     }
 
-    @After
-    public void clean() {
+    @AfterEach
+    void clean() {
         this.initializer = null;
         this.beanDefinitionRegistry = null;
     }
@@ -60,7 +60,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testPostProcessBeanFactory() {
+    void testPostProcessBeanFactory() {
         try {
             initializer.postProcessBeanFactory(new DefaultListableBeanFactory());
         } catch (BeansException ex) {
@@ -69,7 +69,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testCollectionFactory() {
+    void testCollectionFactory() {
         final AtomicInteger containsCounter = new AtomicInteger();
         final AtomicInteger registerCounter = new AtomicInteger();
 
@@ -112,7 +112,7 @@ public class TestCollectionBeanInitializer {
      * 测试未设置basePackages.
      */
     @Test
-    public void testEmptyBasePackages() {
+    void testEmptyBasePackages() {
         initializer.setBasePackages();
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
         assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
@@ -122,13 +122,13 @@ public class TestCollectionBeanInitializer {
      * 测试未设置basePackages.
      */
     @Test
-    public void testNullBasePackages() {
+    void testNullBasePackages() {
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
         assertEquals(2, beanDefinitionRegistry.getBeanDefinitionCount());
     }
 
     @Test
-    public void testNullMongoDatabaseBeanName() {
+    void testNullMongoDatabaseBeanName() {
         initializer.setMongoDatabaseBeanName(null);
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
@@ -139,7 +139,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testEmptyMongoDatabaseBeanName() {
+    void testEmptyMongoDatabaseBeanName() {
         initializer.setMongoDatabaseBeanName("");
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
@@ -150,7 +150,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testOtherMongoDatabaseBeanName() {
+    void testOtherMongoDatabaseBeanName() {
         initializer.setMongoDatabaseBeanName("other");
         try {
             initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
@@ -161,7 +161,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testNoRecursion() {
+    void testNoRecursion() {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
@@ -171,7 +171,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testRecursion() {
+    void testRecursion() {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test");
         initializer.setRecursion(true);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
@@ -182,7 +182,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testIsCollectionBeanDefinition() {
+    void testIsCollectionBeanDefinition() {
         initializer.setBasePackages("io.github.dbstarll.dubai.model.collection.test.o2");
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
@@ -205,7 +205,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testExistCollection() {
+    void testExistCollection() {
         initializer.setBasePackageClasses(SimpleEntity.class);
         initializer.postProcessBeanDefinitionRegistry(beanDefinitionRegistry);
 
@@ -221,7 +221,7 @@ public class TestCollectionBeanInitializer {
     }
 
     @Test
-    public void testException() {
+    void testException() {
         final BeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry() {
             @Override
             public void registerBeanDefinition(@NonNull String beanName, BeanDefinition beanDefinition)

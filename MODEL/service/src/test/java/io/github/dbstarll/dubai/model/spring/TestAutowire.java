@@ -5,18 +5,22 @@ import io.github.dbstarll.dubai.model.collection.CollectionFactory;
 import io.github.dbstarll.dubai.model.mongodb.MongoClientFactory;
 import io.github.dbstarll.dubai.model.service.test3.TestEntity;
 import io.github.dbstarll.dubai.model.service.test3.TestService;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TestAutowire extends TestCase {
+class TestAutowire {
     private ConfigurableApplicationContext context;
 
-    @Override
-    protected void setUp() {
+    @BeforeEach
+    void setUp() {
         final StaticApplicationContext applicationContext = new StaticApplicationContext();
         applicationContext.registerSingleton("implementalAutowirer", SpringImplementalAutowirer.class);
         applicationContext.registerBeanDefinition("testAutowire", BeanDefinitionBuilder
@@ -35,8 +39,8 @@ public class TestAutowire extends TestCase {
         return new MongoClientFactory().createWithPojoCodec("mongodb://localhost:12345/pumpkin").getDatabase("test");
     }
 
-    @Override
-    protected void tearDown() {
+    @AfterEach
+    void tearDown() {
         this.context.close();
         this.context = null;
     }
@@ -44,7 +48,8 @@ public class TestAutowire extends TestCase {
     /**
      * 测试自动装配.
      */
-    public void testAutowire() {
+    @Test
+    void testAutowire() {
         final ServiceBeanInitializer initializer = new ServiceBeanInitializer();
         initializer.setBasePackageClasses(TestService.class);
         context.addBeanFactoryPostProcessor(initializer);

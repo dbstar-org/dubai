@@ -1,9 +1,13 @@
 package io.github.dbstarll.dubai.model.mongodb;
 
-import junit.framework.TestCase;
 
-public class TestMongoClientFactory extends TestCase {
-    public void testNew() {
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+class TestMongoClientFactory {
+    @Test
+    void testNew() {
         try {
             new MongoClientFactory();
         } catch (Exception ex) {
@@ -14,7 +18,8 @@ public class TestMongoClientFactory extends TestCase {
     /**
      * 测试createWithPojoCodecSplit.
      */
-    public void testCreateWithPojoCodecSplit() {
+    @Test
+    void testCreateWithPojoCodecSplit() {
         final MongoClientFactory factory = new MongoClientFactory();
         final String servers = "localhost,localhost:12345";
         final String db = "pumpkin";
@@ -29,7 +34,8 @@ public class TestMongoClientFactory extends TestCase {
         }
     }
 
-    public void testCreateWithPojoCodec() {
+    @Test
+    void testCreateWithPojoCodec() {
         final MongoClientFactory factory = new MongoClientFactory();
         try {
             factory.createWithPojoCodec("mongodb://localhost:12345/pumpkin");

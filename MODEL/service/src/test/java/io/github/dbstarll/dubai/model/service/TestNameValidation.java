@@ -6,30 +6,30 @@ import io.github.dbstarll.dubai.model.entity.info.Namable;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableEntity;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableService;
 import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestNameValidation extends ServiceTestCase {
+class TestNameValidation extends ServiceTestCase {
     private final Class<TestNamableEntity> entityClass = TestNamableEntity.class;
     private final Class<TestNamableService> serviceClass = TestNamableService.class;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testInsertSetName() {
+    void testInsertSetName() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -40,7 +40,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testInsertSetNameError() {
+    void testInsertSetNameError() {
         useService(serviceClass, s -> new HashMap<String, String>() {{
             put(null, "名称未设置");
             put("", "名称未设置");
@@ -61,7 +61,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetName() {
+    void testUpdateSetName() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -77,7 +77,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testUpdateSetNameSame() {
+    void testUpdateSetNameSame() {
         useService(serviceClass, s -> {
             final TestNamableEntity entity = EntityFactory.newInstance(entityClass);
             entity.setName("name");
@@ -93,7 +93,7 @@ public class TestNameValidation extends ServiceTestCase {
     }
 
     @Test
-    public void testNameValidation() {
+    void testNameValidation() {
         useService(serviceClass, s -> {
             try {
                 s.name(5, 4);

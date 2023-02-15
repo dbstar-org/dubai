@@ -4,8 +4,7 @@ import io.github.dbstarll.dubai.model.entity.test.InterfaceEntity;
 import io.github.dbstarll.dubai.model.service.ImplementalAutowirer;
 import io.github.dbstarll.dubai.model.service.test.InterfaceService;
 import io.github.dbstarll.dubai.model.spring.ServiceBeanInitializer;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
@@ -14,13 +13,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.NONE,
         classes = {
                 MongoAutoConfiguration.class,
@@ -28,7 +25,7 @@ import static org.junit.Assert.assertSame;
                 CollectionAutoConfiguration.class,
                 ServiceAutoConfiguration.class
         })
-public class ServiceAutoConfigurationTest implements ApplicationContextAware {
+class ServiceAutoConfigurationTest implements ApplicationContextAware {
     private ApplicationContext ctx;
 
     @Autowired(required = false)
@@ -43,12 +40,12 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     }
 
     @Test
-    public void serviceBeanInitializer() {
+    void serviceBeanInitializer() {
         assertNotNull(ctx.getBean("serviceBeanInitializer", ServiceBeanInitializer.class));
     }
 
     @Test
-    public void implementalAutowirer() {
+    void implementalAutowirer() {
         assertNotNull(ctx.getBean("implementalAutowirer", ImplementalAutowirer.class));
         for (String name : ctx.getBeanDefinitionNames()) {
             System.out.println(name);
@@ -56,13 +53,13 @@ public class ServiceAutoConfigurationTest implements ApplicationContextAware {
     }
 
     @Test
-    public void interfaceService() {
+    void interfaceService() {
         assertNotNull(service1);
         assertSame(InterfaceEntity.class, service1.getEntityClass());
     }
 
     @Test
-    public void interfaceService2() {
+    void interfaceService2() {
         assertNull(service2);
     }
 }

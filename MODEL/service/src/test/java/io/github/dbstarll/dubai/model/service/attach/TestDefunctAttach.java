@@ -6,25 +6,25 @@ import io.github.dbstarll.dubai.model.service.ServiceTestCase;
 import io.github.dbstarll.dubai.model.service.test.TestEntity;
 import io.github.dbstarll.dubai.model.service.test.TestEntityService;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestDefunctAttach extends ServiceTestCase {
+class TestDefunctAttach extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestEntityService> serviceClass = TestEntityService.class;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testContainsWithDefunct() {
+    void testContainsWithDefunct() {
         useService(serviceClass, s -> {
             assertFalse(s.contains(new ObjectId(), null));
             assertFalse(s.contains(new ObjectId(), true));
@@ -44,7 +44,7 @@ public class TestDefunctAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindWithDefunct() {
+    void testFindWithDefunct() {
         useService(serviceClass, s -> {
             assertNull(s.find(Filters.eq(new ObjectId()), null).first());
             assertNull(s.find(Filters.eq(new ObjectId()), true).first());
@@ -64,7 +64,7 @@ public class TestDefunctAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindByIdWithDefunct() {
+    void testFindByIdWithDefunct() {
         useService(serviceClass, s -> {
             assertNull(s.findById(new ObjectId(), null));
             assertNull(s.findById(new ObjectId(), true));
@@ -84,7 +84,7 @@ public class TestDefunctAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testCountWithDefunct() {
+    void testCountWithDefunct() {
         useService(serviceClass, s -> {
             assertEquals(0, s.count(Filters.eq(new ObjectId()), null));
             assertEquals(0, s.count(Filters.eq(new ObjectId()), true));
@@ -104,7 +104,7 @@ public class TestDefunctAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testCountNullWithDefunct() {
+    void testCountNullWithDefunct() {
         useService(serviceClass, s -> {
             assertEquals(0, s.count(null, null));
             assertEquals(0, s.count(null, true));

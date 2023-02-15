@@ -9,26 +9,26 @@ import io.github.dbstarll.dubai.model.service.test.TestEntityService;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableEntity;
 import io.github.dbstarll.dubai.model.service.test3.namable.TestNamableService;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map.Entry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TestCompanyAttach extends ServiceTestCase {
+class TestCompanyAttach extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestEntityService> serviceClass = TestEntityService.class;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         globalCollectionFactory();
     }
 
     @Test
-    public void testCountByCompanyId() {
+    void testCountByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -42,7 +42,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindByCompanyId() {
+    void testFindByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -56,7 +56,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByCompanyId() {
+    void testDeleteByCompanyId() {
         useService(serviceClass, s -> {
             final ObjectId companyId = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -70,7 +70,7 @@ public class TestCompanyAttach extends ServiceTestCase {
     }
 
     @Test
-    public void testFindWithCompany() {
+    void testFindWithCompany() {
         useCollectionFactory(cf -> {
             final TestEntityService service = ServiceFactory.newInstance(serviceClass, cf.newInstance(entityClass));
             final TestNamableService companyService = ServiceFactory.newInstance(TestNamableService.class,

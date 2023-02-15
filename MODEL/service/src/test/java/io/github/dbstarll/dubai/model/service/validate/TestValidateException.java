@@ -1,12 +1,18 @@
 package io.github.dbstarll.dubai.model.service.validate;
 
-import junit.framework.TestCase;
 
-public class TestValidateException extends TestCase {
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+class TestValidateException {
     /**
      * 测试传入validate为null.
      */
-    public void testNull() {
+    @Test
+    void testNull() {
         final ValidateException exception = new ValidateException(null);
         assertEquals("[]", exception.getMessage());
         assertNull(exception.getValidate());
@@ -15,7 +21,8 @@ public class TestValidateException extends TestCase {
     /**
      * 测试传入message且validate为null.
      */
-    public void testNullMessage() {
+    @Test
+    void testNullMessage() {
         final ValidateException exception = new ValidateException("message", null);
         assertEquals("message", exception.getMessage());
         assertNull(exception.getValidate());
@@ -24,7 +31,8 @@ public class TestValidateException extends TestCase {
     /**
      * 测试addActionError.
      */
-    public void testAddActionError() {
+    @Test
+    void testAddActionError() {
         final Validate validate = new DefaultValidate();
         validate.addActionError("addActionError");
 
@@ -36,7 +44,8 @@ public class TestValidateException extends TestCase {
     /**
      * 测试addFieldError.
      */
-    public void testAddFieldError() {
+    @Test
+    void testAddFieldError() {
         final Validate validate = new DefaultValidate();
         validate.addFieldError("f1", "addFieldError");
         validate.addFieldError("f1", "addFieldError1");

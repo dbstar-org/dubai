@@ -22,31 +22,31 @@ import io.github.dbstarll.dubai.model.service.test5.ImplFailedEntity;
 import io.github.dbstarll.dubai.model.service.test5.ImplFailedImplemental;
 import io.github.dbstarll.dubai.model.service.test5.ImplFailedService;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestServiceFactory extends ServiceTestCase {
+class TestServiceFactory extends ServiceTestCase {
     private final Class<InterfaceEntity> entityClass = InterfaceEntity.class;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testGetInterfaceService() {
+    void testGetInterfaceService() {
         useService(InterfaceService.class, s -> {
             assertEquals(entityClass, s.getEntityClass());
             assertEquals(InterfaceService.class, ServiceFactory.getServiceClass(s));
@@ -54,7 +54,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testGetNoAnnotationInterfaceService() {
+    void testGetNoAnnotationInterfaceService() {
         useCollection(entityClass, c -> {
             try {
                 ServiceFactory.newInstance(NoAnnotationInterfaceService.class, c);
@@ -67,7 +67,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testGetClassService() {
+    void testGetClassService() {
         useCollection(entityClass, c -> {
             final ClassService service = ServiceFactory.newInstance(ClassService.class, c);
             assertEquals(entityClass, service.getEntityClass());
@@ -77,7 +77,7 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetAbstractClassService() {
+    void testGetAbstractClassService() {
         useCollection(entityClass, c -> {
             try {
                 ServiceFactory.newInstance(AbstractClassService.class, c);
@@ -90,7 +90,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testGetPrivateClassService() {
+    void testGetPrivateClassService() {
         useCollection(entityClass, c -> {
             try {
                 ServiceFactory.newInstance(PrivateClassService.class, c);
@@ -103,7 +103,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testThrowClassService() {
+    void testThrowClassService() {
         useCollection(entityClass, c -> {
             try {
                 ServiceFactory.newInstance(ThrowClassService.class, c);
@@ -116,7 +116,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testNoAnnotationClassService() {
+    void testNoAnnotationClassService() {
         useCollection(entityClass, c -> {
             try {
                 ServiceFactory.newInstance(NoAnnotationClassService.class, c);
@@ -132,7 +132,7 @@ public class TestServiceFactory extends ServiceTestCase {
      * 测试非ServiceFactory的代理类调用getServiceClass.
      */
     @Test
-    public void testGetServiceClassNoServiceFactory() {
+    void testGetServiceClassNoServiceFactory() {
         useCollection(entityClass, c -> {
             final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
                     new Class[]{InterfaceService.class, ServiceProxy.class}, (proxy, method, args) -> null);
@@ -142,7 +142,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testGetServiceClassNoServiceProxy() {
+    void testGetServiceClassNoServiceProxy() {
         useCollection(entityClass, c -> {
             final InterfaceService service = (InterfaceService) Proxy.newProxyInstance(InterfaceService.class.getClassLoader(),
                     new Class[]{InterfaceService.class}, (proxy, method, args) -> null);
@@ -152,7 +152,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testHashCode() {
+    void testHashCode() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             assertNotEquals(0, service.hashCode());
@@ -160,7 +160,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testSetImplementalAutowirer() {
+    void testSetImplementalAutowirer() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             ((ImplementalAutowirerAware) service).setImplementalAutowirer(null);
@@ -170,7 +170,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testInvokeUnImplementation() {
+    void testInvokeUnImplementation() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -190,7 +190,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testOverrideMethod() {
+    void testOverrideMethod() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             assertTrue(service.contains(new ObjectId()));
@@ -198,7 +198,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testFailedMethod() {
+    void testFailedMethod() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -218,7 +218,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testThrowExceptionMethod() {
+    void testThrowExceptionMethod() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -232,7 +232,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testNotPublicImplementation() {
+    void testNotPublicImplementation() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -252,7 +252,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testNotFinalImplementation() {
+    void testNotFinalImplementation() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -272,7 +272,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testCreateImplementationWithException() {
+    void testCreateImplementationWithException() {
         useCollection(ImplFailedEntity.class, c -> {
             final ImplFailedService service = ServiceFactory.newInstance(ImplFailedService.class, c);
             try {
@@ -290,7 +290,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testAutowireException() {
+    void testAutowireException() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             ((ImplementalAutowirerAware) service).setImplementalAutowirer(new ImplementalAutowirer() {
@@ -310,7 +310,7 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testCall() {
+    void testCall() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             try {
@@ -331,7 +331,7 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGeneralValidation() {
+    void testGeneralValidation() {
         useCollection(entityClass, c -> {
             final InterfaceService service = ServiceFactory.newInstance(InterfaceService.class, c);
             assertTrue(service instanceof GeneralValidateable);
@@ -346,7 +346,7 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGeneralValidationThrow() {
+    void testGeneralValidationThrow() {
         useCollection(TestValidEntity.class, c -> {
             final TestValidService service = ServiceFactory.newInstance(TestValidService.class, c);
             try {
@@ -361,19 +361,19 @@ public class TestServiceFactory extends ServiceTestCase {
     }
 
     @Test
-    public void testGetServiceClassNoProxy() {
+    void testGetServiceClassNoProxy() {
         assertSame(String.class, ServiceFactory.getServiceClass(String.class));
     }
 
     @Test
-    public void testIsServiceInterface() {
+    void testIsServiceInterface() {
         assertFalse(ServiceFactory.isServiceInterface(String.class));
         assertTrue(ServiceFactory.isServiceInterface(InterfaceService.class));
         assertFalse(ServiceFactory.isServiceInterface(ClassService.class));
     }
 
     @Test
-    public void testIsServiceProxy() {
+    void testIsServiceProxy() {
         useCollection(InterfaceEntity.class, c -> {
             assertFalse(ServiceFactory.isServiceProxy(String.class));
             assertTrue(ServiceFactory.isServiceProxy(ServiceFactory.newInstance(InterfaceService.class, c).getClass()));
@@ -387,7 +387,7 @@ public class TestServiceFactory extends ServiceTestCase {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetEntityClass() {
+    void testGetEntityClass() {
         assertSame(InterfaceEntity.class, ServiceFactory.getEntityClass(InterfaceService.class));
         assertSame(InterfaceEntity.class, ServiceFactory.getEntityClass(ClassService.class));
         assertNull(ServiceFactory.getEntityClass(TestServices.class));

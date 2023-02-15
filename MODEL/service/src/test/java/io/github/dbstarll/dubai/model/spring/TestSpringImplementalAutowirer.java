@@ -2,8 +2,8 @@ package io.github.dbstarll.dubai.model.spring;
 
 import io.github.dbstarll.dubai.model.service.AutowireException;
 import io.github.dbstarll.dubai.model.service.Implemental;
-import junit.framework.TestCase;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyBatchUpdateException;
@@ -12,12 +12,17 @@ import org.springframework.context.support.StaticApplicationContext;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TestSpringImplementalAutowirer extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
+class TestSpringImplementalAutowirer {
     /**
      * 测试未设置ApplicationContext.
      */
-    public void testNoApplicationContext() {
+    @Test
+    void testNoApplicationContext() {
         try {
             new SpringImplementalAutowirer().autowire(new Implemental() {
             });
@@ -32,7 +37,8 @@ public class TestSpringImplementalAutowirer extends TestCase {
     /**
      * 测试设置ApplicationContext.
      */
-    public void testApplicationContext() {
+    @Test
+    void testApplicationContext() {
         final StaticApplicationContext context = new StaticApplicationContext();
         context.registerPrototype("objectId", ObjectId.class);
         final SpringImplementalAutowirer autowirer = new SpringImplementalAutowirer();
@@ -51,7 +57,8 @@ public class TestSpringImplementalAutowirer extends TestCase {
     /**
      * 测试抛出BeansException.
      */
-    public void testBeansException() {
+    @Test
+    void testBeansException() {
         final StaticApplicationContext context = new StaticApplicationContext();
         context.registerPrototype("objectId", ObjectId.class);
         final SpringImplementalAutowirer autowirer = new SpringImplementalAutowirer();

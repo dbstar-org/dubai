@@ -9,32 +9,32 @@ import io.github.dbstarll.dubai.model.service.validate.DefaultValidate;
 import io.github.dbstarll.dubai.model.service.validate.Validate;
 import io.github.dbstarll.dubai.model.service.validate.ValidateException;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestAbstractImplemental extends ServiceTestCase {
+class TestAbstractImplemental extends ServiceTestCase {
     private final Class<TestEntity> entityClass = TestEntity.class;
     private final Class<TestService> serviceClass = TestService.class;
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeAll
+    static void setup() {
         MongodTestCase.globalCollectionFactory();
     }
 
     @Test
-    public void testSaveValidateNull() {
+    void testSaveValidateNull() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             entity.setDefunct(true);
@@ -53,7 +53,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveEntityNull() {
+    void testSaveEntityNull() {
         useService(serviceClass, s -> {
             final DefaultValidate validate = new DefaultValidate();
             assertNull(s.save(null, validate));
@@ -65,7 +65,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveEntityNotFound() {
+    void testSaveEntityNotFound() {
         useService(serviceClass, s -> {
             final ObjectId id = new ObjectId();
             final TestEntity entity = EntityFactory.newInstance(entityClass);
@@ -80,7 +80,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveEntityNoChange() {
+    void testSaveEntityNoChange() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));
@@ -91,7 +91,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveOk() {
+    void testSaveOk() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             final DefaultValidate validate = new DefaultValidate();
@@ -101,7 +101,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveError() {
+    void testSaveError() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             final DefaultValidate validate = new DefaultValidate();
@@ -113,7 +113,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testSaveException() {
+    void testSaveException() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             final DefaultValidate validate = new DefaultValidate();
@@ -125,7 +125,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testNoGeneralValidateable() {
+    void testNoGeneralValidateable() {
         useService(serviceClass, s -> {
             final InvocationHandler handler = Proxy.getInvocationHandler(s);
             final TestService service = (TestService) Proxy.newProxyInstance(TestService.class.getClassLoader(),
@@ -139,7 +139,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByIdNotExist() {
+    void testDeleteByIdNotExist() {
         useService(serviceClass, s -> {
             final DefaultValidate validate = new DefaultValidate();
             assertNull(s.deleteById(new ObjectId(), validate));
@@ -148,7 +148,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByIdOk() {
+    void testDeleteByIdOk() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));
@@ -161,7 +161,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByIdFailed() {
+    void testDeleteByIdFailed() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));
@@ -178,7 +178,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByIdException() {
+    void testDeleteByIdException() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));
@@ -195,7 +195,7 @@ public class TestAbstractImplemental extends ServiceTestCase {
     }
 
     @Test
-    public void testDeleteByIdValidateNull() {
+    void testDeleteByIdValidateNull() {
         useService(serviceClass, s -> {
             final TestEntity entity = EntityFactory.newInstance(entityClass);
             assertSame(entity, s.save(entity, null));

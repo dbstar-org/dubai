@@ -12,19 +12,19 @@ import io.github.dbstarll.dubai.model.entity.test.NoTableEntity;
 import io.github.dbstarll.dubai.model.notify.NotifyProvider;
 import io.github.dbstarll.dubai.model.notify.NotifyType;
 import org.bson.types.ObjectId;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class TestCollectionFactory extends MongodTestCase {
-    @BeforeClass
-    public static void beforeClass() {
+class TestCollectionFactory extends MongodTestCase {
+    @BeforeAll
+    static void beforeClass() {
         globalCollectionFactory();
     }
 
@@ -36,7 +36,7 @@ public class TestCollectionFactory extends MongodTestCase {
     }
 
     @Test
-    public void testGetCollection() {
+    void testGetCollection() {
         useCollectionFactory(cf -> {
             testGetCollection(cf, InterfaceEntity.class);
             testGetCollection(cf, DefunctableEntity.class);
@@ -46,7 +46,7 @@ public class TestCollectionFactory extends MongodTestCase {
     }
 
     @Test
-    public void testGetCollectionInject() {
+    void testGetCollectionInject() {
         final NotifyProvider notifyProvider = new NotifyProvider() {
             @Override
             public <E extends Entity> void doNotify(E e, NotifyType notifyType) {
@@ -82,7 +82,7 @@ public class TestCollectionFactory extends MongodTestCase {
     }
 
     @Test
-    public void testGetCollectionNotEntity() {
+    void testGetCollectionNotEntity() {
         useCollectionFactory(cf -> {
             try {
                 cf.newInstance(NoTableEntity.class);
@@ -94,7 +94,7 @@ public class TestCollectionFactory extends MongodTestCase {
     }
 
     @Test
-    public void testGetCollectionClassEntity() {
+    void testGetCollectionClassEntity() {
         useCollectionFactory(cf -> {
             try {
                 cf.newInstance(ClassNoTableEntity.class);
@@ -107,7 +107,7 @@ public class TestCollectionFactory extends MongodTestCase {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetBaseCollectionNull() {
+    void testGetBaseCollectionNull() {
         final Collection<InterfaceEntity> collection = (Collection<InterfaceEntity>) Proxy.newProxyInstance(
                 this.getClass().getClassLoader(), new Class[]{Collection.class}, (proxy, method, args) -> null);
         assertNull(CollectionFactory.getBaseCollection(collection));

@@ -1,12 +1,18 @@
 package io.github.dbstarll.dubai.model.service.validate;
 
-import junit.framework.TestCase;
 
-public class TestValidateWrapper extends TestCase {
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class TestValidateWrapper {
     /**
      * 测试初始状态.
      */
-    public void testInit() {
+    @Test
+    void testInit() {
         final Validate validate = ValidateWrapper.wrap(new DefaultValidate());
 
         assertFalse(validate.hasErrors());
@@ -20,7 +26,8 @@ public class TestValidateWrapper extends TestCase {
     /**
      * 测试初始状态，Wrapper为null.
      */
-    public void testInitNull() {
+    @Test
+    void testInitNull() {
         final Validate validate = ValidateWrapper.wrap(null);
 
         assertFalse(validate.hasErrors());
@@ -34,7 +41,8 @@ public class TestValidateWrapper extends TestCase {
     /**
      * 测试addActionError.
      */
-    public void testAddActionError() {
+    @Test
+    void testAddActionError() {
         final Validate validate = ValidateWrapper.wrap(new DefaultValidate());
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());
@@ -59,7 +67,8 @@ public class TestValidateWrapper extends TestCase {
     /**
      * 测试addActionErrorNull.
      */
-    public void testAddActionErrorNull() {
+    @Test
+    void testAddActionErrorNull() {
         final Validate validate = ValidateWrapper.wrap(null);
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());
@@ -84,7 +93,8 @@ public class TestValidateWrapper extends TestCase {
     /**
      * 测试addFieldError.
      */
-    public void testAddFieldError() {
+    @Test
+    void testAddFieldError() {
         final Validate validate = ValidateWrapper.wrap(new DefaultValidate());
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());
@@ -122,7 +132,8 @@ public class TestValidateWrapper extends TestCase {
     /**
      * 测试addFieldErrorNull.
      */
-    public void testAddFieldErrorNull() {
+    @Test
+    void testAddFieldErrorNull() {
         final Validate validate = ValidateWrapper.wrap(null);
         assertFalse(validate.hasErrors());
         assertFalse(validate.hasActionErrors());
