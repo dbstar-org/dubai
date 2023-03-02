@@ -14,7 +14,7 @@ public final class ExtendedEnumCodecProvider implements CodecProvider {
     @Override
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
         if (Enum.class.isAssignableFrom(clazz)) {
-            return (Codec<T>) new ExtendedEnumCodec(clazz);
+            return new ExtendedEnumCodec(clazz);
         }
         return null;
     }
