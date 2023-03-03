@@ -2,10 +2,6 @@ package io.github.dbstarll.dubai.model.mongodb.codecs;
 
 import com.mongodb.client.internal.MongoClientImpl;
 import io.github.dbstarll.dubai.model.MongodTestCase;
-import io.github.dbstarll.dubai.model.entity.test.enums.Custom;
-import io.github.dbstarll.dubai.model.entity.test.enums.Default;
-import io.github.dbstarll.dubai.model.entity.test.enums.Normal;
-import io.github.dbstarll.dubai.model.entity.test.enums.ToString;
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentReader;
 import org.bson.BsonDocumentWriter;
