@@ -1,6 +1,6 @@
-package io.github.dbstarll.dubai.model.entity.test.enums;
+package io.github.dbstarll.dubai.model.mongodb.codecs;
 
-import io.github.dbstarll.dubai.model.entity.EnumValue;
+import io.github.dbstarll.utils.lang.enums.EnumValue;
 
 @EnumValue(method = "toString")
 public enum ToString {

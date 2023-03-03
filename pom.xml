@@ -31,7 +31,7 @@
     <project.git.project>dubai</project.git.project>
     <sonar.coverage.jacoco.xmlReportPaths>report-aggregate/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <!-- module version -->
-    <version.utils-lang>1.0.7</version.utils-lang>
+    <version.utils-lang>1.0.9</version.utils-lang>
     <version.mongodb>4.8.2</version.mongodb>
     <version.spring-boot>2.7.8</version.spring-boot>
   </properties>

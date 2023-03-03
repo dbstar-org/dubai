@@ -1,11 +1,13 @@
 package io.github.dbstarll.dubai.model.mongodb.codecs;
 
-import io.github.dbstarll.dubai.model.entity.utils.EnumValueHelper;
+import io.github.dbstarll.utils.lang.enums.EnumUtils;
 import org.bson.BsonReader;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
+
+import static org.apache.commons.lang3.Validate.notEmpty;
 
 /**
  * A codec for classes that extends {@link Enum}.
@@ -15,7 +17,6 @@ import org.bson.codecs.EncoderContext;
  */
 public final class ExtendedEnumCodec<T extends Enum<T>> implements Codec<T> {
     private final Class<T> clazz;
-    private final EnumValueHelper<T> helper;
 
     /**
      * Construct an instance for teh given enum class.
@@ -24,17 +25,17 @@ public final class ExtendedEnumCodec<T extends Enum<T>> implements Codec<T> {
      */
     public ExtendedEnumCodec(final Class<T> clazz) {
         this.clazz = clazz;
-        this.helper = new EnumValueHelper<>(clazz);
+        notEmpty(EnumUtils.stream(clazz).toArray());
     }
 
     @Override
     public T decode(final BsonReader reader, final DecoderContext decoderContext) {
-        return helper.valueOf(reader.readString());
+        return EnumUtils.valueOf(clazz, reader.readString());
     }
 
     @Override
     public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
-        writer.writeString(helper.name(value));
+        writer.writeString(EnumUtils.name(value));
     }
 
     @Override
