@@ -108,6 +108,17 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
         }
 
         /**
+         * Creates a $sample pipeline stage with the specified sample size.
+         *
+         * @param size the sample size
+         * @return Builder self
+         */
+        public Builder<E, S> sample(final int size) {
+            aggregator.pipelines.add(Aggregates.sample(size));
+            return this;
+        }
+
+        /**
          * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
          * using equality match between the local field and the foreign _id field.
          *

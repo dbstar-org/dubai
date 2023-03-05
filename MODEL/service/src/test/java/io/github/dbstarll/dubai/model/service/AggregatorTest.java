@@ -16,13 +16,16 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AggregatorTest extends ServiceTestCase {
     private static final DecoderContext DEFAULT_CONTEXT = DecoderContext.builder().checkedDiscriminator(true).build();
@@ -126,6 +129,43 @@ class AggregatorTest extends ServiceTestCase {
             assertNull(s.filter(null));
             final Bson f = Filters.eq(new ObjectId());
             assertSame(f, s.filter(f));
+        });
+    }
+
+    @Test
+    void sample() {
+        useCollectionFactory(cf -> {
+            final Collection<TestEntity> collection = cf.newInstance(entityClass);
+            final TestEntityService service = ServiceFactory.newInstance(serviceClass, cf.newInstance(entityClass));
+
+            final TestEntity entity = service.save(EntityFactory.newInstance(entityClass), null);
+            assertNotNull(entity);
+
+            final Aggregator<TestEntity, TestEntityService> aggregator = Aggregator.builder(service, collection)
+                    .sample(1)
+                    .build();
+
+            final List<TestEntity> match = aggregator.aggregate(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
+            assertEquals(1, match.size());
+            assertEquals(entity, match.get(0));
+
+            final TestEntity entity2 = service.save(EntityFactory.newInstance(entityClass), null);
+            assertNotNull(entity2);
+
+            final AtomicInteger match1 = new AtomicInteger();
+            final AtomicInteger match2 = new AtomicInteger();
+            for (int i = 0; i < 10; i++) {
+                final List<TestEntity> matchAgain = aggregator.aggregate(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
+                assertEquals(1, matchAgain.size());
+                if (entity.equals(matchAgain.get(0))) {
+                    match1.incrementAndGet();
+                } else if (entity2.equals(matchAgain.get(0))) {
+                    match2.incrementAndGet();
+                }
+            }
+            assertTrue(match1.get() > 0);
+            assertTrue(match2.get() > 0);
+            assertEquals(10, match1.get() + match2.get());
         });
     }
 }

@@ -7,6 +7,7 @@ import io.github.dbstarll.dubai.model.service.validate.Validate;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -92,9 +93,8 @@ class TestMultiValidation {
     @Test
     void testEquals() {
         final MultiValidation<InterfaceEntity> mv1 = new MultiValidation<>(InterfaceEntity.class);
-        assertNotEquals(mv1, null);
-        assertNotEquals(mv1, new Object());
-        assertEquals(mv1, mv1);
+        assertTrue(Stream.of(null, new Object()).noneMatch(mv1::equals));
+        assertTrue(Stream.of(mv1).allMatch(mv1::equals));
     }
 
     /**

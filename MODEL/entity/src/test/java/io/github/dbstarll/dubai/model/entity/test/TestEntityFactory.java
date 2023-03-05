@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -191,15 +192,12 @@ class TestEntityFactory {
                 Collections.singletonMap(Entity.FIELD_NAME_ID, id1));
         final InterfaceEntity entity4 = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap(Entity.FIELD_NAME_ID, id2));
-        assertNotEquals(entity1, entity2);
         assertEquals(entity2, entity3);
-        assertNotEquals(entity1, entity2);
-        assertNotEquals(entity1, entity4);
         assertNotEquals(entity2, entity4);
 
-        assertNotEquals(entity1, null);
-        assertNotEquals(entity1, new Object());
-        assertEquals(entity1, entity1);
+        assertTrue(Stream.of(null, new Object(), entity2, entity4).noneMatch(entity1::equals));
+        assertTrue(Stream.of(entity1).allMatch(entity1::equals));
+
         assertNotEquals(entity1, Proxy.newProxyInstance(InterfaceEntity.class.getClassLoader(),
                 new Class[]{InterfaceEntity.class}, (proxy, method, args) -> null));
         assertNotEquals(entity1, EntityFactory.newInstance(ClassPackageInterfaceEntity.class));
