@@ -4,9 +4,9 @@ import io.github.dbstarll.dubai.model.service.attach.DefunctAttach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestMethodValue {
     /**
@@ -18,11 +18,8 @@ class TestMethodValue {
     void testEquals() throws Exception {
         final Class<?> serviceInterface = DefunctAttach.class;
         final Method method = serviceInterface.getMethod("filterByDefunct", Boolean.TYPE);
-
         final MethodValue mv = new MethodValue(serviceInterface, method);
-
-        assertEquals(mv, mv);
-        assertNotEquals(mv, null);
-        assertNotEquals(mv, new Object());
+        assertTrue(Stream.of(null, new Object()).noneMatch(mv::equals));
+        assertTrue(Stream.of(mv).allMatch(mv::equals));
     }
 }
