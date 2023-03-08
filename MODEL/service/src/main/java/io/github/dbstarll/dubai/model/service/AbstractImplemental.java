@@ -26,6 +26,7 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -232,10 +233,21 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected abstract class AbstractEntityValidation extends AbstractValidation<E> {
-        protected final ValidationContext context = ValidationContext.get();
-
         protected AbstractEntityValidation() {
             super(AbstractImplemental.this.entityClass);
+        }
+
+        /**
+         * 获取并缓存实体，供其他Validation再次使用时无需重复加载.
+         *
+         * @param entityId      实体Id
+         * @param entityService 提供实体对应的服务
+         * @param <E1>          实体类型
+         * @return 实体Id对应的实体
+         */
+        protected final <E1 extends Entity> Optional<E1> getEntity(final ObjectId entityId,
+                                                                   final Service<E1> entityService) {
+            return ValidationContext.getEntity(entityId, entityService);
         }
     }
 
