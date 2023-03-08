@@ -56,6 +56,18 @@ public final class ValidationContext implements AutoCloseable {
         return getEntity(entityId, notNull(serviceSupplier.get(), "service is null")::findById);
     }
 
+    /**
+     * 获取并缓存实体，供其他Validation再次使用时无需重复加载.
+     *
+     * @param entityId 实体Id
+     * @param service  提供实体对应的服务
+     * @param <E>      实体类型
+     * @return 实体Id对应的实体
+     */
+    public static <E extends Entity> Optional<E> getEntity(final ObjectId entityId, final Service<E> service) {
+        return getEntity(entityId, () -> service);
+    }
+
     private final ConcurrentMap<ObjectId, Entity> entityMap;
 
     private ValidationContext() {
