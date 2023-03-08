@@ -18,7 +18,6 @@ import io.github.dbstarll.dubai.model.service.validation.GeneralValidation;
 import io.github.dbstarll.dubai.model.service.validation.GeneralValidation.Position;
 import io.github.dbstarll.dubai.model.service.validation.MultiValidation;
 import io.github.dbstarll.dubai.model.service.validation.Validation;
-import io.github.dbstarll.dubai.model.service.validation.ValidationContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.codecs.DecoderContext;
@@ -135,7 +134,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             if (original == null) {
                 return false;
             }
-            try (ValidationContext ignored = ValidationContext.get()) {
+            try (ValidationContext ignored = ValidationContext.get().clear()) {
                 new MultiValidation<>(entityClass, validations).validate(null, original, v);
             }
         }
@@ -147,7 +146,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
         if (entity == null) {
             v.addActionError("实体未设置");
         } else if (entity.getId() == null) {
-            try (ValidationContext ignored = ValidationContext.get()) {
+            try (ValidationContext ignored = ValidationContext.get().clear()) {
                 getValidation(validations).validate(entity, null, v);
             }
             return true;
@@ -156,7 +155,7 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
             if (original == null) {
                 v.addActionError("实体未找到");
             } else {
-                try (ValidationContext ignored = ValidationContext.get()) {
+                try (ValidationContext ignored = ValidationContext.get().clear()) {
                     getValidation(validations).validate(entity, original, v);
                 }
                 return !v.hasErrors() && !entity.equals(original);
