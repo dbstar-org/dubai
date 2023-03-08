@@ -232,6 +232,8 @@ public abstract class AbstractImplemental<E extends Entity, S extends Service<E>
     }
 
     protected abstract class AbstractEntityValidation extends AbstractValidation<E> {
+        protected final ValidationContext context = ValidationContext.get();
+
         protected AbstractEntityValidation() {
             super(AbstractImplemental.this.entityClass);
         }
