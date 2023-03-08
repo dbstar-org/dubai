@@ -41,7 +41,7 @@ class ValidationContextTest extends ServiceTestCase {
     }
 
     @Test
-    void getEntityBySupplier() {
+    void getEntityWithService() {
         useService(TestEntityService.class, service -> {
             try (ValidationContext ignored = ValidationContext.get().clear()) {
                 final TestEntity entity = EntityFactory.newInstance(TestEntity.class);
@@ -50,7 +50,7 @@ class ValidationContextTest extends ServiceTestCase {
                 assertFalse(ValidationContext.getEntity(null).isPresent());
                 assertFalse(ValidationContext.getEntity(entity.getId()).isPresent());
 
-                final Optional<TestEntity> o1 = ValidationContext.getEntity(entity.getId(), () -> service);
+                final Optional<TestEntity> o1 = ValidationContext.getEntity(entity.getId(), service);
                 assertTrue(o1.isPresent());
                 o1.ifPresent(e -> assertEquals(entity, e));
                 final Optional<TestEntity> o2 = ValidationContext.getEntity(entity.getId());

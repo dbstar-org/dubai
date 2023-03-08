@@ -20,6 +20,7 @@ public final class TestNamableServiceImplemental extends TestImplementals<TestNa
     private class MyNameValidation extends NameValidation {
         public MyNameValidation() {
             super(-1, -1);
+            getEntity(null, service);
         }
     }
 
