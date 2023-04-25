@@ -193,7 +193,9 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          * @return Builder self
          */
         public Builder<E, S> sample(final int size) {
-            aggregator.pipelines.add(Aggregates.sample(size));
+            if (size > 0) {
+                aggregator.pipelines.add(Aggregates.sample(size));
+            }
             return this;
         }
 
@@ -209,8 +211,24 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          */
         public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(
                 final S1 joinService, final String localField) {
+            return join(joinService, localField, Entity.FIELD_NAME_ID);
+        }
+
+        /**
+         * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
+         * using equality match between the local field and the foreign _id field.
+         *
+         * @param joinService  join的服务类
+         * @param localField   the field from the local collection to match values against.
+         * @param foreignField the field in the from collection to match values against.
+         * @param <E1>         join的实体类
+         * @param <S1>         join的服务类
+         * @return Builder self
+         */
+        public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(
+                final S1 joinService, final String localField, final String foreignField) {
             aggregator.asMap.computeIfAbsent(DigestUtils.sha256Hex(joinService.getEntityClass().getName()), as -> {
-                aggregator.pipelines.add(helper(joinService).lookup(localField, as));
+                aggregator.pipelines.add(helper(joinService).lookup(localField, foreignField, as));
                 return joinService;
             });
             return this;
