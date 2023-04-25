@@ -176,12 +176,12 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
         /**
          * Creates a $group pipeline stage for the specified filter.
          *
-         * @param <TExpression>     the expression type
+         * @param <V>               the expression type
          * @param id                the id expression for the group, which may be null
          * @param fieldAccumulators zero or more field accumulator pairs
          * @return Builder self
          */
-        public <TExpression> Builder<E, S> group(@Nullable final TExpression id, final BsonField... fieldAccumulators) {
+        public <V> Builder<E, S> group(@Nullable final V id, final BsonField... fieldAccumulators) {
             aggregator.pipelines.add(Aggregates.group(id, fieldAccumulators));
             return this;
         }
@@ -238,16 +238,16 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
          * using the given pipeline.
          *
-         * @param joinService   join的服务类
-         * @param let           the variables to use in the pipeline field stages.
-         * @param pipeline      the pipeline to run on the joined collection.
-         * @param <E1>          join的实体类
-         * @param <S1>          join的服务类
-         * @param <TExpression> the Variable value expression type
+         * @param joinService join的服务类
+         * @param let         the variables to use in the pipeline field stages.
+         * @param pipeline    the pipeline to run on the joined collection.
+         * @param <E1>        join的实体类
+         * @param <S1>        join的服务类
+         * @param <V>         the Variable value expression type
          * @return Builder self
          */
-        public <E1 extends Entity, S1 extends Service<E1>, TExpression> Builder<E, S> join(
-                final S1 joinService, final List<Variable<TExpression>> let, final List<? extends Bson> pipeline) {
+        public <E1 extends Entity, S1 extends Service<E1>, V> Builder<E, S> join(
+                final S1 joinService, final List<Variable<V>> let, final List<? extends Bson> pipeline) {
             aggregator.asMap.computeIfAbsent(DigestUtils.sha256Hex(joinService.getEntityClass().getName()), as -> {
                 aggregator.pipelines.add(helper(joinService).lookup(let, pipeline, as));
                 return joinService;

@@ -89,13 +89,13 @@ public interface ServiceHelper<E extends Entity> {
      * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
      * using the given pipeline.
      *
-     * @param <TExpression> the Variable value expression type
-     * @param let           the variables to use in the pipeline field stages.
-     * @param pipeline      the pipeline to run on the joined collection.
-     * @param as            the name of the new array field to add to the input documents.
+     * @param <V>      the Variable value expression type
+     * @param let      the variables to use in the pipeline field stages.
+     * @param pipeline the pipeline to run on the joined collection.
+     * @param as       the name of the new array field to add to the input documents.
      * @return the $lookup pipeline stage
      */
-    default <TExpression> Bson lookup(List<Variable<TExpression>> let, List<? extends Bson> pipeline, String as) {
+    default <V> Bson lookup(List<Variable<V>> let, List<? extends Bson> pipeline, String as) {
         return Aggregates.lookup(getNamespace().getCollectionName(), let, pipeline, as);
     }
 }
