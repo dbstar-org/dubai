@@ -1,7 +1,11 @@
 package io.github.dbstarll.dubai.model.service;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.BsonField;
+import com.mongodb.client.model.Variable;
+import com.mongodb.lang.Nullable;
 import io.github.dbstarll.dubai.model.collection.Collection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import io.github.dbstarll.utils.lang.wrapper.EntryWrapper;
@@ -37,9 +41,8 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
      * @param decoderContext the decoder context
      * @return an iterable containing the result of the aggregation operation
      */
-    public MongoIterable<Entry<E, Map<Class<? extends Entity>, Entity>>> aggregateOne(
-            final DecoderContext decoderContext) {
-        return collection.aggregate(pipelines, BsonDocument.class).map(t -> {
+    public MongoIterable<Entry<E, Map<Class<? extends Entity>, Entity>>> joinOne(final DecoderContext decoderContext) {
+        return aggregate(BsonDocument.class).map(t -> {
             final E entity = helper(service).decode(t.asBsonReader(), decoderContext);
             final Map<Class<? extends Entity>, Entity> joins = asMap.entrySet().stream().map(e -> {
                 final Service<? extends Entity> joinService = e.getValue();
@@ -58,9 +61,9 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
      * @param decoderContext the decoder context
      * @return an iterable containing the result of the aggregation operation
      */
-    public MongoIterable<Entry<E, Map<Class<? extends Entity>, List<Entity>>>> aggregate(
+    public MongoIterable<Entry<E, Map<Class<? extends Entity>, List<Entity>>>> join(
             final DecoderContext decoderContext) {
-        return collection.aggregate(pipelines, BsonDocument.class).map(t -> {
+        return aggregate(BsonDocument.class).map(t -> {
             final E entity = helper(service).decode(t.asBsonReader(), decoderContext);
             final Map<Class<? extends Entity>, List<Entity>> joins = asMap.entrySet().stream().map(e -> {
                 final Service<? extends Entity> joinService = e.getValue();
@@ -71,6 +74,17 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
                     Map::putAll);
             return EntryWrapper.wrap(entity, joins);
         });
+    }
+
+    /**
+     * Aggregates documents according to the specified aggregation pipeline.
+     *
+     * @param resultClass the class to decode each document into
+     * @param <T>         the target document type of the iterable.
+     * @return an iterable containing the result of the aggregation operation
+     */
+    public <T> AggregateIterable<T> aggregate(final Class<T> resultClass) {
+        return collection.aggregate(pipelines, resultClass);
     }
 
     /**
@@ -108,6 +122,71 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
         }
 
         /**
+         * Creates a $sort pipeline stage for the specified sort specification.
+         *
+         * @param sort the sort specification
+         * @return Builder self
+         */
+        public Builder<E, S> sort(final Bson sort) {
+            if (sort != null) {
+                aggregator.pipelines.add(Aggregates.sort(sort));
+            }
+            return this;
+        }
+
+        /**
+         * Creates a $skip pipeline stage.
+         *
+         * @param skip the number of documents to skip
+         * @return Builder self
+         */
+        public Builder<E, S> skip(final int skip) {
+            if (skip > 0) {
+                aggregator.pipelines.add(Aggregates.skip(skip));
+            }
+            return this;
+        }
+
+        /**
+         * Creates a $limit pipeline stage for the specified filter.
+         *
+         * @param limit the limit
+         * @return Builder self
+         */
+        public Builder<E, S> limit(final int limit) {
+            if (limit > 0) {
+                aggregator.pipelines.add(Aggregates.limit(limit));
+            }
+            return this;
+        }
+
+        /**
+         * Creates a $project pipeline stage for the specified projection.
+         *
+         * @param projection the projection
+         * @return Builder self
+         */
+        public Builder<E, S> project(final Bson projection) {
+            if (projection != null) {
+                aggregator.pipelines.add(Aggregates.project(projection));
+            }
+            return this;
+        }
+
+        /**
+         * Creates a $group pipeline stage for the specified filter.
+         *
+         * @param <TExpression>     the expression type
+         * @param id                the id expression for the group, which may be null
+         * @param fieldAccumulators zero or more field accumulator pairs
+         * @return Builder self
+         */
+        public <TExpression> Builder<E, S> group(@Nullable final TExpression id, final BsonField... fieldAccumulators) {
+            aggregator.pipelines.add(Aggregates.group(id, fieldAccumulators));
+            return this;
+        }
+
+        /**
          * Creates a $sample pipeline stage with the specified sample size.
          *
          * @param size the sample size
@@ -128,10 +207,31 @@ public final class Aggregator<E extends Entity, S extends Service<E>> {
          * @param <S1>        join的服务类
          * @return Builder self
          */
-        public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(final S1 joinService,
-                                                                              final String localField) {
+        public <E1 extends Entity, S1 extends Service<E1>> Builder<E, S> join(
+                final S1 joinService, final String localField) {
             aggregator.asMap.computeIfAbsent(DigestUtils.sha256Hex(joinService.getEntityClass().getName()), as -> {
                 aggregator.pipelines.add(helper(joinService).lookup(localField, as));
+                return joinService;
+            });
+            return this;
+        }
+
+        /**
+         * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
+         * using the given pipeline.
+         *
+         * @param joinService   join的服务类
+         * @param let           the variables to use in the pipeline field stages.
+         * @param pipeline      the pipeline to run on the joined collection.
+         * @param <E1>          join的实体类
+         * @param <S1>          join的服务类
+         * @param <TExpression> the Variable value expression type
+         * @return Builder self
+         */
+        public <E1 extends Entity, S1 extends Service<E1>, TExpression> Builder<E, S> join(
+                final S1 joinService, final List<Variable<TExpression>> let, final List<? extends Bson> pipeline) {
+            aggregator.asMap.computeIfAbsent(DigestUtils.sha256Hex(joinService.getEntityClass().getName()), as -> {
+                aggregator.pipelines.add(helper(joinService).lookup(let, pipeline, as));
                 return joinService;
             });
             return this;

@@ -51,7 +51,7 @@ class AggregatorTest extends ServiceTestCase {
                     .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                     .build();
 
-            assertNull(aggregator.aggregateOne(DEFAULT_CONTEXT)
+            assertNull(aggregator.joinOne(DEFAULT_CONTEXT)
                     .map(e -> EntryWrapper.wrap(e.getKey(), e.getValue().get(companyService.getEntityClass())))
                     .first());
 
@@ -62,7 +62,7 @@ class AggregatorTest extends ServiceTestCase {
             final TestEntity entity = service.save(EntityFactory.newInstance(entityClass), null);
             assertNotNull(entity);
 
-            final Entry<TestEntity, Entity> match = aggregator.aggregateOne(DEFAULT_CONTEXT)
+            final Entry<TestEntity, Entity> match = aggregator.joinOne(DEFAULT_CONTEXT)
                     .map(e -> EntryWrapper.wrap(e.getKey(), e.getValue().get(companyService.getEntityClass())))
                     .first();
             assertNotNull(match);
@@ -72,7 +72,7 @@ class AggregatorTest extends ServiceTestCase {
             entity.setCompanyId(company.getId());
             assertNotNull(service.save(entity, null));
 
-            final Entry<TestEntity, Entity> match2 = aggregator.aggregateOne(DEFAULT_CONTEXT)
+            final Entry<TestEntity, Entity> match2 = aggregator.joinOne(DEFAULT_CONTEXT)
                     .map(e -> EntryWrapper.wrap(e.getKey(), e.getValue().get(companyService.getEntityClass())))
                     .first();
             assertNotNull(match2);
@@ -101,7 +101,7 @@ class AggregatorTest extends ServiceTestCase {
                     .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                     .build();
 
-            final Entry<TestEntity, List<Entity>> match = aggregator.aggregate(DEFAULT_CONTEXT)
+            final Entry<TestEntity, List<Entity>> match = aggregator.join(DEFAULT_CONTEXT)
                     .map(e -> EntryWrapper.wrap(e.getKey(), e.getValue().get(companyService.getEntityClass())))
                     .first();
             assertNotNull(match);
@@ -112,7 +112,7 @@ class AggregatorTest extends ServiceTestCase {
             entity.setCompanyId(company.getId());
             assertNotNull(service.save(entity, null));
 
-            final Entry<TestEntity, List<Entity>> match2 = aggregator.aggregate(DEFAULT_CONTEXT)
+            final Entry<TestEntity, List<Entity>> match2 = aggregator.join(DEFAULT_CONTEXT)
                     .map(e -> EntryWrapper.wrap(e.getKey(), e.getValue().get(companyService.getEntityClass())))
                     .first();
             assertNotNull(match2);
@@ -145,7 +145,7 @@ class AggregatorTest extends ServiceTestCase {
                     .sample(1)
                     .build();
 
-            final List<TestEntity> match = aggregator.aggregate(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
+            final List<TestEntity> match = aggregator.join(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
             assertEquals(1, match.size());
             assertEquals(entity, match.get(0));
 
@@ -155,7 +155,7 @@ class AggregatorTest extends ServiceTestCase {
             final AtomicInteger match1 = new AtomicInteger();
             final AtomicInteger match2 = new AtomicInteger();
             for (int i = 0; i < 10; i++) {
-                final List<TestEntity> matchAgain = aggregator.aggregate(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
+                final List<TestEntity> matchAgain = aggregator.join(DEFAULT_CONTEXT).map(Entry::getKey).into(new ArrayList<>());
                 assertEquals(1, matchAgain.size());
                 if (entity.equals(matchAgain.get(0))) {
                     match1.incrementAndGet();

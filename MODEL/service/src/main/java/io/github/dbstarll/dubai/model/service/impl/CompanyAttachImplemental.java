@@ -57,7 +57,7 @@ public final class CompanyAttachImplemental<E extends Entity & CompanyBase, S ex
                 .match(aggregateMatchFilter(filter))
                 .join(companyService, CompanyBase.FIELD_NAME_COMPANY_ID)
                 .build()
-                .aggregateOne(DEFAULT_CONTEXT)
+                .joinOne(DEFAULT_CONTEXT)
                 .map(e -> EntryWrapper.wrap(e.getKey(), (E1) e.getValue().get(companyService.getEntityClass())));
     }
 }
