@@ -81,7 +81,7 @@ public abstract class MongodTestCase {
     }
 
     @AfterEach
-    public void cleanupTest() {
+    public final void cleanupTest() {
         if (globalDatabase != null) {
             globalDatabase.drop();
         }
