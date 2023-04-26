@@ -3,6 +3,7 @@ package io.github.dbstarll.dubai.model.service;
 import com.mongodb.MongoNamespace;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Variable;
 import io.github.dbstarll.dubai.model.collection.BaseCollection;
 import io.github.dbstarll.dubai.model.entity.Entity;
 import org.bson.BsonArray;
@@ -75,11 +76,26 @@ public interface ServiceHelper<E extends Entity> {
      * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
      * using equality match between the local field and the foreign field.
      *
-     * @param localField the field from the local collection to match values against.
-     * @param as         the name of the new array field to add to the input documents.
+     * @param localField   the field from the local collection to match values against.
+     * @param foreignField the field in the from collection to match values against.
+     * @param as           the name of the new array field to add to the input documents.
      * @return the $lookup pipeline stage
      */
-    default Bson lookup(String localField, String as) {
-        return Aggregates.lookup(getNamespace().getCollectionName(), localField, Entity.FIELD_NAME_ID, as);
+    default Bson lookup(String localField, String foreignField, String as) {
+        return Aggregates.lookup(getNamespace().getCollectionName(), localField, foreignField, as);
+    }
+
+    /**
+     * Creates a $lookup pipeline stage, joining the current collection with the one specified in from
+     * using the given pipeline.
+     *
+     * @param <V>      the Variable value expression type
+     * @param let      the variables to use in the pipeline field stages.
+     * @param pipeline the pipeline to run on the joined collection.
+     * @param as       the name of the new array field to add to the input documents.
+     * @return the $lookup pipeline stage
+     */
+    default <V> Bson lookup(List<Variable<V>> let, List<? extends Bson> pipeline, String as) {
+        return Aggregates.lookup(getNamespace().getCollectionName(), let, pipeline, as);
     }
 }
