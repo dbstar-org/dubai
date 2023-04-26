@@ -28,6 +28,10 @@ public abstract class ServiceTestCase extends MongodTestCase {
         return beanMap.get(beanClass);
     }
 
+    protected final <T> void put(final Class<T> beanClass, final T bean) {
+        beanMap.put(beanClass, bean);
+    }
+
     protected final <E extends Entity, S extends Service<E>> void useService(
             final Class<S> serviceClass, final Consumer<S> consumer) {
         useService(serviceClass, s -> beanMapAutowirer, consumer);
@@ -45,7 +49,7 @@ public abstract class ServiceTestCase extends MongodTestCase {
         if (entityClass != null) {
             useCollection(entityClass, collection -> {
                 final S service = ServiceFactory.newInstance(serviceClass, collection);
-                beanMap.put(serviceClass, service);
+                put(serviceClass, service);
                 if (service instanceof ImplementalAutowirerAware) {
                     ((ImplementalAutowirerAware) service).setImplementalAutowirer(function.apply(service));
                 }
