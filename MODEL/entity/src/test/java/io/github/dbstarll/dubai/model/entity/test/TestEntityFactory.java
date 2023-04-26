@@ -210,7 +210,7 @@ class TestEntityFactory {
     void testDefaultPrimitiveFields() {
         final InterfaceEntity entity = EntityFactory.newInstance(InterfaceEntity.class,
                 Collections.singletonMap("booleanFromNoTableEntity", true));
-        final Map<String, Object> fields = ((PojoFields) entity).fields();
+        final Map<String, Serializable> fields = ((PojoFields) entity).fields();
         assertEquals(0, fields.get("intFromInterfaceEntity"));
         assertEquals(true, fields.get("booleanFromNoTableEntity"));
         assertFalse(fields.containsKey("stringFromInterfaceEntity"));

@@ -319,6 +319,6 @@ public final class EntityFactory<E extends Entity> implements InvocationHandler,
          *
          * @return 所有字段的map
          */
-        Map<String, Object> fields();
+        Map<String, Serializable> fields();
     }
 }
